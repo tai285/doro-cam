@@ -31,7 +31,8 @@ Define the client–server protocol for getting Memories and their media to the 
 ### 3. Transfer
 - The client PUTs each part (or the single object) directly to storage and stores the returned `ETag` per part in `upload_parts` before moving to the next state.
 - Each part is a separate background transfer task. On iOS this requires a **part file** on disk (a byte-range slice written to a temp file just before its task is scheduled, deleted after success). At most 2 part files exist per asset at a time, to bound disk use.
-- An expired URL (`403 AccessDenied`/`Request has expired`) triggers a re-call of step 2. This is not an error.
+- An expired or otherwise rejected presigned URL triggers a re-call of step 2, which returns fresh URLs. This is not an error. **Providers disagree on the status:** AWS S3 answers `403 AccessDenied` ("Request has expired"), Garage answers `400 InvalidRequest` ("Date is too old"). The client therefore treats **400 and 403 from a presigned URL as "re-presign and retry once"** and only counts a failure toward the permanent-failure limit if a *freshly* presigned URL is also rejected. It also re-requests URLs proactively once `expiresAt` has passed.
+- **Presigner requirement:** the server's S3 client must disable the SDK's default flexible checksums (`requestChecksumCalculation: 'WHEN_REQUIRED'`). Otherwise the SDK embeds the CRC32 of an *empty* body in every presigned URL and every real upload is rejected with `InvalidDigest` (found while building the local stack; regression-tested in `tools/local-infra`).
 
 ### 4. Complete
 `POST /v1/memories/{memoryId}/assets/{assetId}/upload/complete` with `{ uploadId?, parts: [{partNumber, etag}] }`.
@@ -76,4 +77,4 @@ The client polls `GET /v1/memories/{id}` with backoff, or receives the status in
 ## Acceptance criteria
 
 - S4/S5 scenario: a 200 MB motion or video test file uploads through 5 random network drops and 2 app kills. The final object's SHA-256 matches, there is exactly one asset row, and there are no orphan objects after the lifecycle rule runs.
-- API integration tests (real Postgres + MinIO) cover every error code above and every idempotency path.
+- API integration tests (real Postgres + Garage S3) cover every error code above and every idempotency path.

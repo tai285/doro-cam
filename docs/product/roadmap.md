@@ -50,7 +50,7 @@ The MVP includes two native camera engines, a GPU look pipeline, motion capture,
 
 ### P0 — Foundations, test infrastructure and spikes
 - **Objective:** a working monorepo skeleton with CI, **complete test infrastructure** (Android Emulator locally and in CI, iOS Simulator on cloud macOS, coverage gates, requirement traceability), and answers to the feasibility questions.
-- **Deliverables:** repo layout per ADR-0012; CI workflows; Docker Compose (Postgres, MinIO); Flutter, API, and web scaffolds each with passing tests; emulator/simulator pipelines; spikes S1–S7 with results in [spikes.md](../research/spikes.md).
+- **Deliverables:** repo layout per ADR-0012; CI workflows; Docker Compose (Postgres, Garage S3); Flutter, API, and web scaffolds each with passing tests; emulator/simulator pipelines; spikes S1–S7 with results in [spikes.md](../research/spikes.md).
 - **Risks:** WHPX availability on the owner's PC (one-time admin enable); scarce macOS CI minutes; the Android motion ring buffer (S3).
 - **Acceptance:** CI green on all scaffolds, including an emulator job and an iOS Simulator job; coverage gates active; each spike has a recorded result.
 - **Tests:** scaffold tests per package; docs check; traceability report.
@@ -92,7 +92,7 @@ The MVP includes two native camera engines, a GPU look pipeline, motion capture,
 
 ### P5 — Cloud storage, upload queue, sync
 - **Requirements:** SYNC-001–SYNC-005, SYNC-008, LIB-004, NFR-005.
-- **Acceptance (automated):** on the Android Emulator (and the iOS Simulator), a 200 MB file uploads to MinIO through scripted network drops and app kills, with no duplicates and a verified checksum. Field verification FV-005 covers OEM background limits.
+- **Acceptance (automated):** on the Android Emulator (and the iOS Simulator), a 200 MB file uploads to local S3 (Garage) through scripted network drops and app kills, with no duplicates and a verified checksum. Field verification FV-005 covers OEM background limits.
 
 ### P6 — Motion Memory
 - **Requirements:** MOT-001–MOT-006, MOT-009, NFR-012.

@@ -43,7 +43,7 @@ Spikes answer feasibility questions **before** architecture is locked in. Rules:
 ## S4 — Background, resumable multipart uploads
 - **Question:** Do per-part presigned PUT uploads via `background_downloader` complete reliably through network loss and app kills?
 - **Hypothesis:** Yes on the emulator. The iOS Simulator's background session support is partial, so foreground resume is verified there.
-- **Experiment:** An automated emulator test uploads a 200 MB file in 8 MiB parts to local MinIO (at `10.0.2.2`). It toggles `svc wifi` and `svc data`, force-stops the app, cold-boots the emulator, and logs part timings.
+- **Experiment:** An automated emulator test uploads a 200 MB file in 8 MiB parts to the local Garage S3 (at `10.0.2.2:9000`). It toggles `svc wifi` and `svc data`, force-stops the app, cold-boots the emulator, and logs part timings.
 - **Success criteria:** the upload always completes with the correct checksum, and no part is uploaded twice after its ETag was persisted.
 - **Field verification:** FV-005 (MagicOS battery management).
 - **Result:** *pending*

@@ -1,6 +1,6 @@
 # ADR-0008: S3-compatible storage with direct presigned multipart uploads
 
-Status: Accepted
+Status: Accepted (amended by ADR-0014: local server is Garage, not MinIO)
 Date: 2026-09-30
 Related: SYNC-003, SYNC-004, SYNC-008, NFR-005, PRIV-003, [upload-sync.md](../../specs/upload-sync.md), [uploads-storage.md](../../research/uploads-storage.md)
 
@@ -10,12 +10,12 @@ Originals can be tens of MB (photos) to GBs (video). Routing bytes through the A
 
 ## Decision
 
-- Media is stored in **one private S3-compatible bucket**. Locally that's MinIO; production is an owner decision (R2 recommended).
+- Media is stored in **one private S3-compatible bucket**. Locally that's Garage (ADR-0014; MinIO's community edition was archived); production is an owner decision (R2 recommended).
 - Clients upload **directly** with presigned URLs issued after authorization: single PUT for ≤ 16 MiB, **S3 multipart with per-part presigned PUTs** above that.
 - Object keys are opaque: `o/{ownerId}/{memoryId}/{assetId}/{role}`. Objects are immutable.
 - Integrity: a client-declared SHA-256, verified by the worker before an asset becomes visible.
 - Downloads use short-lived presigned GETs (≤ 15 min) after authorization.
-- Only S3 API features common to MinIO, R2, S3, and B2 are used.
+- Only S3 API features common to Garage, R2, S3, and B2 are used.
 
 ## Alternatives
 

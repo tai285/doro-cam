@@ -1,0 +1,51 @@
+name: infra
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/**"
+      - "tools/local-infra/**"
+      - ".github/workflows/infra.yml"
+  pull_request:
+    paths:
+      - "infrastructure/**"
+      - "tools/local-infra/**"
+      - ".github/workflows/infra.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-stack:
+    name: Local stack (Postgres + S3) protocol tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start and bootstrap the stack
+        run: pnpm infra:up
+
+      - name: Bootstrap is idempotent
+        run: pnpm infra:up
+
+      - name: Live-stack tests
+        run: pnpm test:infra
+
+      - name: Service logs on failure
+        if: failure()
+        run: docker compose -f infrastructure/docker-compose.yml logs --no-color

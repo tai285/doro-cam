@@ -29,7 +29,7 @@ Tests must prove behavior:
 | App feature (end to end on mobile) | `integration_test` flows on the Android Emulator and iOS Simulator | `integration_test` |
 | API endpoint | Integration tests: success, validation error, 401, IDOR (404), idempotent replay, and every documented error code | Vitest + Fastify `inject` + Testcontainers |
 | DB query / repository | Tests on real Postgres | Testcontainers |
-| Worker job | Handler tests with real Postgres and MinIO, run twice to prove idempotency; media outputs checked with ffprobe/exif parsing | Vitest |
+| Worker job | Handler tests with real Postgres and S3 (Garage), run twice to prove idempotency; media outputs checked with ffprobe/exif parsing | Vitest |
 | Web component / hook | Component tests with MSW for HTTP; accessibility assertions (axe) | Vitest + Testing Library |
 | Web journey | Playwright E2E against the Docker Compose stack | Playwright |
 | Cross-system journey | Emulator app captures and uploads to the local stack in CI, then Playwright confirms the Memory on the web | `integration_test` + Playwright |

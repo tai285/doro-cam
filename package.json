@@ -10,6 +10,9 @@
   "scripts": {
     "test": "pnpm -r --if-present run test",
     "typecheck": "pnpm -r --if-present run typecheck",
-    "check:docs": "pnpm --filter @doro/docs-check run check:docs"
+    "check:docs": "pnpm --filter @doro/docs-check run check:docs",
+    "infra:up": "pnpm --filter @doro/local-infra run infra:up",
+    "infra:down": "pnpm --filter @doro/local-infra run infra:down",
+    "test:infra": "pnpm --filter @doro/local-infra run test:infra"
   }
 }

@@ -9,7 +9,7 @@ Status: Living (partially planned) · Last updated: 2026-09-30 · Related: ADR-0
 | Git | 2.52 | Version control |
 | Node.js | 24.12 | Repo tooling (`tools/docs-check`), later API and web |
 | GitHub CLI | 2.102 (`C:\Program Files\GitHub CLI\gh.exe`; logged in as `tai285`) | Repo and CI operations, triggering iOS cloud builds |
-| Docker Desktop | installed (WSL2 backend) | Local Postgres and MinIO (planned) |
+| Docker Desktop | 29.1 (WSL2 backend; start it if `docker info` fails) | Local Postgres and Garage S3 |
 | Hypervisor | present (WSL2/Hyper-V) | The Android Emulator must use WHPX (see below) |
 
 ```sh
@@ -39,7 +39,7 @@ pm` to `PATH`.
    `avdmanager create avd -n doro_api35 -k "system-images;android-35;google_apis;x86_64" -d pixel_7`
    Set `hw.camera.back=virtualscene` and `hw.camera.front=emulated` in the AVD `config.ini`.
 4. Run headless for tests: `emulator -avd doro_api35 -no-window -no-audio -no-snapshot-save -gpu swiftshader_indirect`
-5. The emulator reaches the host's local API and MinIO via `10.0.2.2` (no `adb reverse` needed).
+5. The emulator reaches the host's local API and S3 (`10.0.2.2:9000`) without `adb reverse`.
 
 Resource note: 16 GB RAM supports one emulator plus the Docker stack. Don't run two emulators locally.
 
@@ -49,13 +49,20 @@ Resource note: 16 GB RAM supports one emulator plus the Docker stack. Don't run 
 - Codemagic is the overflow runner. The owner connects the GitHub repo in the Codemagic UI once; after that, `codemagic.yaml` in the repo defines the workflow.
 - Simulator camera: none. Debug and test builds use the plugin's synthetic camera source (ADR-0013).
 
-### Planned services (`infrastructure/docker-compose.yml`, FND-T-003)
+### Local services (`infrastructure/docker-compose.yml`)
 
-| Service | Port | Purpose |
+```sh
+pnpm infra:up          # starts Postgres + Garage S3, bootstraps bucket, key, CORS, lifecycle (idempotent)
+pnpm infra:down        # stops the stack, keeps data (add -- --volumes to wipe it)
+pnpm test:infra        # live-stack protocol tests (needs infra:up first)
+```
+
+| Service | Host port | Purpose |
 |---|---|---|
-| postgres | 5432 | Metadata + pg-boss |
-| minio | 9000 (S3), 9001 (console) | S3-compatible storage |
-| minio-init | — | Creates the bucket, CORS, and lifecycle rule (abort incomplete multipart after 7 days) |
+| postgres (17) | 5432 (`POSTGRES_PORT`) | Metadata + pg-boss |
+| garage (S3) | 9000 (`S3_PORT`) | S3-compatible storage (ADR-0014). Bucket `doro-media`, public dev key from `.env.example` |
+
+Both are bound to `127.0.0.1` only, and the credentials are public dev-only values. `pnpm infra:up` creates the bucket, imports the dev key, and applies CORS and the abort-incomplete-multipart lifecycle rule using the S3 API, so the same code works against R2 or S3 later. Copy `.env.example` to `.env` to override anything.
 
 ### Planned commands
 

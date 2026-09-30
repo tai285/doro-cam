@@ -21,7 +21,7 @@ Status: Living · Researched: 2026-09-30 · Related: ADR-0008, ADR-0009, ADR-001
 - **Action:** Use S3 multipart with **one background task per part** and part files sliced on demand ([upload-sync.md](../specs/upload-sync.md)).
 
 ### R-UP-3 — S3 multipart constraints
-- **Source:** AWS S3 multipart upload documentation (the S3 API is implemented by MinIO, Cloudflare R2, and Backblaze B2).
+- **Source:** AWS S3 multipart upload documentation (the S3 API is implemented by Garage, Cloudflare R2, AWS S3, and Backblaze B2).
 - **Date:** 2026-09-30
 - **Finding:** Parts must be 5 MiB–5 GiB (except the last), with at most 10,000 parts. Parts can be uploaded in any order and retried individually. `ListParts` returns the completed parts. Incomplete uploads should be cleaned up by a lifecycle rule. Presigned URLs work per part (`UploadPart`).
 - **Confidence:** High
@@ -42,7 +42,7 @@ Status: Living · Researched: 2026-09-30 · Related: ADR-0008, ADR-0009, ADR-001
 - **Finding:** All three support the S3 API, including multipart and presigned URLs. R2 charges **no egress fees**. S3 has the richest ecosystem but charges internet egress. B2 is low-cost with free egress through some CDN partners.
 - **Confidence:** Medium (pricing is volatile)
 - **Implication:** Original-quality sharing and downloads make egress a major cost driver. R2 is attractive.
-- **Action:** An owner decision for production. MinIO is used locally. Code must use only the S3 API features common to all three (no provider-specific SDKs).
+- **Action:** An owner decision for production. Garage is used locally (ADR-0014). Code must use only the S3 API features common to all three (no provider-specific SDKs).
 
 ### R-UP-6 — Flutter local persistence
 - **Source:** pub.dev: `drift`, `sqflite`, `isar`, `hive`/`hive_ce`, `objectbox`.
@@ -59,3 +59,11 @@ Status: Living · Researched: 2026-09-30 · Related: ADR-0008, ADR-0009, ADR-001
 - **Confidence:** High
 - **Implication:** One fewer service, and no dual-write problem between the DB and the queue.
 - **Action:** ADR-0010 (owner approved 2026-09-30).
+
+### R-UP-8 — MinIO is no longer a viable local S3 server
+- **Source:** community reports of MinIO's community edition being archived in 2026 and its Docker Hub repositories being deleted (https://vonng.com/en/db/silo-is-coming/, https://stormdevelopments.ca/blog/minio-s-community-edition-is-archived-what-still-runs-in-2026/); verified locally on 2026-09-30 by pulling candidate images (`dxflrs/garage:v2.1.0`, `pgsty/minio`, `chrislusf/seaweedfs`, `rustfs/rustfs`).
+- **Date:** 2026-09-30
+- **Finding:** MinIO has no maintained upstream or official image. Garage 2.1 pulls cleanly (39 MB) and passed our live protocol suite: presigned PUT/GET, out-of-order multipart parts, `ListParts`, wrong-ETag rejection, abort, CORS, lifecycle (including abort-incomplete-multipart).
+- **Confidence:** High (verified by tests)
+- **Implication:** Local S3 must be provider-agnostic in code. Provider differences exist (expired URL status: Garage 400 vs S3 403).
+- **Action:** ADR-0014. The presigner must also disable SDK default flexible checksums (see [upload-sync.md](../specs/upload-sync.md)).

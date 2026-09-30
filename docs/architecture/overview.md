@@ -56,7 +56,7 @@ Layer rules are enforced by folder structure and lint rules where possible (see 
 | DB | PostgreSQL 17+, Drizzle ORM and migrations | ADR-0007 |
 | Jobs | pg-boss | ADR-0010 |
 | Media processing | On-device native; ffmpeg in the worker | ADR-0004, ADR-0005 |
-| Storage | S3-compatible (MinIO locally; production provider is an open owner decision) | ADR-0008 |
+| Storage | S3-compatible (Garage locally; production provider is an open owner decision) | ADR-0008, ADR-0014 |
 | Tests | Vitest, Fastify inject, Testcontainers, Playwright, flutter_test, integration_test, JUnit + Robolectric, XCTest; Android Emulator and iOS Simulator | [testing-strategy.md](../development/testing-strategy.md), ADR-0013 |
 | Infra | Docker, Docker Compose, GitHub Actions (Linux + KVM for emulators, macOS for iOS), Codemagic (iOS overflow) | ADR-0012, ADR-0013 |
 

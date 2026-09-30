@@ -23,9 +23,10 @@ Statuses: `Proposed` · `Accepted` · `Superseded by ADR-NNNN` · `Deprecated`
 | [ADR-0005](0005-platform-neutral-motion-memory.md) | Platform-neutral Motion Memory representation | Accepted (validated by S3) |
 | [ADR-0006](0006-modular-monolith-backend.md) | Fastify modular monolith with a separate worker process | Accepted |
 | [ADR-0007](0007-postgresql-with-drizzle.md) | PostgreSQL with Drizzle ORM | Accepted |
-| [ADR-0008](0008-direct-presigned-multipart-uploads.md) | S3-compatible storage with direct presigned multipart uploads | Accepted |
+| [ADR-0008](0008-direct-presigned-multipart-uploads.md) | S3-compatible storage with direct presigned multipart uploads | Accepted (amended by ADR-0014) |
 | [ADR-0009](0009-offline-first-local-source-of-truth.md) | Offline-first: drift as local source of truth, idempotent sync | Accepted |
 | [ADR-0010](0010-pg-boss-job-queue.md) | Background jobs with pg-boss on PostgreSQL | Accepted |
 | [ADR-0011](0011-self-hosted-auth-better-auth.md) | Self-hosted authentication with Better Auth | Accepted |
 | [ADR-0012](0012-monorepo-and-contract-generation.md) | Polyglot monorepo and OpenAPI contract generation | Accepted |
 | [ADR-0013](0013-emulator-simulator-and-cloud-macos-verification.md) | Verification on emulators, simulators and cloud macOS | Accepted |
+| [ADR-0014](0014-garage-for-local-s3.md) | Garage as the local S3-compatible server | Accepted |

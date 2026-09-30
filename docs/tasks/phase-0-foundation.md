@@ -29,15 +29,15 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** development-guide.md (CI section).
 
 ### FND-T-003 Local infrastructure with Docker Compose
-- **Status:** todo
+- **Status:** done
 - **Platform:** infra
 - **Depends:** FND-T-001
 - **Requirements:** NFR-013
 - **Docs:** [local-development.md](../development/local-development.md), ADR-0008
-- **Scope:** `infrastructure/docker-compose.yml` with Postgres 17 and MinIO; `minio-init` creating the bucket, CORS, and the abort-multipart lifecycle rule; `.env.example`; a `scripts/smoke-infra.ts` script.
+- **Scope:** `infrastructure/docker-compose.yml` with Postgres 17 and Garage S3 (ADR-0014; MinIO is no longer maintained); a bootstrap in `tools/local-infra` creating the bucket, dev key, CORS, and the abort-multipart lifecycle rule via the S3 API; `.env.example`; live-stack protocol tests.
 - **Out of scope:** production deployment.
 - **Acceptance:** `docker compose up -d` gives healthy services on Windows and on the CI Linux runner; the lifecycle rule exists.
-- **Tests:** the smoke script runs as a test in CI: Postgres query, MinIO presigned PUT/GET round-trip with checksum equality, lifecycle rule present.
+- **Tests:** `tools/local-infra`: 38 unit tests (config, bootstrap idempotency, CORS/lifecycle builders, presigned URLs carry no checksum params) and 15 live tests in CI (Postgres 17, SKIP LOCKED, presigned PUT/GET SHA-256 round-trip, out-of-order multipart with ListParts, part retry, wrong-ETag rejection, abort, expiry, tamper rejection, CORS, lifecycle).
 - **Doc updates:** local-development.md (move from planned to available).
 
 ### FND-T-004 Flutter app scaffold
@@ -192,7 +192,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Depends:** FND-T-003, FND-T-008
 - **Requirements:** SYNC-002, SYNC-003
 - **Docs:** [spikes.md](../research/spikes.md), [upload-sync.md](../specs/upload-sync.md)
-- **Scope:** the S4 automated experiment against MinIO from the emulator.
+- **Scope:** the S4 automated experiment against the local Garage S3 from the emulator.
 - **Out of scope:** the production queue; OEM behavior (FV-005).
 - **Acceptance:** S4 result recorded.
 - **Tests:** the network-drop and kill scenario runs as an automated integration test with a checksum assertion.

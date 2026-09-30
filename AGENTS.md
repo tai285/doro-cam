@@ -127,6 +127,8 @@ Full tiered definition: [development-guide.md](docs/development/development-guid
 | Docs integrity check | `pnpm check:docs` |
 | Tests (all TypeScript packages) | `pnpm test` |
 | Type check (all TypeScript packages) | `pnpm typecheck` |
+| Start local Postgres + S3 (Docker must be running) | `pnpm infra:up` |
+| Live-stack tests (after `infra:up`) | `pnpm test:infra` |
 
 App-level commands (Flutter, API, web) are added here by the scaffolding tasks as they land. See [local-development.md](docs/development/local-development.md).
 

@@ -1,0 +1,45 @@
+# Local development stack for Doro Cam (ADR-0008, ADR-0010, ADR-0013).
+#   docker compose -f infrastructure/docker-compose.yml up -d --wait
+#   pnpm infra:up   (also bootstraps the S3 bucket, key, CORS and lifecycle rules)
+# Ports are bound to localhost only. Everything here is dev-only: the credentials are public.
+name: doro-cam
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: doro
+      POSTGRES_PASSWORD: doro_dev_password
+      POSTGRES_DB: doro
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doro -d doro"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # S3-compatible object storage. MinIO's community edition was archived and its Docker Hub
+  # images removed, so local development uses Garage (ADR-0008, amended).
+  garage:
+    image: dxflrs/garage:v2.1.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${S3_PORT:-9000}:3900"
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgres-data:
+  garage-meta:
+  garage-data:

@@ -1,0 +1,23 @@
+{
+  "name": "@doro/local-infra",
+  "private": true,
+  "type": "module",
+  "description": "Bootstraps and smoke-tests the local Postgres + S3 stack used for development and CI.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:infra": "node --test --test-concurrency=1 \"test-infra/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "infra:up": "node src/up.ts",
+    "infra:down": "node src/down.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1142.0",
+    "@aws-sdk/s3-request-presigner": "3.1142.0",
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "@types/pg": "8.23.1",
+    "typescript": "7.0.2"
+  }
+}
