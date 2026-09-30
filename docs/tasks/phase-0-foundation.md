@@ -139,7 +139,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** testing-strategy.md if the thresholds are adjusted (owner approval required).
 
 ### FND-T-011 Requirement-to-test traceability report
-- **Status:** todo
+- **Status:** done
 - **Platform:** infra
 - **Depends:** FND-T-001
 - **Requirements:** NFR-015

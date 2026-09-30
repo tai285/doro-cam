@@ -39,7 +39,9 @@ Tests must prove behavior:
 
 ## Requirement traceability (NFR-015)
 
-Every MVP requirement must be covered by at least one automated test. Tests carry requirement IDs in their names, e.g. `test('[CAM-010] clamps ISO to the device range', …)`. A traceability report (task FND-T-011) scans test sources and fails CI when an MVP requirement marked implemented in the roadmap has no tagged test.
+Every requirement of a `done` task must be covered by at least one automated test. Tests carry requirement IDs in their names, e.g. `test('[CAM-010] clamps ISO to the device range', …)`; Swift test method names cannot hold brackets, so Swift tests put the tag in a comment (`// [CAM-010]`). `pnpm check:traceability` (`tools/docs-check`, task FND-T-011) scans every test source (Dart, TypeScript, Playwright, Kotlin, Swift), and CI fails when a tag names an unknown requirement or when a done task's requirement has no tagged test.
+
+Requirements that cannot be proven by a test (process and meta requirements such as NFR-009, NFR-010, NFR-014) are listed with a reason in [traceability-waivers.json](../product/traceability-waivers.json). Waivers without a reason do not count, and a waiver becomes an error once the requirement does get a tagged test, so the file cannot rot. Add a waiver only for genuine process requirements, never to skip writing a test.
 
 ## Coverage gates (enforced in CI)
 

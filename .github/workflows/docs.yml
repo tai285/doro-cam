@@ -38,3 +38,6 @@ jobs:
 
       - name: Check documentation integrity
         run: pnpm check:docs
+
+      - name: Check requirement-to-test traceability
+        run: pnpm check:traceability

@@ -1,0 +1,14 @@
+[
+  {
+    "requirement": "NFR-009",
+    "reason": "Process requirement (every change passes the Definition of Done). Enforced by CI, code review and the agent instructions, not by a unit test."
+  },
+  {
+    "requirement": "NFR-010",
+    "reason": "Process requirement (CI runs on every push and pull request). Proven by the workflows themselves and their run history, not by a unit test."
+  },
+  {
+    "requirement": "NFR-014",
+    "reason": "Meta requirement (a full automated test suite with coverage gates). It is satisfied by the aggregate of all tests plus the coverage thresholds and ratchet (FND-T-010), not by one test."
+  }
+]

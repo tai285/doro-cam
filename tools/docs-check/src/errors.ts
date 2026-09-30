@@ -1,4 +1,4 @@
-export type CheckName = 'links' | 'requirements' | 'adrs' | 'tasks' | 'index';
+export type CheckName = 'links' | 'requirements' | 'adrs' | 'tasks' | 'index' | 'traceability';
 
 export interface DocError {
   check: CheckName;

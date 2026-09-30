@@ -1,0 +1,6 @@
+[
+  { "requirement": "NFR-001", "reason": "Was untestable once." },
+  { "requirement": "CAM-777", "reason": "Refers to a requirement that does not exist." },
+  { "requirement": "NFR-002", "reason": "   " },
+  { "reason": "Missing the requirement field." }
+]

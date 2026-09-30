@@ -1,0 +1,6 @@
+[
+  {
+    "requirement": "NFR-001",
+    "reason": "Process requirement enforced by CI configuration and review, not by a unit test."
+  }
+]

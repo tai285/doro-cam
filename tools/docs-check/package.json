@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.json",
-    "check:docs": "node src/cli.ts ../.."
+    "check:docs": "node src/cli.ts ../..",
+    "check:traceability": "node src/traceability-cli.ts ../.."
   },
   "devDependencies": {
     "@types/node": "24.19.0",

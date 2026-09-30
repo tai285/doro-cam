@@ -64,7 +64,7 @@ You do **not** need to read every document for every task.
 7. Run the relevant tests, linters, type checks, and coverage gates until they are green. For mobile work, also run on the **Android Emulator** (locally or in CI) and the **iOS Simulator** via the cloud macOS workflow (`gh workflow run ios.yml`). See ADR-0013.
 8. Review your own diff: no unrelated changes, no debug leftovers, no commented-out code.
 9. Update the docs the change affects (see §6), and update the task's status.
-10. Run `pnpm check:docs`. It must report 0 errors.
+10. Run `pnpm check:docs` and `pnpm check:traceability`. Both must report 0 errors.
 11. Report:
     - what changed;
     - the exact test commands, with their pass/fail counts and coverage;
@@ -125,6 +125,7 @@ Full tiered definition: [development-guide.md](docs/development/development-guid
 | Purpose | Command |
 |---|---|
 | Docs integrity check | `pnpm check:docs` |
+| Requirement-to-test traceability (every requirement of a `done` task has a tagged test or a reasoned waiver) | `pnpm check:traceability` |
 | Tooling tests only (no Docker needed) | `pnpm test:tools` |
 | Tests in every TypeScript package (API tests need `pnpm infra:up` first) | `pnpm test` |
 | Type check (all TypeScript packages) | `pnpm typecheck` |
