@@ -9,15 +9,5 @@ export function usePageTitle(title: string | null): void {
   }, [title]);
 }
 
-/** Deliberately untested function: this branch exists only to prove the coverage gate fails CI. */
-export function untestedHelper(values: number[]): number {
-  let total = 0;
-  for (const value of values) {
-    if (value > 0) {
-      total += value;
-    } else {
-      total -= value;
-    }
-  }
-  return total;
-}
+/** Deliberately untested: a one-line slip that stays above the 95% floor but below the recorded 100% ratchet. */
+export const untestedHelper = (n: number): number => n + 1;
