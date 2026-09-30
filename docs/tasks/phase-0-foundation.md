@@ -103,15 +103,15 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** development-guide.md (codegen notes).
 
 ### FND-T-006 Fastify API skeleton
-- **Status:** todo
+- **Status:** done
 - **Platform:** api
 - **Depends:** FND-T-001, FND-T-003
 - **Requirements:** NFR-008, NFR-011, NFR-013, NFR-014
 - **Docs:** [backend.md](../architecture/backend.md), ADR-0006, ADR-0007, ADR-0010
-- **Scope:** `services/api` with `app.ts`, `server.ts`, `worker.ts`, zod config, pino with request IDs, the error envelope, `/healthz` and `/readyz`, Drizzle with an empty migration, pg-boss boot in the worker, Vitest + Testcontainers + coverage thresholds, a Dockerfile, `services/api/AGENTS.md`, and a CI job.
+- **Scope:** `services/api` with `app.ts`, `server.ts`, `worker.ts`, zod config, pino with request IDs, the error envelope, `/healthz` and `/readyz`, Drizzle with an empty migration, pg-boss boot in the worker, Vitest against the real local stack (isolated database per test file; Testcontainers was dropped because the compose stack is already required and CI-proven) + coverage thresholds, a Dockerfile, `services/api/AGENTS.md`, and a CI job.
 - **Out of scope:** auth and business modules.
 - **Acceptance:** `/readyz` reports DB and storage status correctly, including degraded states; CI green with coverage gates met.
-- **Tests:** integration tests for health endpoints (all states), the error envelope (every AppError class), config validation (valid and invalid env), and worker boot/shutdown.
+- **Tests:** 122 tests at 100% statements / 98.6% branches: health endpoints in every degraded state, the error envelope for every AppError class and framework error (bad JSON, too large, wrong type), non-Error throws, request IDs, log redaction, config validation, migrations (idempotent), pg-boss on our Postgres (including a job surviving a restart), API and worker lifecycles (port in use, leaked connections), and the real `server.ts`/`worker.ts` entrypoints as child processes. The Docker image is built and run against the stack (migrate, ready, non-root, graceful SIGTERM) locally and in CI.
 - **Doc updates:** backend.md status; AGENTS.md §8.
 
 ### FND-T-007 React web scaffold

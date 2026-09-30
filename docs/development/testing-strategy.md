@@ -27,8 +27,8 @@ Tests must prove behavior:
 | Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices) | JUnit + Robolectric, XCTest |
 | Native camera integration | Instrumented tests on the **Android Emulator**; XCTest plus the synthetic source on the **iOS Simulator** | AndroidX Test, XCTest |
 | App feature (end to end on mobile) | `integration_test` flows on the Android Emulator and iOS Simulator | `integration_test` |
-| API endpoint | Integration tests: success, validation error, 401, IDOR (404), idempotent replay, and every documented error code | Vitest + Fastify `inject` + Testcontainers |
-| DB query / repository | Tests on real Postgres | Testcontainers |
+| API endpoint | Integration tests: success, validation error, 401, IDOR (404), idempotent replay, and every documented error code | Vitest + Fastify `inject` against the real Postgres/S3 from `pnpm infra:up` (an isolated database per test file) |
+| DB query / repository | Tests on real Postgres (isolated database per test file) | Vitest |
 | Worker job | Handler tests with real Postgres and S3 (Garage), run twice to prove idempotency; media outputs checked with ffprobe/exif parsing | Vitest |
 | Web component / hook | Component tests with MSW for HTTP; accessibility assertions (axe) | Vitest + Testing Library |
 | Web journey | Playwright E2E against the Docker Compose stack | Playwright |

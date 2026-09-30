@@ -77,3 +77,14 @@ Handlers are pure functions of `(job data, deps)` so they can be tested directly
 ## Configuration
 
 All config comes from environment variables validated at startup: `DATABASE_URL`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `AUTH_SECRET`, `PUBLIC_BASE_URL`, and so on. `.env.example` documents them. Real `.env` files are never committed.
+
+## Implementation status (as of FND-T-006)
+
+Built: `src/app.ts` (app factory), `src/config/env.ts`, `src/lib/{errors,error-handler,request-id,timeout,storage,jobs}.ts`, `src/db/{client,migrate,schema}.ts`, `src/modules/health`, `src/runtime/{api,worker,lifecycle}.ts`, the two entrypoints, a baseline Drizzle migration and the Dockerfile. No feature modules exist yet; they arrive with P4.
+
+Notes that refine the design above:
+
+- `pg-boss` 12 and `zod` 4 with `fastify-type-provider-zod` 7. Empty environment values count as unset.
+- **Thrown primitives:** Fastify's error path throws a TypeError when a handler rejects with a non-object, which bypasses our handler and leaks the text in its default 500 body. Every route handler is therefore wrapped so primitives become a `NonErrorThrown` error before reaching Fastify (covered by tests).
+- **Health:** `GET /healthz` is liveness only and touches no dependency. `GET /readyz` checks Postgres (`select 1`) and the bucket (`HeadBucket`) with a 3-second timeout each and reveals only pass/fail per dependency.
+- Tests run against the real local stack (an isolated database per test file) instead of Testcontainers.

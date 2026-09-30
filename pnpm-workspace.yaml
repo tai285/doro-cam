@@ -4,3 +4,5 @@ packages:
   - "packages/profiles"
   - "packages/api-contract"
   - "tools/*"
+allowBuilds:
+  esbuild: true

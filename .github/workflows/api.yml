@@ -1,0 +1,116 @@
+name: api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/api/**"
+      - "infrastructure/**"
+      - "tools/local-infra/**"
+      - "pnpm-lock.yaml"
+      - ".dockerignore"
+      - ".github/workflows/api.yml"
+  pull_request:
+    paths:
+      - "services/api/**"
+      - "infrastructure/**"
+      - "tools/local-infra/**"
+      - "pnpm-lock.yaml"
+      - ".dockerignore"
+      - ".github/workflows/api.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Type check, tests and coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start Postgres and S3
+        run: pnpm infra:up
+
+      - name: Type check
+        run: pnpm --filter @doro/api typecheck
+
+      - name: Test with coverage (real Postgres and S3)
+        run: pnpm --filter @doro/api test:coverage
+
+      - name: Build
+        run: pnpm --filter @doro/api build
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: services/api/coverage/lcov.info
+
+      - name: Service logs on failure
+        if: failure()
+        run: docker compose -f infrastructure/docker-compose.yml logs --no-color
+
+  docker:
+    name: Docker image smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: test
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start Postgres and S3
+        run: pnpm infra:up
+
+      - name: Build the image
+        run: docker build -f services/api/Dockerfile -t doro-api:ci .
+
+      - name: Apply migrations with the image
+        run: |
+          docker run --rm --network doro-cam_default \
+            -e DATABASE_URL=postgres://doro:doro_dev_password@postgres:5432/doro \
+            -e S3_ENDPOINT=http://garage:3900 -e S3_BUCKET=doro-media \
+            -e S3_ACCESS_KEY_ID=GK0123456789abcdef01234567 \
+            -e S3_SECRET_ACCESS_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+            doro-api:ci node dist/db/migrate-cli.js
+
+      - name: Run the API and check readiness
+        run: |
+          docker run -d --name api --network doro-cam_default -p 3000:3000 \
+            -e DATABASE_URL=postgres://doro:doro_dev_password@postgres:5432/doro \
+            -e S3_ENDPOINT=http://garage:3900 -e S3_BUCKET=doro-media \
+            -e S3_ACCESS_KEY_ID=GK0123456789abcdef01234567 \
+            -e S3_SECRET_ACCESS_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+            doro-api:ci
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/healthz && break; sleep 1; done
+          test "$(curl -s http://127.0.0.1:3000/readyz)" = '{"status":"ready","checks":{"database":"ok","storage":"ok"}}'
+          test "$(docker exec api id -un)" = node
+          docker stop -t 10 api
+          test "$(docker inspect api --format '{{.State.ExitCode}}')" = 0
+
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs api || true

@@ -1,0 +1,19 @@
+# Keep the Docker build context small and deterministic.
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/.dart_tool
+.git
+.github
+docs
+apps
+packages
+infrastructure
+scripts
+tools/docs-check/fixtures
+*.md
+!services/api/**/*.md
+.env
+.env.*
+!.env.example

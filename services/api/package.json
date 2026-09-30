@@ -1,0 +1,36 @@
+{
+  "name": "@doro/api",
+  "private": true,
+  "type": "module",
+  "description": "Doro Cam API (Fastify modular monolith) and background worker (pg-boss). See docs/architecture/backend.md.",
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "worker:dev": "node --watch src/worker.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "worker:start": "node dist/worker.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -p tsconfig.json",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node src/db/migrate-cli.ts"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "@types/pg": "8.23.1",
+    "@vitest/coverage-v8": "5.0.2",
+    "drizzle-kit": "0.31.11",
+    "typescript": "7.0.2",
+    "vitest": "5.0.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1142.0",
+    "@aws-sdk/s3-request-presigner": "3.1142.0",
+    "drizzle-orm": "0.45.3",
+    "fastify": "5.12.5",
+    "fastify-type-provider-zod": "7.0.0",
+    "pg": "8.23.0",
+    "pg-boss": "12.35.0",
+    "zod": "4.6.5"
+  }
+}
