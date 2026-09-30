@@ -15,7 +15,7 @@ This document is the single source of truth for **what** Doro Cam must do. Each 
 
 ## MVP journey
 
-The MVP proves this end-to-end flow on the reference Android device (iOS follows once a macOS machine is available):
+The MVP proves this end-to-end flow on Android and iOS. It is verified automatically on the Android Emulator and on the iOS Simulator (cloud macOS), and field-verified on real devices when available (ADR-0013):
 
 1. Open the app and choose a camera Experience (EXP-001).
 2. Configure supported camera settings (CAM-010, CAM-011, CAM-020, CAM-030, CAM-006) or pick a scenario or preset (EXP-004, EXP-006).
@@ -253,8 +253,8 @@ The MVP proves this end-to-end flow on the reference Android device (iOS follows
 |---|---|---|
 | NFR-001 | All capture, profile, and local library functions work fully offline. | MVP |
 | NFR-002 | Zero lost captures: a capture is on disk and recorded in the local DB before success is shown. | MVP |
-| NFR-003 | Viewfinder preview with the profile applied runs at ≥ 30 fps on reference devices (to be validated by spike S2). | MVP |
-| NFR-004 | Shutter-to-saved latency is measured on reference devices and a budget is set after spike S1. No budget is invented before measurement. | MVP |
+| NFR-003 | Viewfinder preview with the profile applied runs at ≥ 30 fps on real devices. This can only be measured on hardware ([field-verification.md](../development/field-verification.md), FV-003); emulators verify correctness only. | MVP |
+| NFR-004 | Shutter-to-saved latency is measured on real devices and a budget is set from that measurement (FV-006). No budget is invented before measurement. | MVP |
 | NFR-005 | Originals are stored and served bit-exact (verified by SHA-256). | MVP |
 | NFR-006 | API latency budgets are set after the first baseline in P4, then tracked. | MVP |
 | NFR-007 | Web meets WCAG 2.2 AA; mobile supports screen readers, dynamic text, and sufficient contrast. | MVP |
@@ -264,3 +264,6 @@ The MVP proves this end-to-end flow on the reference Android device (iOS follows
 | NFR-011 | Structured logs with request IDs; no media content, precise location, or secrets in logs. | MVP |
 | NFR-012 | LIVE pre-buffering and preview stop when the camera is idle or backgrounded, to protect battery and thermals. | MVP |
 | NFR-013 | The backend runs as a single deployable (API + worker processes) on Docker, portable across hosts. | MVP |
+| NFR-014 | Full automated test suite: every function, class, widget, endpoint, job, migration and feature has automated tests, and per-package coverage gates are enforced in CI (see [testing-strategy.md](../development/testing-strategy.md)). | MVP |
+| NFR-015 | Every implemented MVP requirement is traceable to at least one automated test tagged with its ID. | MVP |
+| NFR-016 | Mobile features are verified automatically on the Android Emulator and on the iOS Simulator (cloud macOS) in CI. Hardware-only aspects are logged for field verification. | MVP |

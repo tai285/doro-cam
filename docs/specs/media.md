@@ -34,7 +34,7 @@ A Motion Memory is a Memory with `kind = motion` and one `motion_clip` asset.
   "clipAssetId": "0191…",
   "hasAudio": true,
   "orientation": 90,
-  "source": "android-ringbuffer | ios-livephoto"
+  "source": "android-ringbuffer | ios-ringbuffer | ios-livephoto | synthetic"
 }
 ```
 
@@ -72,6 +72,6 @@ Local: `media/{memoryId}/{assetId}.{ext}`. Server keys: `o/{ownerId}/{memoryId}/
 
 ## Acceptance criteria
 
-- Clips produced on the reference Android device play in Chrome, Safari, and VLC, and the web rendition plays in all evergreen browsers.
-- The sync tolerance is met on 20 test captures (clap test).
+- Clips produced on the Android Emulator and the iOS Simulator (synthetic source) pass `ffprobe` validation. The web rendition plays in Chromium, Firefox, and WebKit under Playwright.
+- The sync tolerance is met in an automated test: synthetic input with a flash frame and a beep at the same timestamp, 20 runs, offsets measured after demuxing. The real microphone clap test is field verification FV-004.
 - Manifest round-trips: embed → extract equals the source.

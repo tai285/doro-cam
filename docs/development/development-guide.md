@@ -54,7 +54,7 @@ They must not restate root rules.
 
 ### Kotlin / Swift
 - Kotlin: ktlint; coroutines for async; no blocking on the camera thread.
-- Swift: SwiftLint (when a Mac is available); Swift concurrency where AVFoundation permits; camera work on a dedicated serial queue.
+- Swift: SwiftLint (run in the cloud macOS workflow); Swift concurrency where AVFoundation permits; camera work on a dedicated serial queue. All `AVCaptureDevice`/`AVCaptureSession` access goes through protocols (`CaptureDeviceProviding`, `CaptureSessionControlling`) so logic is testable in XCTest without a camera (ADR-0013).
 
 ### Git
 - Trunk-based: short-lived branches `feat/<task-id>-slug`, `fix/…`, `docs/…`.
@@ -83,20 +83,24 @@ Lockfiles are always committed. Dependabot or Renovate is configured in P0 (FND-
 
 Three tiers. The PR or report states which tier applies.
 
-**Tier 1 — trivial** (typo, comment, config value, doc fix):
+**Tier 1 — trivial** (typo, comment, doc fix; no behavior change):
 - [ ] Change is minimal and scoped
 - [ ] Existing checks pass (`check:docs` for docs changes)
+- [ ] Any config value that changes behavior is Tier 2, and needs a test
 
 **Tier 2 — feature or bug fix** (the default):
 - [ ] Scope matches the task; out-of-scope ideas are recorded as new tasks
-- [ ] Unit tests for logic, plus integration tests where a boundary is crossed (DB, HTTP, platform channel)
+- [ ] **Every new or changed function, class, widget, endpoint, job, and migration has automated tests** per the obligations table in [testing-strategy.md](testing-strategy.md), including error paths
+- [ ] Tests are tagged with the requirement IDs they cover (`[CAM-010] …`)
 - [ ] Bug fixes include a regression test that fails before the fix
+- [ ] Mobile changes pass on the Android Emulator and the iOS Simulator (cloud macOS `ios.yml`) where applicable
+- [ ] Coverage gates and ratchets hold
 - [ ] Lint, format, and type checks pass for every touched package
 - [ ] Errors handled with typed failures and user-facing messages where relevant
 - [ ] Security and privacy considered (authz, validation, location, logging)
 - [ ] Logging added where operationally useful, and without sensitive data
 - [ ] Docs updated per AGENTS.md §6; `check:docs` passes
-- [ ] Acceptance criteria verified. Device-only criteria have an executed manual script or are explicitly marked *pending device verification* (then the task is not `done`)
+- [ ] Acceptance criteria verified by automated tests. Hardware-only aspects are added to [field-verification.md](field-verification.md) (they don't block `done`)
 
 **Tier 3 — architectural** (new module, new dependency class, protocol or schema change, anything touching an ADR):
 - [ ] Everything in Tier 2

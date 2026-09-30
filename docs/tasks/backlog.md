@@ -1,6 +1,6 @@
 # Backlog — Epics for P3–P13
 
-Coarse epics only. **Do not implement directly from this file.** When a phase starts, refine its epic into a `phase-N-*.md` task file (see [README.md](README.md)).
+Coarse epics only. **Do not implement directly from this file.** When a phase starts, refine its epic into a `phase-N-*.md` task file (see [README.md](README.md)). Every refined task follows the full-test-suite obligations and ends with an end-to-end suite task on the Android Emulator, the iOS Simulator, and the web (Playwright), as P1 and P2 do.
 
 ## EPIC P3 — Image profile engine
 Requirements: PRF-001–PRF-004, PRF-006, PRF-009, PRF-010, NFR-003. Docs: [image-profile.md](../specs/image-profile.md), ADR-0004. Depends on the S2 and S7 results.
@@ -16,11 +16,11 @@ Includes: assets module (create/resume upload, complete, download URL); storage_
 
 ## EPIC P6 — Motion Memory
 Requirements: MOT-001–MOT-006, MOT-009, CAM-052, NFR-012. Docs: [media.md](../specs/media.md), ADR-0005. Depends on the S3 result.
-Includes: productionize the Android ring buffer; microphone permission; LIVE toggle UX; manifest; local playback; motion.transcode job; iOS Live Photo source (blocked: needs macOS).
+Includes: productionize the ring buffer on Android and iOS; microphone permission; LIVE toggle UX; manifest; local playback; motion.transcode job; synthetic A/V sync tests on the emulator and Simulator; optional iOS native Live Photo source (field-evaluated, FV-004).
 
 ## EPIC P7 — Web dashboard (MVP complete)
 Requirements: WEB-001–WEB-006, MOT-006, NFR-007. Docs: [ux-principles.md](../design/ux-principles.md), [api.md](../specs/api.md).
-Includes: auth pages; library grid (cursor pagination); detail with motion playback; original download; storage usage; account deletion; Playwright E2E of the MVP web journey.
+Includes: auth pages; library grid (cursor pagination); detail with motion playback; original download; storage usage; account deletion; Playwright E2E of the MVP web journey; the cross-system E2E (the emulator app captures and uploads to the Docker stack, then Playwright verifies it on the web) in `e2e.yml`.
 
 ## EPIC P8 — Video
 Requirements: VID-001–VID-006. Docs: [media-pipeline.md](../architecture/media-pipeline.md). Depends on the S6 result.

@@ -1,6 +1,6 @@
 # ADR-0001: Flutter app with a first-party native camera plugin
 
-Status: Accepted
+Status: Accepted (amended by ADR-0013: iOS is no longer blocked; it is built and tested on cloud macOS)
 Date: 2026-09-30
 Related: CAM-004, CAM-006, CAM-010, CAM-011, CAM-021, CAM-031, ADR-0002, [camera-apis.md](../../research/camera-apis.md)
 

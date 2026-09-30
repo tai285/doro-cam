@@ -63,8 +63,9 @@ Related: requirement IDs, ADR IDs
 | Doc | Purpose |
 |---|---|
 | [development/development-guide.md](development/development-guide.md) | Repo structure, conventions, dependency policy, Definition of Done, doc rules |
-| [development/testing-strategy.md](development/testing-strategy.md) | What to test where, CI vs real-device testing |
-| [development/local-development.md](development/local-development.md) | Local setup (Windows-first), Docker Compose, commands |
+| [development/testing-strategy.md](development/testing-strategy.md) | Full-test-suite obligations, coverage gates, emulator/simulator matrix, CI layout |
+| [development/local-development.md](development/local-development.md) | Local setup (Windows-first), Android Emulator, cloud macOS for iOS, Docker Compose, commands |
+| [development/field-verification.md](development/field-verification.md) | Hardware-only checks that emulators can't prove; results from real devices |
 
 ## Research — evidence and open questions
 
@@ -74,6 +75,7 @@ Related: requirement IDs, ADR IDs
 | [research/motion-capture.md](research/motion-capture.md) | Live Photo / Motion Photo research, buffering, A/V sync |
 | [research/image-processing.md](research/image-processing.md) | Real-time grading, LUTs, capture rendering, server-side processing |
 | [research/uploads-storage.md](research/uploads-storage.md) | Background uploads, resumability, object storage providers, local persistence |
+| [research/testing-infrastructure.md](research/testing-infrastructure.md) | Android Emulator camera, iOS Simulator limits, cloud macOS options and costs |
 | [research/spikes.md](research/spikes.md) | Technical spike definitions (S1–S7) and results |
 
 ## Decisions and work

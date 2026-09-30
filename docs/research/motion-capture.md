@@ -10,7 +10,7 @@ Status: Living · Researched: 2026-09-30 · Related: ADR-0005, [media.md](../spe
 - **Finding:** The system maintains the pre-capture buffer and delivers a short MOV (≈1.5 s before and after) with audio, paired to the still by an asset identifier. The still and the movie are delivered as separate files.
 - **Confidence:** High (API) · unverified whether custom exposure mode or our preview grading pipeline coexists with Live Photo capture on the same session
 - **Implication:** On iOS the cheapest path is to use native Live Photo capture as the **source** and repackage it into our Motion Memory representation.
-- **Action:** Part of S3-iOS (blocked: needs macOS). The fallback is a custom ring buffer similar to Android's.
+- **Action:** Live Photo capture needs a real camera and can't run on the Simulator. The iOS implementation therefore uses the **same encoded-sample ring buffer design as Android**, which is testable with the synthetic source on the Simulator. Native Live Photo as an alternative source is evaluated during field verification (FV-004).
 
 ### R-MOT-2 — No Android public equivalent; Motion Photo is a format
 - **Source:** Android developer documentation (CameraX / Camera2 APIs); Google "Motion Photo" format documentation (JPEG/HEIC with an embedded MP4 via XMP container metadata).
@@ -29,7 +29,7 @@ Status: Living · Researched: 2026-09-30 · Related: ADR-0005, [media.md](../spe
   - Audio: `AudioRecord` PCM → AAC encoder → a separate sample ring buffer, timestamped on the same monotonic clock as video (`SENSOR_TIMESTAMP` / `System.nanoTime` base).
   - On shutter: snapshot the buffer from the nearest keyframe at or before T−pre, continue encoding for `post`, then mux to MP4 with `MediaMuxer`.
   - Surface sharing: CameraX may not allow Preview + ImageCapture + an extra encoder surface on LIMITED devices (stream-combination limits). A Camera2 fallback or sharing the preview stream through `SurfaceProcessor` may be required.
-- **Confidence:** Medium (design), unverified on the Honor
+- **Confidence:** Medium (design). Verified on the emulator with synthetic A/V by S3; the real device is FV-004.
 - **Implication:** Feasible in principle. The risks are stream-combination limits, battery, thermals, and A/V sync.
 - **Action:** S3 measures memory, battery drain per minute with LIVE on, thermal state after 10 minutes, and A/V offset (clap test).
 

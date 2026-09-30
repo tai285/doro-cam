@@ -2,6 +2,8 @@
 
 Status: Accepted · Last updated: 2026-09-30 · Related: [requirements.md](requirements.md)
 
+**Product name:** Doro Cam (confirmed by the owner on 2026-09-30; may be revisited before public launch).
+
 ## One sentence
 
 **Doro Cam captures and preserves the feeling of a moment:** an honest, beautiful camera whose photos become durable, shareable, relivable Memories.
@@ -76,7 +78,8 @@ The app **never fakes hardware**. If the device exposes manual ISO, the user get
 
 These are measured qualitatively with early users and quantitatively via product analytics once they exist.
 
-- A user can complete the MVP journey (see [requirements.md](requirements.md#mvp-journey)) on a reference Android device without assistance.
-- No capture is lost across app kills, offline periods, and restarts during a two-week personal field test.
+- The MVP journey (see [requirements.md](requirements.md#mvp-journey)) passes as an automated end-to-end test on the Android Emulator and the iOS Simulator in CI, and a user can complete it without assistance on a real phone.
+- No capture is lost across app kills, offline periods, and restarts: automated kill-loop tests pass, followed by a two-week personal field test.
 - Uploaded originals are byte-identical to the local originals (checksum verified) for 100% of uploads.
 - Manual controls shown on a device are exactly those the device honours (verified against [capability-matrix.md](../specs/capability-matrix.md)).
+- The full automated test suite is green, with coverage gates met (NFR-014).

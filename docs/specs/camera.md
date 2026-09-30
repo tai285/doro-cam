@@ -26,7 +26,8 @@ Final signatures are defined in the Pigeon file `packages/doro_camera/pigeons/ca
 
 ```text
 CameraDescriptor { id, facing: back|front|external, lensKind, isLogical, physicalIds[], sensorOrientation,
-                   focalLengthMm, focalLength35mmEq }
+                   focalLengthMm, focalLength35mmEq,
+                   source: hardware|synthetic }   // synthetic exists only in debug/test builds (ADR-0013)
 CameraCapabilities {
   iso:            IntRange?           // null ⇒ no manual ISO
   exposureTime:   DurationRange?      // null ⇒ no manual shutter
@@ -90,6 +91,8 @@ Rules:
 
 ## Acceptance criteria
 
-- On the reference device, every control shown has its effect confirmed in `CaptureResult.appliedSettings` (CAM-050). A control whose request/applied mismatch persists across 3 captures is disabled for the session with an explanation.
+- On the Android Emulator, every control the emulated camera supports has its effect confirmed in `CaptureResult.appliedSettings` by instrumentation tests (CAM-050). On iOS, the same is proven with fake capture devices in XCTest and with the synthetic source on the Simulator.
+- A control whose request/applied mismatch persists across 3 captures is disabled for the session with an explanation. This is tested with a sink that ignores requests.
 - A capability absent from the platform APIs never appears in the UI (CAM-005). Widget tests cover the capability permutations.
 - The resolver has 100% branch coverage, and property tests pass.
+- Real-device behavior is field verification (FV-001, FV-002).

@@ -22,22 +22,24 @@ Tasks are the unit of implementation work for agents. Each task is small (about 
 - **Docs:** links to the spec/architecture sections to read
 - **Scope:** what to build
 - **Out of scope:** what not to build
-- **Acceptance:** verifiable criteria
-- **Tests:** tests to write
+- **Acceptance:** automated, verifiable criteria (host / emulator / simulator)
+- **Tests:** the concrete tests to write (required)
 - **Doc updates:** docs that must change on completion
 ```
 
 - **IDs:** `<AREA>-T-<NNN>`. Areas: `FND` (foundation), `SPK` (spike), `CAM`, `EXP`, `MEM`, `LIB`, and later `PRF`, `API`, `SYNC`, `WEB`, and so on. IDs are never reused.
 - **Status:** `todo` · `in-progress` · `blocked (<reason>)` · `done`. The checker requires one of these as the first word.
-- **Required fields:** Status, Depends, Requirements, Acceptance. Every ID in `Depends` must exist, and the graph must be acyclic. Every requirement ID must exist in [requirements.md](../product/requirements.md).
-- **Platform pairs:** native work is split into `-android` and `-ios` tasks. iOS tasks stay `blocked (needs macOS)` until a Mac is available.
+- **Required fields:** Status, Depends, Requirements, Acceptance, **Tests**. Every ID in `Depends` must exist, and the graph must be acyclic. Every requirement ID must exist in [requirements.md](../product/requirements.md).
+- **Tests field:** it names the concrete tests the task adds (unit, widget, integration, emulator, simulator). `n/a` is allowed only with a reason in parentheses, e.g. `n/a (docs-only)`, and is essentially never valid for code. The checker enforces the format; review enforces the substance ([testing-strategy.md](../development/testing-strategy.md)).
+- **Platform pairs:** native work is split into Android and iOS tasks. Both are active. iOS is built and tested on cloud macOS against the Simulator with the synthetic camera (ADR-0013). Batch iOS changes to save macOS CI minutes.
+- **Acceptance** is phrased as automated checks on host, emulator, or simulator. Hardware-only aspects go into [field-verification.md](../development/field-verification.md) and never block a task.
 
 ## Picking a task
 
 1. Choose the lowest-numbered `todo` task in the current phase whose `Depends` are all `done`.
 2. Set it to `in-progress` in the same change that starts the work.
 3. If the task turns out bigger than about 2 days, split it into new IDs, update dependents, and note the split.
-4. On completion, set `done` only when all acceptance items are verified. Device-dependent items need an executed device script (see [testing-strategy.md](../development/testing-strategy.md)).
+4. On completion, set `done` only when every acceptance item passes as an automated test on all applicable targets, coverage gates hold, and the task's tests are tagged with its requirement IDs.
 5. Found work outside scope? Add a new `todo` task. Don't do it now.
 
 ## Refining a phase

@@ -38,7 +38,7 @@ Always read: this file, the task entry in `docs/tasks/`, and every doc the task'
 
 | Task area | Read |
 |---|---|
-| Camera / native plugin | [architecture/camera.md](docs/architecture/camera.md), [specs/camera.md](docs/specs/camera.md), [specs/capability-matrix.md](docs/specs/capability-matrix.md), ADR-0001, ADR-0002, ADR-0003 |
+| Camera / native plugin | [architecture/camera.md](docs/architecture/camera.md), [specs/camera.md](docs/specs/camera.md), [specs/capability-matrix.md](docs/specs/capability-matrix.md), ADR-0001, ADR-0002, ADR-0003, ADR-0013 |
 | Image profiles / rendering | [specs/image-profile.md](docs/specs/image-profile.md), [architecture/camera.md](docs/architecture/camera.md), ADR-0004 |
 | Motion Memory / media formats | [specs/media.md](docs/specs/media.md), [architecture/media-pipeline.md](docs/architecture/media-pipeline.md), ADR-0005 |
 | Flutter app structure / UI | [architecture/mobile.md](docs/architecture/mobile.md), [design/ux-principles.md](docs/design/ux-principles.md), [design/camera-ux.md](docs/design/camera-ux.md) |
@@ -49,6 +49,7 @@ Always read: this file, the task entry in `docs/tasks/`, and every doc the task'
 | Web dashboard | [architecture/overview.md](docs/architecture/overview.md), [specs/api.md](docs/specs/api.md), [design/ux-principles.md](docs/design/ux-principles.md) |
 | Domain model questions | [specs/memory-domain.md](docs/specs/memory-domain.md) |
 | Tooling / CI / repo layout | [development/development-guide.md](docs/development/development-guide.md), ADR-0012 |
+| Tests, emulators, simulators, cloud macOS | [development/testing-strategy.md](docs/development/testing-strategy.md), [development/local-development.md](docs/development/local-development.md), [development/field-verification.md](docs/development/field-verification.md), ADR-0013 |
 
 You do **not** need to read every document for every task.
 
@@ -59,12 +60,17 @@ You do **not** need to read every document for every task.
 3. Check the ADRs that govern the area. Never contradict an accepted ADR.
 4. For anything touching more than one module, write a short plan first: affected files, approach, tests, and doc updates.
 5. Implement **only the requested scope**. Record discovered follow-ups as new tasks; do not implement them.
-6. Write tests alongside the code. Tests must exercise real behavior. See [testing-strategy.md](docs/development/testing-strategy.md).
-7. Run the relevant tests, linters, and type checks until they are green.
+6. Write tests for **every** function, class, widget, endpoint, job, migration, and feature you add or change, in the same change. Tag tests with the requirement IDs they cover (e.g. `[CAM-010]`). Tests must exercise real behavior. Obligations: [testing-strategy.md](docs/development/testing-strategy.md).
+7. Run the relevant tests, linters, type checks, and coverage gates until they are green. For mobile work, also run on the **Android Emulator** (locally or in CI) and the **iOS Simulator** via the cloud macOS workflow (`gh workflow run ios.yml`). See ADR-0013.
 8. Review your own diff: no unrelated changes, no debug leftovers, no commented-out code.
 9. Update the docs the change affects (see §6), and update the task's status.
 10. Run `npm run check:docs`. It must report 0 errors.
-11. Report what changed, which tests ran, which acceptance criteria are verified and how, what was *not* verified (e.g. "needs real device"), and any remaining issues.
+11. Report:
+    - what changed;
+    - the exact test commands, with their pass/fail counts and coverage;
+    - which acceptance criteria are verified, and where (host, emulator, simulator);
+    - which hardware-only aspects you added to [field-verification.md](docs/development/field-verification.md);
+    - any remaining issues.
 
 ## 5. Hard rules — agents must NOT
 
@@ -80,7 +86,9 @@ You do **not** need to read every document for every task.
 - Replace a documented decision without updating its ADR (status `Superseded by ADR-XXXX`).
 - Use proprietary film-stock names, logos, or trade dress in profiles.
 - Commit secrets, keys, `.env` files, or personal data.
-- Mark a task `done` when acceptance criteria that need a real device were not verified. Use `blocked` or state what remains.
+- Ship any function or feature without automated tests, lower a coverage ratchet, or mark a task `done` before its automated acceptance tests pass on every applicable target (host, Android Emulator, iOS Simulator).
+- Claim that emulator or simulator results prove hardware-only properties (image quality, real performance, battery, thermals, OEM behavior). Log those in field-verification.md instead.
+- Let the synthetic camera source reach a release build or report itself as real hardware.
 
 ## 6. Documentation maintenance triggers
 
@@ -102,13 +110,15 @@ Documentation that describes something that no longer exists is a bug.
 Full tiered definition: [development-guide.md](docs/development/development-guide.md#definition-of-done). In short, a feature is done when:
 
 - the scope is implemented;
-- tests are added and passing;
+- **every new or changed function has automated tests**, requirement-tagged where applicable;
+- all tests pass on host, the Android Emulator, and the iOS Simulator as applicable;
+- coverage gates are met;
 - lint and type checks pass;
 - error cases are handled;
 - security and privacy are considered;
 - the docs are updated;
 - `check:docs` passes;
-- the acceptance criteria are verified, and anything that needs a real device is explicitly marked as such.
+- hardware-only aspects are logged in field-verification.md.
 
 ## 8. Commands
 
@@ -122,6 +132,11 @@ App-level commands (Flutter, API, web) are added here by the scaffolding tasks a
 
 ## 9. Environment facts
 
-- Owner develops on **Windows 11**. **No macOS machine yet**, so iOS native code cannot be built. iOS tasks are `blocked: needs macOS`. Android leads.
-- Reference devices: **Honor X9c** (Android, MagicOS) and **iPhone 12 Pro Max** (iOS, unusable until a Mac is available).
+- The product name is **Doro Cam** (confirmed by the owner, 2026-09-30).
+- The owner develops on **Windows 11** (i5-12450H, 16 GB RAM, WSL2 and Docker Desktop). There is **no local Mac** (ADR-0013):
+  - **Android:** use the Android Emulator AVD `doro_api35` locally (needs Windows Hypervisor Platform; ask the owner to enable it if `emulator -accel-check` fails) and in CI with KVM.
+  - **iOS:** every build and test runs on **cloud macOS**: GitHub Actions `ios.yml` (primary, about 200 free macOS minutes a month on a private repo, so batch iOS changes) and Codemagic (overflow, 500 free minutes a month). Trigger and inspect runs with `gh`.
+  - **iOS Simulator has no camera.** Use the plugin's synthetic source in debug and test builds only.
+- The owner's physical devices (**Honor X9c**, **iPhone 12 Pro Max**) are for optional field verification only. Agents never depend on them.
+- GitHub CLI: `gh` (on Windows at `C:\Program Files\GitHub CLI\gh.exe`), authenticated as `tai285`. The repo is `tai285/doro-cam` (private).
 - Keep shell commands cross-platform or provide both PowerShell and POSIX variants. Line endings are LF (see `.gitattributes`).

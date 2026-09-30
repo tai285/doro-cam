@@ -62,7 +62,7 @@ Full contract: [specs/camera.md](../specs/camera.md). Key rules:
 
 - Capabilities are **ranges and sets**, not booleans. For example, ISO is `IntRange(min, max)`, not `supportsManualISO`. Booleans are derived getters (`hasManualIso => iso != null`).
 - **Probed at runtime** from `CameraCharacteristics` / `AVCaptureDevice.formats`. Nothing is hardcoded per model. Device quirks, when discovered, go into a small, documented, tested *quirks table* keyed by manufacturer/model. They are recorded in [capability-matrix.md](../specs/capability-matrix.md).
-- **Verified, not trusted:** after capture, the applied ISO and exposure time from the result metadata are compared with the request. A persistent mismatch (the device ignores manual keys) downgrades the capability for the session and is logged (S1 validates this on the Honor).
+- **Verified, not trusted:** after capture, the applied ISO and exposure time from the result metadata are compared with the request. A persistent mismatch (the device ignores manual keys) downgrades the capability for the session and is logged (S1 validates this on the Android Emulator; FV-001 checks the Honor).
 - Manual mode binds a **physical** lens. On iOS, virtual multi-camera devices switch lenses automatically and limit manual control. On Android, logical multi-cameras may expose physical IDs only on some devices.
 - **Aperture** is almost always a single fixed value on phones. It is shown, and controllable only if more than one value is reported (CAM-013).
 
@@ -104,6 +104,25 @@ In either case, **capture rendering is native** and uses the same compiled LUT d
 6. Native returns `CaptureResult{ files, appliedSettings, timestamps, dimensions }`. Dart commits the Memory + assets in one drift transaction, then enqueues upload.
 
 If steps 4–5 fail, the Memory is still saved with the original, and rendering is retried later. The original is never lost to a rendering failure.
+
+## Testability seams (ADR-0013)
+
+Every layer is testable without a physical phone:
+
+| Layer | Seam | Test double | Runs on |
+|---|---|---|---|
+| Dart app | `CameraPlatform` | `FakeCameraPlatform` (scriptable capabilities, results, errors, events) | Dart VM (unit and widget tests) |
+| Kotlin plugin | `CameraCharacteristicsSource`, `CaptureRequestSink`, `Clock` | Fixture characteristics, recording sinks | JVM (JUnit + Robolectric) |
+| Kotlin plugin, real paths | The Android Emulator's emulated camera HAL | — (real CameraX/Camera2 code) | Android Emulator instrumentation |
+| Swift plugin | `CaptureDeviceProviding`, `CaptureSessionControlling`, `Clock` | Fake devices with scripted formats, ISO/duration ranges, and failures | XCTest on the iOS Simulator (cloud macOS) |
+| Swift plugin, end to end | `SyntheticCameraSource` (debug and test builds only) | Deterministic frames: test pattern, frame counter, timestamp; optional synthetic audio tone | iOS Simulator `integration_test` |
+| Motion pipeline | Frame/audio sample providers | Synthetic flash frames and beep tones at known timestamps | Emulator and Simulator |
+
+Rules for the synthetic source:
+- It is compiled only with the `DOROCAM_SYNTHETIC_CAMERA` flag (Swift) or the `debug` source set (Kotlin).
+- It is listed by `listCameras()` with `source: synthetic`, and the UI shows a "TEST CAMERA" badge.
+- It reports honest capabilities: it declares only the controls it actually simulates, and results report exactly what it applied.
+- A CI step asserts that release artifacts contain no synthetic-source symbols.
 
 ## Performance and battery policy
 

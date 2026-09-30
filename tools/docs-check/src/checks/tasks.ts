@@ -11,10 +11,12 @@ const ANY_HEADING_RE = /^ {0,3}#{1,6}\s/;
 const FIELD_RE = /^-\s+\*\*([A-Za-z][A-Za-z ]*):\*\*\s*(.*)$/;
 const STATUS_RE = /^(todo|in-progress|blocked|done)\b(.*)$/;
 const BLOCKED_REASON_RE = /^\s*\(\s*\S.*\)\s*$/;
+const NOT_APPLICABLE_RE = /^n\/a\b(.*)$/i;
+const LEADING_REASON_RE = /^\s*\([^)]*\S[^)]*\)/;
 // The lookbehind stops "T-003" inside a task ID such as "CAM-T-003" from matching.
 const REQUIREMENT_ID_RE = /(?<![A-Za-z0-9-])[A-Z][A-Z0-9]*-\d{3}\b/g;
 
-export const REQUIRED_TASK_FIELDS = ['Status', 'Depends', 'Requirements', 'Acceptance'] as const;
+export const REQUIRED_TASK_FIELDS = ['Status', 'Depends', 'Requirements', 'Acceptance', 'Tests'] as const;
 
 export type TaskStatus = 'todo' | 'in-progress' | 'blocked' | 'done';
 
@@ -170,6 +172,16 @@ export function checkTasks(snapshot: Snapshot, layout: Layout, requirementIds: R
         errors.push(docError('tasks', task.file, status.line, `task ${task.id} has invalid status "${status.value}"`));
       } else if (match[1] === 'blocked' && !BLOCKED_REASON_RE.test(match[2] ?? '')) {
         errors.push(docError('tasks', task.file, status.line, `task ${task.id} is blocked without a "(reason)"`));
+      }
+    }
+
+    const tests = task.fields.get('Tests');
+    if (tests !== undefined) {
+      const notApplicable = NOT_APPLICABLE_RE.exec(tests.value);
+      if (tests.value === '') {
+        errors.push(docError('tasks', task.file, tests.line, `task ${task.id} has an empty Tests field`));
+      } else if (notApplicable !== null && !LEADING_REASON_RE.test(notApplicable[1] ?? '')) {
+        errors.push(docError('tasks', task.file, tests.line, `task ${task.id} has "n/a" Tests without a "(reason)"`));
       }
     }
 

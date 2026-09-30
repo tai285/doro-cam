@@ -92,4 +92,4 @@ Grain uses a seeded noise function. The seed is derived from `memoryId`, so re-r
 
 - The JSON Schema validates all definitions in CI.
 - Compiler golden tests pass; LUTs are byte-stable across runs and OSes.
-- Parity thresholds are met on the reference device for all MVP profiles.
+- Parity thresholds are met for all MVP profiles on the Android Emulator and iOS Simulator GPU paths against the reference renderer (fixture images). Real-camera parity is field verification FV-007.

@@ -5,9 +5,11 @@
 - **Depends:** none
 - **Requirements:** CAM-001
 - **Acceptance:** ok
+- **Tests:** unit tests
 
 ### BBB-T-001 Depends across files
 - **Status:** in-progress
 - **Depends:** AAA-T-001
 - **Requirements:** CAM-001
 - **Acceptance:** ok
+- **Tests:** unit and integration tests

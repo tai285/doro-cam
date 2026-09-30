@@ -28,7 +28,7 @@ Format for each finding: **Source · Date · Finding · Confidence · Implicatio
 - **Finding:** CameraX supports manual sensor control by injecting Camera2 request options: `CONTROL_AE_MODE_OFF`, `SENSOR_SENSITIVITY`, `SENSOR_EXPOSURE_TIME`, and `LENS_FOCUS_DISTANCE` with `CONTROL_AF_MODE_OFF`. Recent CameraX releases deprecated the legacy `Camera2Interop.Extender` / `Camera2CameraControl` in favor of configurator factory methods and Kotlin DSL `camera2Interop {}` blocks. Ranges come from `CameraCharacteristics`, which are available through `Camera2CameraInfo`.
 - **Confidence:** High (API) · Low (behavior on the Honor X9c, unverified)
 - **Implication:** CameraX remains the Android base (lifecycle, preview, capture, extensions). Manual keys go through interop. Manual control is usable only when the device reports `MANUAL_SENSOR`.
-- **Action:** S1 verifies on the Honor X9c. The plugin must detect ignored keys by reading `TotalCaptureResult` (CAM-050).
+- **Action:** S1 verifies the code path on the Android Emulator (ADR-0013). The Honor X9c's behavior is field verification FV-001. The plugin must detect ignored keys by reading `TotalCaptureResult` (CAM-050).
 
 ### R-CAM-4 — Android hardware levels and OEM exposure
 - **Source:** Android `CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL` and `REQUEST_AVAILABLE_CAPABILITIES` documentation; long-standing community experience.
@@ -36,15 +36,15 @@ Format for each finding: **Source · Date · Finding · Confidence · Implicatio
 - **Finding:** `LEGACY` and many `LIMITED` devices lack `MANUAL_SENSOR`. OEMs frequently hide ultra-wide and tele modules from third-party apps, or expose them only through a logical multi-camera with zoom-based switching.
 - **Confidence:** High (general) · Unknown (Honor X9c)
 - **Implication:** The capability-driven UI is mandatory, and the Honor might offer only auto exposure with compensation.
-- **Action:** S1 records the hardware level and physical camera IDs. The owner is advised to add a Pixel as the Android reference device.
+- **Action:** S1 records the emulator's hardware level and physical camera IDs, and field verification FV-001 records the Honor's. A Pixel or a device farm would add real-hardware coverage later (owner decision).
 
 ### R-CAM-5 — iOS AVFoundation manual controls
 - **Source:** Apple AVFoundation documentation for `AVCaptureDevice` (`setExposureModeCustom(duration:iso:)`, `setFocusModeLocked(lensPosition:)`, `setWhiteBalanceModeLocked(with:)`, `deviceWhiteBalanceGains(for:)`, `lensAperture`).
 - **Date:** 2026-09-30
 - **Finding:** Custom exposure (duration + ISO within `activeFormat` limits), lens position 0–1, and WB gains (with temperature/tint conversion) are available on all modern iPhones. `lensAperture` is read-only. Virtual devices (dual/triple camera) switch physical lenses automatically; for precise manual control, bind a physical device (`builtInWideAngleCamera`, `builtInUltraWideCamera`, `builtInTelephotoCamera`).
-- **Confidence:** High (documented API) · unverified on the iPhone 12 Pro Max (no Mac)
+- **Confidence:** High (documented API) · unverified on the iPhone 12 Pro Max (field verification FV-002)
 - **Implication:** iOS offers richer and more uniform manual control than Android. Aperture is display-only.
-- **Action:** iOS implementation tasks are blocked until macOS is available. The contract is already platform-neutral.
+- **Action:** iOS is implemented in parallel and built and tested on cloud macOS (ADR-0013). The Simulator has no camera (R-TST-2), so Swift logic sits behind protocols with fakes, and end-to-end runs use the synthetic source.
 
 ### R-CAM-6 — RAW / ProRAW
 - **Source:** Apple `AVCapturePhotoOutput.availableRawPhotoPixelFormatTypes`, Apple ProRAW (iOS 14.3+ on iPhone 12 Pro/Pro Max and later); Android `REQUEST_AVAILABLE_CAPABILITIES_RAW` + `DngCreator`.

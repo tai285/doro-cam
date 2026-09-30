@@ -54,7 +54,7 @@ stateDiagram-v2
 
 | Platform | Mechanism | Limits |
 |---|---|---|
-| Android | `background_downloader` → WorkManager / user-initiated data transfer jobs | Runs after app kill; OEM battery managers (including Honor/MagicOS) may delay it. Spike S4 measures this. |
+| Android | `background_downloader` → WorkManager / user-initiated data transfer jobs | Runs after app kill; OEM battery managers (including Honor/MagicOS) may delay it. S4 verifies correctness on the emulator; OEM delays are field verification FV-005. |
 | iOS | `background_downloader` → background `URLSession` upload tasks (file-based) | The system schedules tasks; each task is a whole request. Resumability comes from **per-part tasks** (see [upload-sync.md](../specs/upload-sync.md)). |
 
 When the app is in the foreground, the queue runner also drives uploads directly.
