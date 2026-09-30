@@ -328,6 +328,15 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
 
+  tools/script-tests:
+    devDependencies:
+      '@types/node':
+        specifier: 24.19.0
+        version: 24.19.0
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+
 packages:
 
   '@adobe/css-tools@4.5.0':

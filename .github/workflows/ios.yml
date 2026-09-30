@@ -51,6 +51,10 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Build for the simulator (no codesign)
+        working-directory: apps/mobile
+        run: flutter build ios --simulator --debug --no-codesign
+
       - name: Boot simulator
         id: sim
         run: |
@@ -58,9 +62,17 @@ jobs:
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
       - name: Integration tests on the simulator
+        timeout-minutes: 20
         working-directory: apps/mobile
-        run: flutter test integration_test -d "${{ steps.sim.outputs.udid }}"
+        run: flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
 
-      - name: Build for the simulator (no codesign)
-        working-directory: apps/mobile
-        run: flutter build ios --simulator --debug --no-codesign
+      - name: Simulator diagnostics
+        if: failure() || cancelled()
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          echo "--- booted devices"; xcrun simctl list devices booted
+          echo "--- installed apps"; xcrun simctl listapps "$UDID" 2>&1 | grep -E "CFBundleIdentifier|CFBundleDisplayName" | head -20 || true
+          echo "--- Runner log (last 15 minutes)"
+          xcrun simctl spawn "$UDID" log show --last 15m --style compact \
+            --predicate 'process == "Runner" OR process == "runner" OR subsystem CONTAINS "flutter"' 2>&1 | tail -150 || true
+          echo "--- crash reports"; ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null | tail -10 || true

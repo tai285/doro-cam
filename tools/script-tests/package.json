@@ -1,0 +1,14 @@
+{
+  "name": "@doro/script-tests",
+  "private": true,
+  "type": "module",
+  "description": "Tests for the repository's shell scripts (run against fake macOS tools, so they work anywhere bash runs).",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "typescript": "7.0.2"
+  }
+}

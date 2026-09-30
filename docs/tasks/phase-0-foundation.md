@@ -69,7 +69,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** local-development.md, testing-strategy.md, AGENTS.md §8.
 
 ### FND-T-009 iOS on cloud macOS: build, XCTest and Simulator job
-- **Status:** todo
+- **Status:** in-progress
 - **Platform:** infra
 - **Depends:** FND-T-004
 - **Requirements:** NFR-016, NFR-010

@@ -14,7 +14,7 @@ Status: Living (partially planned) · Last updated: 2026-09-30 · Related: ADR-0
 
 ```sh
 pnpm install         # installs workspace dependencies (pnpm 12.8.1, pinned by packageManager)
-pnpm test:tools      # tooling tests only (no Docker needed)
+pnpm test:tools      # tooling and script tests only (no Docker needed)
 pnpm test            # tests in every TypeScript package (the API's need `pnpm infra:up` first)
 pnpm typecheck       # tsc --noEmit in every TypeScript package
 pnpm check:docs      # documentation integrity
@@ -59,7 +59,7 @@ source scripts/dev-env.sh        # Git Bash
 
 Acceleration must use the Windows Hypervisor Platform because WSL2/Hyper-V is active. If `emulator -accel-check` ever reports it unavailable, the owner enables *Windows Hypervisor Platform* once (admin), then reboots; agents must ask rather than attempt elevation.
 
-Resource note: 16 GB RAM supports one emulator plus the Docker stack. Don't run two emulators locally.
+Resource note: 16 GB RAM is tight. One emulator (about 3 GB with its guest) plus Docker Desktop, VS Code and a browser leaves only a few GB free, and once memory runs out everything slows dramatically: a 7-second script test took 8 minutes while the emulator sat idle in the background. **Stop the emulator when you are not running device tests** (`adb emu kill`), and never run two. Closing Docker Desktop when the API tests are not needed also helps.
 
 ### iOS without a Mac
 
