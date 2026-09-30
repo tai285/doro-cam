@@ -80,7 +80,7 @@ jobs:
       # (flutter test only says "Waiting for VM Service port to be available...").
       - name: Launch diagnostics
         continue-on-error: true
-        timeout-minutes: 5
+        timeout-minutes: 4
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           xcrun simctl install "$UDID" apps/mobile/build/ios/iphonesimulator/Runner.app
@@ -88,15 +88,18 @@ jobs:
           sleep 25
           echo "--- console output of the launched app"; cat launch.log || true
           echo "--- is it running?"; xcrun simctl spawn "$UDID" launchctl list | grep -i dorocam || echo "NOT RUNNING"
-          echo "--- system log for Runner (last 2 minutes)"
-          xcrun simctl spawn "$UDID" log show --last 2m --style compact --predicate 'process == "Runner"' 2>&1 | tail -80 || true
+          echo "--- system log for Runner (last minute)"
+          bash scripts/run-with-retry.sh --attempts 1 --timeout 60 -- bash -c 'xcrun simctl spawn "$0" log show --last 1m --style compact --predicate "process == \"Runner\"" 2>&1 | tail -60' "$UDID" || true
           echo "--- crash reports"; ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null | tail -8 || true
           xcrun simctl terminate "$UDID" com.dorocam.app || true
 
+      # `flutter test` on the iOS Simulator sometimes stalls at "Waiting for VM Service port to be
+      # available..." (the tool never sees the app's connection URL). A stalled attempt is killed after
+      # 7 minutes and retried; a healthy run needs about 4 (docs/research/testing-infrastructure.md).
       - name: Integration tests on the simulator
-        timeout-minutes: 10
+        timeout-minutes: 30
         working-directory: apps/mobile
-        run: flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
+        run: bash ../../scripts/run-with-retry.sh --attempts 3 --timeout 420 -- flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
 
       - name: Release build excludes the synthetic camera (ADR-0013)
         working-directory: apps/mobile

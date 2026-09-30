@@ -29,6 +29,7 @@ Load the toolchain first (`source scripts/dev-env.sh`).
 | Kotlin unit tests (debug variant) | `cd apps/mobile/android && ./gradlew :doro_camera:testDebugUnitTest` |
 | Swift core tests (macOS only: CI runs them) | `DOROCAM_SWIFT_STANDALONE=1 swift test --package-path ios/doro_camera --enable-code-coverage` |
 | End to end on the emulator / simulator | `cd apps/mobile && flutter test integration_test -d <device>` |
+| Retry a flaky/stalling command with a per-attempt timeout (used for the iOS integration test) | `bash scripts/run-with-retry.sh --attempts 3 --timeout 420 -- <command>` (repo root) |
 | Check a build for the synthetic camera | `bash scripts/check-synthetic-camera.sh --expect-present\|--expect-absent <apk or .app>` (repo root) |
 
 ## Rules specific to this package
