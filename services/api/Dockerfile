@@ -4,7 +4,7 @@
 #   node dist/db/migrate-cli.js   apply database migrations
 # Build from the repository root:  docker build -f services/api/Dockerfile -t doro-api .
 
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 ENV CI=true
 RUN npm install --global pnpm@12.8.1
 WORKDIR /repo
@@ -17,7 +17,7 @@ COPY services/api services/api
 RUN pnpm --filter @doro/api build
 RUN pnpm --filter @doro/api deploy --prod --legacy /out
 
-FROM node:24-alpine
+FROM node:26-alpine
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /out/node_modules ./node_modules
