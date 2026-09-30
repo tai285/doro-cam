@@ -27,6 +27,16 @@ describe('checkLinks', () => {
   });
 });
 
+describe('checkLinks in nested AGENTS.md files', () => {
+  it('validates links relative to the nested file', () => {
+    assert.deepEqual(lines(checkLinks(fixture('nested'))), [
+      'apps/mobile/AGENTS.md:3 [links] broken link "../../docs/missing.md" (no such file: docs/missing.md)',
+      'apps/mobile/AGENTS.md:3 [links] missing anchor "#nope" in docs/guide.md',
+      'packages/lib/AGENTS.md:3 [links] broken link "nowhere.md" (no such file: packages/lib/nowhere.md)',
+    ]);
+  });
+});
+
 describe('checkRequirements', () => {
   it('parses table-row definitions only', () => {
     assert.deepEqual(parseRequirementDefinitions('| CAM-001 | a |\ntext CAM-002\n|CAM-003|b|'), [

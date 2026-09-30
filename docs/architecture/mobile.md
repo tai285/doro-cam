@@ -19,7 +19,7 @@ Dependency direction: `presentation → application → domain ← data`. `data`
 ```
 apps/mobile/lib/
   main.dart
-  app/                  # app shell, router (go_router), theme tokens, DI (ProviderScope)
+  app/                  # app shell, router (go_router), theme tokens (ThemeExtension), shared widgets, DI (ProviderScope)
   core/                 # shared utilities: result types, logging, clock, ids (UUIDv7)
   features/
     camera/             # presentation/ application/ domain/
@@ -41,7 +41,7 @@ Shared domain types used by more than one feature live in `lib/domain/`. A featu
 
 ## State management
 
-- **Riverpod** (code-generated providers). Chosen for compile-safe DI and testability without `BuildContext`. Recorded in the overview tech stack; it is not an ADR-level decision.
+- **Riverpod 3** with hand-written providers (`Provider`, `NotifierProvider`, `AsyncNotifierProvider`); no code generation, so there is no `build_runner` step for providers. Chosen for compile-safe DI and testability without `BuildContext`. Recorded in the overview tech stack; it is not an ADR-level decision.
 - Providers expose *immutable* state objects (freezed or plain `final` classes with `==`).
 - There is no global mutable singleton. The camera session is owned by a single `CameraSessionController` provider, scoped to the camera route and disposed with it.
 - Long-lived services (upload queue runner, DB) are app-scoped providers.

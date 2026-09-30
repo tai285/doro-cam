@@ -45,7 +45,7 @@ They must not restate root rules.
 - `flutter_lints` + `very_good_analysis`-level strictness (decided at scaffold). `strict-casts`, `strict-inference`, `strict-raw-types` are on.
 - No `dynamic` in domain or application code. Prefer sealed classes for states and failures.
 - File names in `snake_case`. One public type per file in the domain.
-- Codegen (riverpod_generator, drift, pigeon, freezed if used): build_runner outputs are **not** committed; CI regenerates them. Pigeon outputs **are** committed, because the native code compiles against them. The scaffold task records this in the package AGENTS.md.
+- Codegen (drift, pigeon, and freezed if used; Riverpod providers are hand-written): build_runner outputs are **not** committed; CI regenerates them. Pigeon outputs **are** committed, because the native code compiles against them. The scaffold task records this in the package AGENTS.md.
 
 ### TypeScript
 - `strict: true`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. ESM only.

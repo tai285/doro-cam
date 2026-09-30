@@ -19,34 +19,51 @@ pnpm typecheck       # tsc --noEmit in every TypeScript package
 pnpm check:docs      # documentation integrity
 ```
 
-pnpm is installed per user with `npm install -g pnpm` (Corepack's `enable` needs admin rights to write into the nvm-managed Node folder on this machine). If `pnpm` isn't found in a new shell, add `%APPDATA%
-pm` to `PATH`.
+pnpm is installed per user with `npm install -g pnpm` (Corepack's `enable` needs admin rights to write into the nvm-managed Node folder on this machine). If `pnpm` isn't found in a new shell, add `%APPDATA%\npm` to `PATH` (or dot-source `scripts/dev-env.ps1`).
 
-## Planned toolchain (installed by P0 tasks)
+## Mobile toolchain (installed user-level, no admin needed)
 
-| Tool | Needed for | Task |
+Everything lives under `%USERPROFILE%\dev` (override with `DORO_DEV_HOME`). Load it into a shell with:
+
+```sh
+source scripts/dev-env.sh        # Git Bash
+. .\scripts\dev-env.ps1          # PowerShell
+```
+
+| Tool | Version (verified 2026-10-01) | Notes |
 |---|---|---|
-| Flutter SDK (stable), JDK 17, Android SDK command-line tools | Mobile app and plugin | FND-T-004 |
-| Android Emulator + system image `system-images;android-35;google_apis;x86_64` (+ API 30 for nightly) | Emulator testing | FND-T-008 |
-| Cloud macOS: GitHub Actions `macos-*` runners (primary), Codemagic (overflow) | All iOS builds and tests (no local Mac) | FND-T-009 |
+| Flutter (stable) | 3.47.5 (Dart 3.13.4) | `git clone -b stable` into `dev\flutter`; analytics disabled |
+| JDK | Temurin 17.0.20 | The machine's system `JAVA_HOME` points at a stale JDK 1.6; `dev-env` overrides it per session and the user-level variable was set too |
+| Android SDK | platform 35 and 36, build-tools 35.0.0, 36.0.0 and 28.0.3, NDK 28.2.13676358, platform-tools, emulator 37.1 | Flutter 3.47 requires platform 36 and build-tools 28.0.3; the NDK must be installed explicitly or Gradle fails |
+| System image | `system-images;android-35;google_apis;x86_64` | AVD `doro_api35` |
+| Windows Hypervisor Platform | present and usable | `emulator -accel-check` reports "WHPX is installed and usable"; no admin step was needed |
+| Cloud macOS (iOS) | not yet set up | GitHub Actions `macos-*` and Codemagic (FND-T-009) |
+
+`flutter doctor` is green for Flutter, Android toolchain, Chrome and network. The only warning is Visual Studio (Windows-desktop apps), which we don't build.
+
+### Installing the Android SDK (reproduction notes)
+
+- `sdkmanager` is deprecated in favor of Google's new Android CLI but still works. Package names contain `;`, which the `.bat` wrapper splits on, so quote them from `cmd`: `cmd /c "echo y| sdkmanager.bat --sdk_root=... \"platforms;android-35\""`.
+- `--licenses` prints a warning and isn't needed on the current tools.
+- A first `flutter build apk` takes about 4 minutes (Gradle and dependency downloads); later builds take under a minute.
 
 ### Android Emulator on Windows
 
-1. Install the Android SDK command-line tools, then:
-   `sdkmanager "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"`
-2. Acceleration: because Hyper-V/WSL2 is active, the emulator needs **Windows Hypervisor Platform**. Check with `emulator -accel-check`. If it's disabled, the owner enables it once (admin): *Turn Windows features on or off → Windows Hypervisor Platform*, then reboots. Agents must ask the owner rather than attempt elevation.
-3. Create the standard AVD (the name is used by scripts and docs):
+1. Create the standard AVD (the name is used by scripts and docs):
    `avdmanager create avd -n doro_api35 -k "system-images;android-35;google_apis;x86_64" -d pixel_7`
-   Set `hw.camera.back=virtualscene` and `hw.camera.front=emulated` in the AVD `config.ini`.
-4. Run headless for tests: `emulator -avd doro_api35 -no-window -no-audio -no-snapshot-save -gpu swiftshader_indirect`
-5. The emulator reaches the host's local API and S3 (`10.0.2.2:9000`) without `adb reverse`.
+   then set `hw.camera.back=virtualscene`, `hw.camera.front=emulated`, `hw.ramSize=3072` in the AVD `config.ini`. (Done on this machine.)
+2. Run headless for tests: `emulator -avd doro_api35 -no-window -no-audio -no-snapshot-save -gpu swiftshader_indirect`. It boots in about 40-60 seconds here (`adb shell getprop sys.boot_completed` returns `1`).
+3. Run tests on it: `cd apps/mobile && flutter test integration_test -d emulator-5554`.
+4. The emulator reaches the host's local API and S3 (`10.0.2.2:9000`) without `adb reverse`.
+
+Acceleration must use the Windows Hypervisor Platform because WSL2/Hyper-V is active. If `emulator -accel-check` ever reports it unavailable, the owner enables *Windows Hypervisor Platform* once (admin), then reboots; agents must ask rather than attempt elevation.
 
 Resource note: 16 GB RAM supports one emulator plus the Docker stack. Don't run two emulators locally.
 
 ### iOS without a Mac
 
 - Every iOS build and test runs in the cloud (ADR-0013). Agents push a branch, then run `gh workflow run ios.yml --ref <branch>`, `gh run watch`, and `gh run view --log-failed`.
-- Codemagic is the overflow runner. The owner connects the GitHub repo in the Codemagic UI once; after that, `codemagic.yaml` in the repo defines the workflow.
+- The repository is **public**, so GitHub-hosted runners (including macOS) are free and unlimited. Codemagic stays available as an overflow runner.
 - Simulator camera: none. Debug and test builds use the plugin's synthetic camera source (ADR-0013).
 
 ### Local services (`infrastructure/docker-compose.yml`)

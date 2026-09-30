@@ -59,7 +59,8 @@ Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Cover
 | Target | Where | Used for |
 |---|---|---|
 | Android Emulator: Pixel-class AVD, **API 35**, x86_64, emulated back and front cameras | Local (Windows, WHPX) and CI (`ubuntu-latest` with KVM) | Primary Android instrumentation and `integration_test` runs |
-| Android Emulator: API 30 (minimum supported, to be confirmed at FND-T-004) | CI, nightly | Oldest-API regression |
+| Android Emulator: API 28 (minimum supported: `minSdk = 28`, decided at FND-T-004) | CI, nightly | Oldest-API regression of app behavior. Advanced emulated-camera features (RAW, logical cameras) need Android 11+ images, so camera-capability tests run on API 35 |
+| iOS deployment target | iOS 16.0 (decided at FND-T-004) | Simulator runs use the latest iOS runtime |
 | iOS Simulator: iPhone 12 Pro Max profile, latest iOS | Cloud macOS (GitHub Actions macOS, Codemagic overflow) | iOS unit, XCTest, `integration_test` with the synthetic camera |
 | iOS Simulator: newest iPhone profile | Cloud macOS, nightly or manual | Current-device regression |
 

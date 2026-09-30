@@ -1,0 +1,25 @@
+name: doro_cam
+description: "Doro Cam mobile app"
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.4
+resolution: workspace
+
+dependencies:
+  cupertino_icons: ^1.0.8
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

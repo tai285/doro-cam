@@ -40,6 +40,14 @@ describe('loadSnapshot', () => {
     }
   });
 
+  it('also scans nested AGENTS.md files but skips dependency and build folders and other Markdown', () => {
+    const snapshot = fixture('nested');
+    assert.deepEqual(
+      [...snapshot.docs.keys()],
+      ['AGENTS.md', 'docs/guide.md', 'docs/README.md', 'apps/mobile/AGENTS.md', 'packages/lib/AGENTS.md'],
+    );
+  });
+
   it('reports path kinds and reads files outside the scanned set', () => {
     const snapshot = fixture('links');
     assert.equal(snapshot.kindOf('docs'), 'dir');

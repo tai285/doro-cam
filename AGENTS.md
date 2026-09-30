@@ -127,6 +127,9 @@ Full tiered definition: [development-guide.md](docs/development/development-guid
 | Docs integrity check | `pnpm check:docs` |
 | Tests (all TypeScript packages) | `pnpm test` |
 | Type check (all TypeScript packages) | `pnpm typecheck` |
+| Load the mobile toolchain (Flutter, JDK 17, Android SDK) | `source scripts/dev-env.sh` |
+| Flutter analyze / tests (from `apps/mobile`) | `flutter analyze` · `flutter test --coverage` |
+| Flutter integration tests on the emulator (from `apps/mobile`) | `flutter test integration_test -d emulator-5554` |
 | Start local Postgres + S3 (Docker must be running) | `pnpm infra:up` |
 | Live-stack tests (after `infra:up`) | `pnpm test:infra` |
 

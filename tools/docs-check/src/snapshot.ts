@@ -47,9 +47,33 @@ function collectMarkdown(root: string, relativeDir: string, into: Map<string, st
   }
 }
 
+/** Top-level folders searched for package-level AGENTS.md files. */
+const AGENT_FILE_ROOTS = ['apps', 'packages', 'services', 'tools'] as const;
+const AGENT_FILE_NAME = 'AGENTS.md';
+const SKIPPED_DIRECTORIES = new Set(['node_modules', '.dart_tool', 'build', 'dist', 'coverage', 'fixtures', '.git']);
+
+function collectNestedAgentFiles(root: string, relativeDir: string, into: Map<string, string>): void {
+  const absoluteDir = path.join(root, relativeDir);
+  if (!existsSync(absoluteDir)) {
+    return;
+  }
+  const entries = readdirSync(absoluteDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
+  for (const entry of entries) {
+    const relativePath = path.posix.join(relativeDir, entry.name);
+    if (entry.isDirectory()) {
+      if (!SKIPPED_DIRECTORIES.has(entry.name)) {
+        collectNestedAgentFiles(root, relativePath, into);
+      }
+    } else if (entry.isFile() && entry.name === AGENT_FILE_NAME) {
+      into.set(relativePath, normalizeNewlines(readFileSync(path.join(root, relativePath), 'utf8')));
+    }
+  }
+}
+
 /**
- * Loads root-level Markdown files plus every Markdown file under `layout.docsDir`.
- * Everything else (tools, fixtures, node_modules) is not scanned but can still be link targets.
+ * Loads root-level Markdown files, every Markdown file under `layout.docsDir`, and package-level
+ * AGENTS.md files under apps/, packages/, services/ and tools/. Everything else (source,
+ * fixtures, node_modules) is not scanned but can still be a link target.
  */
 export function loadSnapshot(root: string, layout: Layout = DEFAULT_LAYOUT): Snapshot {
   const absoluteRoot = path.resolve(root);
@@ -61,6 +85,9 @@ export function loadSnapshot(root: string, layout: Layout = DEFAULT_LAYOUT): Sna
   }
   if (existsSync(path.join(absoluteRoot, layout.docsDir))) {
     collectMarkdown(absoluteRoot, layout.docsDir, docs);
+  }
+  for (const agentRoot of AGENT_FILE_ROOTS) {
+    collectNestedAgentFiles(absoluteRoot, agentRoot, docs);
   }
 
   return {

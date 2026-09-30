@@ -1,0 +1,3 @@
+# Lib
+
+[bad](nowhere.md)

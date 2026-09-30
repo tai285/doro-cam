@@ -41,15 +41,15 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** local-development.md (move from planned to available).
 
 ### FND-T-004 Flutter app scaffold
-- **Status:** todo
+- **Status:** done
 - **Platform:** dart
 - **Depends:** FND-T-001
 - **Requirements:** NFR-009, NFR-014
 - **Docs:** [mobile.md](../architecture/mobile.md), ADR-0012
-- **Scope:** install the Flutter SDK (stable), JDK 17, and Android command-line tools; root `pubspec.yaml` pub workspace; `apps/mobile` with the mobile.md folder layout, Riverpod, go_router, strict analysis options, and an empty camera route; decide and record the minimum Android API and iOS versions; `apps/mobile/AGENTS.md`; CI job for `flutter analyze` and `flutter test --coverage`.
+- **Scope:** install the Flutter SDK (stable), JDK 17, and Android command-line tools; root `pubspec.yaml` pub workspace; `apps/mobile` with the mobile.md folder layout, Riverpod, go_router, strict analysis options, and an empty camera route; minimum platforms decided and recorded (Android `minSdk` 28, iOS 16.0, app ID `com.dorocam.app`); `apps/mobile/AGENTS.md`; CI job for `flutter analyze` and `flutter test --coverage`.
 - **Out of scope:** camera functionality; emulator runs (FND-T-008).
 - **Acceptance:** analyze is clean; tests pass in CI.
-- **Tests:** widget tests for app startup and each route placeholder; a router unit test.
+- **Tests:** 38 unit/widget tests (routing, deep links, unknown routes, theme tokens with a WCAG contrast check, semantics, the shared back button) at 100% line coverage of `lib/`; `integration_test/app_smoke_test.dart` verified on the Android Emulator (`doro_api35`).
 - **Doc updates:** AGENTS.md §8; local-development.md; testing-strategy.md (confirmed min API).
 
 ### FND-T-008 Android Emulator: local AVD and CI instrumentation job
@@ -61,7 +61,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Scope:**
   - Install the emulator and API 35 image locally and create AVD `doro_api35`. If `emulator -accel-check` reports WHPX is unavailable, ask the owner to enable Windows Hypervisor Platform.
   - Scripts: `scripts/emulator-start.(sh|ps1)` that boots headless and waits for `sys.boot_completed`.
-  - CI `android` job on `ubuntu-latest` with KVM (`reactivecircus/android-emulator-runner`), AVD caching, and a nightly API 30 job.
+  - CI `android` job on `ubuntu-latest` with KVM (`reactivecircus/android-emulator-runner`), AVD caching, and a nightly API 28 (minimum supported) job.
   - Run `flutter test integration_test` on the emulator; upload the debug APK as an artifact (for optional field verification).
 - **Out of scope:** camera tests (added by camera tasks).
 - **Acceptance:** an `integration_test` smoke test (app launches, navigates the routes) passes locally on `doro_api35` and in CI.

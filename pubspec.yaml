@@ -1,0 +1,8 @@
+# Dart pub workspace root (ADR-0012). Members are Dart/Flutter packages; TypeScript packages use pnpm.
+name: doro_cam_workspace
+description: Workspace root for Doro Cam Dart packages.
+publish_to: none
+environment:
+  sdk: ^3.13.4
+workspace:
+  - apps/mobile
