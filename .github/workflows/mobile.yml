@@ -52,8 +52,24 @@ jobs:
         working-directory: apps/mobile
         run: flutter test --coverage
 
+      - name: Analyze the camera plugin
+        working-directory: packages/doro_camera
+        run: flutter analyze
+
+      - name: Test the camera plugin with coverage
+        working-directory: packages/doro_camera
+        run: flutter test --coverage
+
+      - name: Pigeon output is up to date
+        working-directory: packages/doro_camera
+        run: |
+          dart run pigeon --input pigeons/camera_api.dart
+          git diff --exit-code -- lib/src/messages.g.dart android/src/main/kotlin ios/doro_camera/Sources
+
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
           name: mobile-coverage
-          path: apps/mobile/coverage/lcov.info
+          path: |
+            apps/mobile/coverage/lcov.info
+            packages/doro_camera/coverage/lcov.info

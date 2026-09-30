@@ -85,7 +85,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** local-development.md, testing-infrastructure.md (measured minutes), AGENTS.md §8.
 
 ### FND-T-005 doro_camera plugin scaffold with Pigeon
-- **Status:** todo
+- **Status:** in-progress
 - **Platform:** dart
 - **Depends:** FND-T-008, FND-T-009
 - **Requirements:** CAM-004, NFR-014
@@ -94,12 +94,13 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
   - `packages/doro_camera` in the pub workspace, with an Android Kotlin module (Kover configured) and an iOS Swift module (xccov, SwiftLint).
   - Pigeon setup with a `ping` host API.
   - The `CameraPlatform` abstract class, and `FakeCameraPlatform` in `lib/testing.dart`.
-  - Swift protocol seams `CaptureDeviceProviding` and `CaptureSessionControlling` (declared, not yet used).
-  - The `DOROCAM_SYNTHETIC_CAMERA` build flag wiring (debug and test only), plus a CI assertion that release builds exclude it.
+  - Swift protocol seams `CaptureDeviceProviding` and `CaptureSessionControlling` are introduced by CAM-T-013 and CAM-T-014, where they are first consumed and tested (declaring them unused now would be dead, untestable code). The scaffold ships the first seam, `PlatformEnvironment`, on both platforms.
+  - The `DOROCAM_SYNTHETIC_CAMERA` build flag wiring (debug only) and a marker string, plus `scripts/check-synthetic-camera.sh`, which CI runs on debug and release artifacts of both platforms (debug must contain the marker, release must not).
+  - iOS is SwiftPM only with a Flutter-free core package (ADR-0015).
   - `packages/doro_camera/AGENTS.md`.
 - **Out of scope:** real camera calls.
 - **Acceptance:** the app calls `ping` successfully on the Android Emulator and the iOS Simulator in CI; the release-exclusion check passes.
-- **Tests:** Dart tests for the fake and the mapping; JUnit and XCTest tests for the `ping` host API; an integration test on both platforms.
+- **Tests:** 27 Dart tests (mapping, fake, wire format with the real Pigeon codec), 11 Kotlin JVM tests (including a wire round trip through a fake BinaryMessenger), XCTests for the Swift core (`swift test`), 10 tests of the artifact check script, and `integration_test/camera_bridge_test.dart` round-tripping the native ping on the emulator (verified locally) and the simulator.
 - **Doc updates:** development-guide.md (codegen notes).
 
 ### FND-T-006 Fastify API skeleton

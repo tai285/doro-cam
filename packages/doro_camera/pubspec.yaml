@@ -1,0 +1,29 @@
+name: doro_camera
+description: "Doro Cam camera plugin: capability-aware native camera access (Kotlin CameraX, Swift AVFoundation)."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.4
+  flutter: ">=3.3.0"
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  pigeon: ^26.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.dorocam.doro_camera
+        pluginClass: DoroCameraPlugin
+      ios:
+        # Swift Package Manager only (see packages/doro_camera/AGENTS.md).
+        pluginClass: DoroCameraPlugin

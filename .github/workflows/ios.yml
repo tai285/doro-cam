@@ -35,6 +35,16 @@ env:
   FLUTTER_VERSION: "3.47.5"
 
 jobs:
+  core:
+    name: Swift core unit tests
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: swift test (Flutter-free core, no simulator needed)
+        run: swift test --package-path packages/doro_camera/ios/doro_camera_core --enable-code-coverage
+
   simulator:
     name: iOS Simulator (unit + integration)
     runs-on: macos-15
@@ -55,6 +65,9 @@ jobs:
         working-directory: apps/mobile
         run: flutter build ios --simulator --debug --no-codesign
 
+      - name: Debug build contains the synthetic camera marker
+        run: bash scripts/check-synthetic-camera.sh --expect-present apps/mobile/build/ios/iphonesimulator/Runner.app
+
       - name: Boot simulator
         id: sim
         run: |
@@ -65,6 +78,12 @@ jobs:
         timeout-minutes: 20
         working-directory: apps/mobile
         run: flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
+
+      - name: Release build excludes the synthetic camera (ADR-0013)
+        working-directory: apps/mobile
+        run: |
+          flutter build ios --release --no-codesign
+          bash ../../scripts/check-synthetic-camera.sh --expect-absent build/ios/iphoneos/Runner.app
 
       - name: Simulator diagnostics
         if: failure() || cancelled()

@@ -6,3 +6,4 @@ environment:
   sdk: ^3.13.4
 workspace:
   - apps/mobile
+  - packages/doro_camera

@@ -84,6 +84,11 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: flutter pub get
 
+      - name: Kotlin unit tests (plugin)
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        working-directory: apps/mobile/android
+        run: ./gradlew :doro_camera:testDebugUnitTest --console=plain
+
       - name: Integration tests on the emulator
         if: steps.gate.outputs.run == 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -101,6 +106,19 @@ jobs:
         if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
         working-directory: apps/mobile
         run: flutter build apk --debug
+
+      - name: Debug APK contains the synthetic camera marker
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        run: bash scripts/check-synthetic-camera.sh --expect-present apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+
+      - name: Build release APK
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        working-directory: apps/mobile
+        run: flutter build apk --release
+
+      - name: Release APK excludes the synthetic camera (ADR-0013)
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        run: bash scripts/check-synthetic-camera.sh --expect-absent apps/mobile/build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload debug APK (for optional field verification)
         if: steps.gate.outputs.run == 'true' && matrix.api-level == 35

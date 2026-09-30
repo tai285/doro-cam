@@ -1,4 +1,6 @@
 class CapabilityProbeTest {
+    // JVM method names cannot contain brackets, so tags live in comments.
+    // [CAM-001]
     @Test
-    fun `[CAM-001] probes the first camera`() {}
+    fun `probes the first camera`() {}
 }
