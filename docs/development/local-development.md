@@ -14,7 +14,8 @@ Status: Living (partially planned) · Last updated: 2026-09-30 · Related: ADR-0
 
 ```sh
 pnpm install         # installs workspace dependencies (pnpm 12.8.1, pinned by packageManager)
-pnpm test            # tests in every TypeScript package
+pnpm test:tools      # tooling tests only (no Docker needed)
+pnpm test            # tests in every TypeScript package (the API's need `pnpm infra:up` first)
 pnpm typecheck       # tsc --noEmit in every TypeScript package
 pnpm check:docs      # documentation integrity
 ```

@@ -13,6 +13,7 @@
     "check:docs": "pnpm --filter @doro/docs-check run check:docs",
     "infra:up": "pnpm --filter @doro/local-infra run infra:up",
     "infra:down": "pnpm --filter @doro/local-infra run infra:down",
-    "test:infra": "pnpm --filter @doro/local-infra run test:infra"
+    "test:infra": "pnpm --filter @doro/local-infra run test:infra",
+    "test:tools": "pnpm --filter \"./tools/*\" run test"
   }
 }

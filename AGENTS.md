@@ -125,7 +125,8 @@ Full tiered definition: [development-guide.md](docs/development/development-guid
 | Purpose | Command |
 |---|---|
 | Docs integrity check | `pnpm check:docs` |
-| Tests (all TypeScript packages) | `pnpm test` |
+| Tooling tests only (no Docker needed) | `pnpm test:tools` |
+| Tests in every TypeScript package (API tests need `pnpm infra:up` first) | `pnpm test` |
 | Type check (all TypeScript packages) | `pnpm typecheck` |
 | Load the mobile toolchain (Flutter, JDK 17, Android SDK) | `source scripts/dev-env.sh` |
 | API type check / tests with coverage (needs `pnpm infra:up`) | `pnpm --filter @doro/api typecheck` · `pnpm --filter @doro/api test:coverage` |
