@@ -145,7 +145,7 @@ App-level commands (Flutter, API, web) are added here by the scaffolding tasks a
 - The product name is **Doro Cam** (confirmed by the owner, 2026-09-30).
 - The owner develops on **Windows 11** (i5-12450H, 16 GB RAM, WSL2 and Docker Desktop). There is **no local Mac** (ADR-0013):
   - **Android:** use the Android Emulator AVD `doro_api35` locally (needs Windows Hypervisor Platform; ask the owner to enable it if `emulator -accel-check` fails) and in CI with KVM.
-  - **iOS:** every build and test runs on **cloud macOS**: GitHub Actions `ios.yml` (primary, about 200 free macOS minutes a month on a private repo, so batch iOS changes) and Codemagic (overflow, 500 free minutes a month). Trigger and inspect runs with `gh`.
+  - **iOS:** every build and test runs on **cloud macOS** through GitHub Actions `ios.yml` (`bash scripts/ios-ci.sh` triggers it and waits). The repository is **public**, so macOS runners are free. One run takes about 9 minutes (Xcode 16.4, iPhone 16 Pro Max, iOS 18.6 simulator). Do not add an iOS workflow that uses a simulator runtime newer than the runner's Xcode: it hangs.
   - **iOS Simulator has no camera.** Use the plugin's synthetic source in debug and test builds only.
 - The owner's physical devices (**Honor X9c**, **iPhone 12 Pro Max**) are for optional field verification only. Agents never depend on them.
 - GitHub CLI: `gh` (on Windows at `C:\Program Files\GitHub CLI\gh.exe`), authenticated as `tai285`. The repo is `tai285/doro-cam` (private).

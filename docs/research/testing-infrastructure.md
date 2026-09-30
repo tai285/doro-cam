@@ -51,3 +51,15 @@ Format for each finding: **Source · Date · Finding · Confidence · Implicatio
 - **Confidence:** High (docs) · unverified locally until the SDK is installed
 - **Implication:** Agents can run the emulator locally and in CI. 16 GB RAM supports one emulator plus the Docker stack; don't run two emulators at once locally.
 - **Action:** FND-T-008. If WHPX is disabled, the agent asks the owner to enable "Windows Hypervisor Platform" (an admin action).
+
+### R-TST-6 — Measured: iOS Simulator CI on GitHub Actions (first real runs)
+- **Source:** our own `ios.yml` runs on 2026-09-30 (run 36754993639 succeeded).
+- **Date:** 2026-09-30
+- **Finding:**
+  - `macos-15` provides Xcode 16.4 and iOS 18.5/18.6 and 26.x simulator runtimes, but **no iPhone 12 Pro Max device type** (only newer iPhones). `scripts/ios-simulator.sh` picks the closest (iPhone 16 Pro Max).
+  - A full run takes **about 9 minutes**: Flutter setup 1.5 min, `flutter build ios --simulator` 1.5 min, simulator boot 1.2 min, integration test 3.8 min.
+  - **The first attempt hung for 42 minutes** in `flutter test integration_test` when the script chose the newest runtime (iOS 26.2), which is newer than Xcode 16.4's SDK. Choosing the iOS 18.6 runtime fixed it. Lesson: keep the simulator runtime in step with the runner's Xcode.
+  - The repository was made public the same day, so the macOS minutes are free.
+- **Confidence:** High (observed)
+- **Implication:** iOS verification feedback takes about 9 minutes, so batch iOS-affecting changes and rely on the Linux and emulator jobs for fast feedback.
+- **Action:** ios.yml has a 20-minute step timeout and dumps simulator logs on failure. To test the newest iOS, add a nightly job on a `macos-26` runner with Xcode 26 rather than forcing a new runtime onto Xcode 16.

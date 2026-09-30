@@ -69,19 +69,19 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** local-development.md, testing-strategy.md, AGENTS.md §8.
 
 ### FND-T-009 iOS on cloud macOS: build, XCTest and Simulator job
-- **Status:** in-progress
+- **Status:** done
 - **Platform:** infra
 - **Depends:** FND-T-004
 - **Requirements:** NFR-016, NFR-010
 - **Docs:** [local-development.md](../development/local-development.md) (iOS without a Mac), [testing-infrastructure.md](../research/testing-infrastructure.md), ADR-0013
 - **Scope:**
   - `ios.yml` on `macos-*` runners: path filters, `workflow_dispatch`, and a weekly schedule. It builds the Flutter iOS app for the Simulator, boots an iPhone 12 Pro Max–profile simulator, and runs `flutter test integration_test`. It caches pub, CocoaPods/SwiftPM, and DerivedData, and uploads `.xcresult` bundles.
-  - An equivalent `codemagic.yaml` workflow.
+  - Codemagic is not configured: the repository is public, so GitHub macOS runners are free (a fallback only).
   - A `scripts/ios-ci.sh` helper that wraps `gh workflow run` and `gh run watch` for agents.
   - Record the macOS minutes each run consumes.
 - **Out of scope:** signing and TestFlight (owner decision).
-- **Acceptance:** the smoke `integration_test` passes on the iOS Simulator in GitHub Actions; minutes per run are recorded in testing-infrastructure.md; Codemagic config validated by one run (after the owner connects the repo in the Codemagic UI).
-- **Tests:** the integration smoke test on the Simulator; `actionlint` on the workflow.
+- **Acceptance:** the smoke `integration_test` passes on the iOS Simulator in GitHub Actions (done: iPhone 16 Pro Max, iOS 18.6, Xcode 16.4, about 9 minutes); minutes per run are recorded in testing-infrastructure.md.
+- **Tests:** the integration smoke test on the Simulator (passing in CI); 9 tests of `scripts/ios-simulator.sh` against a fake `xcrun` (`tools/script-tests`).
 - **Doc updates:** local-development.md, testing-infrastructure.md (measured minutes), AGENTS.md §8.
 
 ### FND-T-005 doro_camera plugin scaffold with Pigeon

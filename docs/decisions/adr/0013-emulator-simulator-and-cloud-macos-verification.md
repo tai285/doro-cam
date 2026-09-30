@@ -40,6 +40,6 @@ Facts ([testing-infrastructure.md](../../research/testing-infrastructure.md)):
 
 - Agents can verify nearly all behavior on their own. The remaining hardware risk is explicit and tracked, not hidden.
 - Performance numbers (NFR-003, NFR-004) and image-quality parity measured on emulators are **not** representative. Emulators verify correctness only. Budgets are set from field measurements when available; until then, the architecture uses the lower-risk native GPU path.
-- **CI minutes are the scarce resource.** iOS jobs are path-filtered and use caching. The owner may make the repo public, which gives unlimited standard runners, or rely on Codemagic.
+- **CI minutes were the scarce resource, until the repository became public** (2026-09-30), which makes GitHub-hosted runners, including macOS, free. A full iOS run takes about 9 minutes; Codemagic stays a documented fallback, not a configured workflow. iOS jobs are path-filtered and use caching. The owner may make the repo public, which gives unlimited standard runners, or rely on Codemagic.
 - Installing builds on the owner's iPhone needs signing. TestFlight requires the Apple Developer Program, an owner decision. The Honor can sideload debug APKs directly.
 - Revisit if a Mac becomes available (local iteration gets faster) or if CI costs become a problem.

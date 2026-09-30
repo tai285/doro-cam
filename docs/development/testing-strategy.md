@@ -63,7 +63,7 @@ Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Cover
 | Android Emulator: Pixel-class AVD, **API 35**, x86_64, emulated back and front cameras | Local (Windows, WHPX) and CI (`ubuntu-latest` with KVM) | Primary Android instrumentation and `integration_test` runs |
 | Android Emulator: API 28 (minimum supported: `minSdk = 28`, decided at FND-T-004) | CI, nightly | Oldest-API regression of app behavior. Advanced emulated-camera features (RAW, logical cameras) need Android 11+ images, so camera-capability tests run on API 35 |
 | iOS deployment target | iOS 16.0 (decided at FND-T-004) | Simulator runs use the latest iOS runtime |
-| iOS Simulator: iPhone 12 Pro Max profile, latest iOS | Cloud macOS (GitHub Actions macOS, Codemagic overflow) | iOS unit, XCTest, `integration_test` with the synthetic camera |
+| iOS Simulator: a large iPhone on the iOS 18 runtime (the runner image has no iPhone 12 Pro Max device type; `scripts/ios-simulator.sh` picks the closest) | Cloud macOS (GitHub Actions `macos-15`, Xcode 16.4) | iOS unit, XCTest, `integration_test` with the synthetic camera |
 | iOS Simulator: newest iPhone profile | Cloud macOS, nightly or manual | Current-device regression |
 
 ### What emulators can verify
@@ -87,10 +87,9 @@ Image quality and real sensor response, OEM-specific camera HAL behavior, real p
 | `ci.yml` › mobile-dart | ubuntu | path-filtered | `flutter analyze`, `flutter test --coverage`, gates |
 | `ci.yml` › android | ubuntu + KVM | path-filtered to mobile/plugin | Gradle unit tests (Kover), emulator instrumentation, `integration_test` against Docker Compose |
 | `ios.yml` | `macos-*` | path-filtered to iOS/plugin/Dart changes, `workflow_dispatch`, weekly | build, XCTest (xccov), Simulator `integration_test`, check that release builds exclude the synthetic source |
-| `codemagic.yaml` | Codemagic M2 | manual or when GitHub macOS minutes run out | same as `ios.yml` |
 | `e2e.yml` | ubuntu + KVM | nightly and before a release | full cross-system journey (emulator app → API → web) |
 
-**Minute budget:** on a private repo, macOS minutes are scarce (about 200 a month on GitHub). Agents run the iOS workflow when iOS-affecting code changes and batch iOS changes. Caching (pub, CocoaPods/SwiftPM, DerivedData) is mandatory. See [testing-infrastructure.md](../research/testing-infrastructure.md).
+**Cost:** the repository is public, so GitHub-hosted macOS runners are free; a run takes about 9 minutes. Still path-filter and cache, because runs are slow. If the repository ever goes private, macOS minutes count 10x against the free quota (see [testing-infrastructure.md](../research/testing-infrastructure.md)) and Codemagic (500 free minutes a month) becomes the fallback.
 
 ## How agents run tests
 

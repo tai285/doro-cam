@@ -15,7 +15,7 @@ Phases are ordered by dependency and risk. Status values are `not started`, `in 
 | Video moved after the MVP (P8) | Video isn't in the MVP journey, and it's costly: codecs, transcoding, storage. |
 | Motion Memory (P6) after upload (P5) | Motion capture is the riskiest capture feature. Its spike (S3) runs in P0, but the feature ships after the core loop works end to end. |
 | Redis removed from the MVP | pg-boss on Postgres covers jobs (ADR-0010). |
-| **Android and iOS in parallel, without a local Mac** | iOS builds and tests run on cloud macOS (GitHub Actions and Codemagic). The iOS Simulator has no camera, so it uses a synthetic source in test builds (ADR-0013). |
+| **Android and iOS in parallel, without a local Mac** | iOS builds and tests run on cloud macOS (GitHub Actions; free because the repository is public). The iOS Simulator has no camera, so it uses a synthetic source in test builds (ADR-0013). |
 | Emulators and simulators are the primary verification targets | Agents can verify their own work. Real devices are optional field validation. |
 
 ## MVP scope realism
@@ -51,7 +51,7 @@ The MVP includes two native camera engines, a GPU look pipeline, motion capture,
 ### P0 — Foundations, test infrastructure and spikes
 - **Objective:** a working monorepo skeleton with CI, **complete test infrastructure** (Android Emulator locally and in CI, iOS Simulator on cloud macOS, coverage gates, requirement traceability), and answers to the feasibility questions.
 - **Deliverables:** repo layout per ADR-0012; CI workflows; Docker Compose (Postgres, Garage S3); Flutter, API, and web scaffolds each with passing tests; emulator/simulator pipelines; spikes S1–S7 with results in [spikes.md](../research/spikes.md).
-- **Risks:** WHPX availability on the owner's PC (one-time admin enable); scarce macOS CI minutes; the Android motion ring buffer (S3).
+- **Risks:** The Android motion ring buffer (S3); slow iOS CI feedback (about 9 minutes per run, no local Mac).
 - **Acceptance:** CI green on all scaffolds, including an emulator job and an iOS Simulator job; coverage gates active; each spike has a recorded result.
 - **Tests:** scaffold tests per package; docs check; traceability report.
 - **Docs:** spikes.md, capability-matrix.md (emulator columns), local-development.md, AGENTS.md commands.

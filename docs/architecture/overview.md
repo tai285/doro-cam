@@ -58,7 +58,7 @@ Layer rules are enforced by folder structure and lint rules where possible (see 
 | Media processing | On-device native; ffmpeg in the worker | ADR-0004, ADR-0005 |
 | Storage | S3-compatible (Garage locally; production provider is an open owner decision) | ADR-0008, ADR-0014 |
 | Tests | Vitest, Fastify inject, Testcontainers, Playwright, flutter_test, integration_test, JUnit + Robolectric, XCTest; Android Emulator and iOS Simulator | [testing-strategy.md](../development/testing-strategy.md), ADR-0013 |
-| Infra | Docker, Docker Compose, GitHub Actions (Linux + KVM for emulators, macOS for iOS), Codemagic (iOS overflow) | ADR-0012, ADR-0013 |
+| Infra | Docker, Docker Compose, GitHub Actions (Linux + KVM for emulators, macOS for iOS) | ADR-0012, ADR-0013 |
 
 Versions are pinned by lockfiles when each package is scaffolded, not in this document.
 

@@ -38,7 +38,7 @@ source scripts/dev-env.sh        # Git Bash
 | Android SDK | platform 35 and 36, build-tools 35.0.0, 36.0.0 and 28.0.3, NDK 28.2.13676358, platform-tools, emulator 37.1 | Flutter 3.47 requires platform 36 and build-tools 28.0.3; the NDK must be installed explicitly or Gradle fails |
 | System image | `system-images;android-35;google_apis;x86_64` | AVD `doro_api35` |
 | Windows Hypervisor Platform | present and usable | `emulator -accel-check` reports "WHPX is installed and usable"; no admin step was needed |
-| Cloud macOS (iOS) | not yet set up | GitHub Actions `macos-*` and Codemagic (FND-T-009) |
+| Cloud macOS (iOS) | working (2026-09-30) | GitHub Actions `macos-15`, Xcode 16.4; see `ios.yml` |
 
 `flutter doctor` is green for Flutter, Android toolchain, Chrome and network. The only warning is Visual Studio (Windows-desktop apps), which we don't build.
 
@@ -64,7 +64,7 @@ Resource note: 16 GB RAM is tight. One emulator (about 3 GB with its guest) plus
 ### iOS without a Mac
 
 - Every iOS build and test runs in the cloud (ADR-0013). Agents push a branch, then run `gh workflow run ios.yml --ref <branch>`, `gh run watch`, and `gh run view --log-failed`.
-- The repository is **public**, so GitHub-hosted runners (including macOS) are free and unlimited. Codemagic stays available as an overflow runner.
+- The repository is **public**, so GitHub-hosted runners (including macOS) are free. A run takes about 9 minutes; `bash scripts/ios-ci.sh` triggers it and waits. Codemagic is not configured; it is only a fallback if the repository ever goes private again.
 - Simulator camera: none. Debug and test builds use the plugin's synthetic camera source (ADR-0013).
 
 ### Local services (`infrastructure/docker-compose.yml`)
