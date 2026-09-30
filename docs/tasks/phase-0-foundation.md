@@ -96,7 +96,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
   - The `CameraPlatform` abstract class, and `FakeCameraPlatform` in `lib/testing.dart`.
   - Swift protocol seams `CaptureDeviceProviding` and `CaptureSessionControlling` are introduced by CAM-T-013 and CAM-T-014, where they are first consumed and tested (declaring them unused now would be dead, untestable code). The scaffold ships the first seam, `PlatformEnvironment`, on both platforms.
   - The `DOROCAM_SYNTHETIC_CAMERA` build flag wiring (debug only) and a marker string, plus `scripts/check-synthetic-camera.sh`, which CI runs on debug and release artifacts of both platforms (debug must contain the marker, release must not).
-  - iOS is SwiftPM only with a Flutter-free core package (ADR-0015).
+  - iOS is SwiftPM only with a Flutter-free core target inside the one package (ADR-0015).
   - `packages/doro_camera/AGENTS.md`.
 - **Out of scope:** real camera calls.
 - **Acceptance:** the app calls `ping` successfully on the Android Emulator and the iOS Simulator in CI; the release-exclusion check passes.
@@ -128,7 +128,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** AGENTS.md §8.
 
 ### FND-T-010 Coverage gates and ratchet across packages
-- **Status:** todo
+- **Status:** in-progress
 - **Platform:** infra
 - **Depends:** FND-T-005, FND-T-006, FND-T-007
 - **Requirements:** NFR-014

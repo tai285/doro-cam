@@ -8,6 +8,8 @@ on:
       - "infrastructure/**"
       - "tools/local-infra/**"
       - "pnpm-lock.yaml"
+      - "coverage-policy.json"
+      - "tools/coverage-gate/**"
       - ".dockerignore"
       - ".github/workflows/api.yml"
   pull_request:
@@ -16,6 +18,8 @@ on:
       - "infrastructure/**"
       - "tools/local-infra/**"
       - "pnpm-lock.yaml"
+      - "coverage-policy.json"
+      - "tools/coverage-gate/**"
       - ".dockerignore"
       - ".github/workflows/api.yml"
 
@@ -51,6 +55,9 @@ jobs:
 
       - name: Test with coverage (real Postgres and S3)
         run: pnpm --filter @doro/api test:coverage
+
+      - name: Coverage gate (policy floors and ratchet)
+        run: node tools/coverage-gate/src/cli.ts . --only services/api
 
       - name: Build
         run: pnpm --filter @doro/api build

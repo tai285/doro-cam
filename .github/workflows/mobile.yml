@@ -8,6 +8,8 @@ on:
       - "packages/doro_camera/**"
       - "pubspec.yaml"
       - "pubspec.lock"
+      - "coverage-policy.json"
+      - "tools/coverage-gate/**"
       - ".github/workflows/mobile.yml"
   pull_request:
     paths:
@@ -15,6 +17,8 @@ on:
       - "packages/doro_camera/**"
       - "pubspec.yaml"
       - "pubspec.lock"
+      - "coverage-policy.json"
+      - "tools/coverage-gate/**"
       - ".github/workflows/mobile.yml"
 
 permissions:
@@ -65,6 +69,13 @@ jobs:
         run: |
           dart run pigeon --input pigeons/camera_api.dart
           git diff --exit-code -- lib/src/messages.g.dart android/src/main/kotlin ios/doro_camera/Sources
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Coverage gate (policy floors and ratchet)
+        run: node tools/coverage-gate/src/cli.ts . --only apps/mobile,packages/doro_camera
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

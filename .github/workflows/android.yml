@@ -84,6 +84,12 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: flutter pub get
 
+      # Flutter generates the Gradle wrapper on the first build (its template git-ignores it).
+      - name: Build debug APK
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        working-directory: apps/mobile
+        run: flutter build apk --debug
+
       - name: Kotlin unit tests (plugin)
         if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
         working-directory: apps/mobile/android
@@ -101,11 +107,6 @@ jobs:
           emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -camera-back virtualscene -camera-front emulated
           working-directory: apps/mobile
           script: flutter test integration_test
-
-      - name: Build debug APK
-        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
-        working-directory: apps/mobile
-        run: flutter build apk --debug
 
       - name: Debug APK contains the synthetic camera marker
         if: steps.gate.outputs.run == 'true' && matrix.api-level == 35

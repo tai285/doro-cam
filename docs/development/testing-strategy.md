@@ -24,7 +24,7 @@ Tests must prove behavior:
 | Widget / screen | Widget tests: rendering per state, interactions, semantics labels; golden tests for Experience skins | `flutter_test` |
 | drift schema | DAO tests on real SQLite; **a migration test for every schema version step** | drift `SchemaVerifier` |
 | Pigeon message / platform mapping | Round-trip mapping tests on both sides (Dart and Kotlin/Swift) | `package:test`, JUnit, XCTest |
-| Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices). Kotlin runs through the app's Gradle project (`./gradlew :doro_camera:testDebugUnitTest` in `apps/mobile/android`); Swift logic lives in the Flutter-free `doro_camera_core` package and runs with `swift test` on a macOS runner (ADR-0015) | kotlin-test (JUnit 5), XCTest |
+| Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices). Kotlin runs through the app's Gradle project (`./gradlew :doro_camera:testDebugUnitTest` in `apps/mobile/android`); Swift logic lives in the Flutter-free `DoroCameraCore` target and runs with `swift test` on a macOS runner (ADR-0015) | kotlin-test (JUnit 5), XCTest |
 | Native camera integration | Instrumented tests on the **Android Emulator**; XCTest plus the synthetic source on the **iOS Simulator** | AndroidX Test, XCTest |
 | App feature (end to end on mobile) | `integration_test` flows on the Android Emulator and iOS Simulator | `integration_test` |
 | API endpoint | Integration tests: success, validation error, 401, IDOR (404), idempotent replay, and every documented error code | Vitest + Fastify `inject` against the real Postgres/S3 from `pnpm infra:up` (an isolated database per test file) |
@@ -41,7 +41,7 @@ Tests must prove behavior:
 
 Every requirement of a `done` task must be covered by at least one automated test. Tests carry requirement IDs in their names, e.g. `test('[CAM-010] clamps ISO to the device range', …)`; Swift and Kotlin test method names cannot hold brackets (the JVM forbids `[` and `]` in names), so Swift and Kotlin tests put the tag in a comment directly above the test (`// [CAM-010]`). `pnpm check:traceability` (`tools/docs-check`, task FND-T-011) scans every test source (Dart, TypeScript, Playwright, Kotlin, Swift), and CI fails when a tag names an unknown requirement or when a done task's requirement has no tagged test.
 
-Requirements that cannot be proven by a test (process and meta requirements such as NFR-009, NFR-010, NFR-014) are listed with a reason in [traceability-waivers.json](../product/traceability-waivers.json). Waivers without a reason do not count, and a waiver becomes an error once the requirement does get a tagged test, so the file cannot rot. Add a waiver only for genuine process requirements, never to skip writing a test.
+Requirements that cannot be proven by a test (process requirements such as NFR-009 and NFR-010) are listed with a reason in [traceability-waivers.json](../product/traceability-waivers.json). Waivers without a reason do not count, and a waiver becomes an error once the requirement does get a tagged test, so the file cannot rot. Add a waiver only for genuine process requirements, never to skip writing a test.
 
 ## Coverage gates (enforced in CI)
 
@@ -54,7 +54,7 @@ Requirements that cannot be proven by a test (process and meta requirements such
 | Kotlin plugin code (Kover) | ≥ 90% | ≥ 80% |
 | Swift plugin code (xccov) | ≥ 90% | — |
 
-Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Coverage may never decrease on `main` (a ratchet file per package, updated only upward). Coverage is a floor, not the goal: the obligations table still applies.
+Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Coverage may never decrease on `main`: [coverage-policy.json](../../coverage-policy.json) records each package's policy floor (`min`) and the best coverage reached so far (`ratchet`). `pnpm check:coverage -- --only <package>` (`tools/coverage-gate`) fails below either, tolerating 0.01 points of rounding noise. After improving coverage run it with `--update` and commit the file; ratchets only ever go up. Gated so far: Dart (`apps/mobile`, `packages/doro_camera`) and TypeScript (`apps/web`, `services/api`) through their lcov reports. Kotlin (Kover) and Swift (llvm-cov) gates are added when those toolchains report coverage (FND-T-010 follow-up). Coverage is a floor, not the goal: the obligations table still applies.
 
 ## Emulator and simulator matrix
 

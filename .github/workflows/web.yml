@@ -6,11 +6,15 @@ on:
     paths:
       - "apps/web/**"
       - "pnpm-lock.yaml"
+      - "coverage-policy.json"
+      - "tools/coverage-gate/**"
       - ".github/workflows/web.yml"
   pull_request:
     paths:
       - "apps/web/**"
       - "pnpm-lock.yaml"
+      - "coverage-policy.json"
+      - "tools/coverage-gate/**"
       - ".github/workflows/web.yml"
 
 permissions:
@@ -48,6 +52,9 @@ jobs:
 
       - name: Unit and component tests with coverage
         run: pnpm --filter @doro/web test:coverage
+
+      - name: Coverage gate (policy floors and ratchet)
+        run: node tools/coverage-gate/src/cli.ts . --only apps/web
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

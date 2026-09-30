@@ -125,6 +125,7 @@ Full tiered definition: [development-guide.md](docs/development/development-guid
 | Purpose | Command |
 |---|---|
 | Docs integrity check | `pnpm check:docs` |
+| Coverage gate (floors + ratchet), after running a package's tests with coverage | `pnpm check:coverage -- --only <package>` · raise the ratchet after improving coverage: add `--update` and commit `coverage-policy.json` |
 | Requirement-to-test traceability (every requirement of a `done` task has a tagged test or a reasoned waiver) | `pnpm check:traceability` |
 | Tooling tests only (no Docker needed) | `pnpm test:tools` |
 | Tests in every TypeScript package (API tests need `pnpm infra:up` first) | `pnpm test` |

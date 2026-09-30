@@ -30,4 +30,4 @@ Statuses: `Proposed` · `Accepted` · `Superseded by ADR-NNNN` · `Deprecated`
 | [ADR-0012](0012-monorepo-and-contract-generation.md) | Polyglot monorepo and OpenAPI contract generation | Accepted |
 | [ADR-0013](0013-emulator-simulator-and-cloud-macos-verification.md) | Verification on emulators, simulators and cloud macOS | Accepted |
 | [ADR-0014](0014-garage-for-local-s3.md) | Garage as the local S3-compatible server | Accepted |
-| [ADR-0015](0015-ios-plugin-swiftpm-only-with-flutter-free-core.md) | iOS camera plugin is SwiftPM-only with a Flutter-free core package | Accepted |
+| [ADR-0015](0015-ios-plugin-swiftpm-only-with-flutter-free-core.md) | iOS camera plugin is SwiftPM-only with a Flutter-free core target | Accepted |

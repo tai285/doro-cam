@@ -1,0 +1,56 @@
+{
+  "packages": [
+    {
+      "name": "apps/mobile",
+      "report": "apps/mobile/coverage/lcov.info",
+      "exclude": [
+        "**/*.g.dart"
+      ],
+      "min": {
+        "lines": 85
+      },
+      "ratchet": {
+        "lines": 100
+      }
+    },
+    {
+      "name": "packages/doro_camera",
+      "report": "packages/doro_camera/coverage/lcov.info",
+      "exclude": [
+        "**/*.g.dart"
+      ],
+      "min": {
+        "lines": 95
+      },
+      "ratchet": {
+        "lines": 100
+      }
+    },
+    {
+      "name": "apps/web",
+      "report": "apps/web/coverage/lcov.info",
+      "exclude": [],
+      "min": {
+        "lines": 95,
+        "branches": 90
+      },
+      "ratchet": {
+        "lines": 100,
+        "branches": 100
+      }
+    },
+    {
+      "name": "services/api",
+      "report": "services/api/coverage/lcov.info",
+      "exclude": [],
+      "min": {
+        "lines": 95,
+        "branches": 90
+      },
+      "ratchet": {
+        "lines": 100,
+        "branches": 98.63
+      }
+    }
+  ]
+}

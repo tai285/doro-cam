@@ -1,0 +1,15 @@
+{
+  "name": "@doro/coverage-gate",
+  "private": true,
+  "type": "module",
+  "description": "Coverage gate with a ratchet: fails when a package falls below its policy floor or below its recorded coverage.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "check:coverage": "node src/cli.ts ../.."
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "typescript": "7.0.2"
+  }
+}
