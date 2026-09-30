@@ -54,7 +54,7 @@ jobs:
       - name: Boot simulator
         id: sim
         run: |
-          UDID="$(scripts/ios-simulator.sh)"
+          UDID="$(bash scripts/ios-simulator.sh)"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
       - name: Integration tests on the simulator
