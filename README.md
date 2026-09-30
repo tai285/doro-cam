@@ -6,7 +6,7 @@ Doro Cam is a photography and memory platform. It combines a Flutter camera app 
 
 ## Status
 
-**Phase 0 (foundations) in progress.** The docs, the docs checker, the pnpm workspace, the local Postgres + S3 stack, and the Flutter app shell are done. See the [roadmap](docs/product/roadmap.md) and [tasks](docs/tasks/README.md).
+**Phase 0 (foundations) nearly done.** Done and green in CI: the docs and traceability checkers, the pnpm workspace, the local Postgres + S3 stack, the API and worker skeleton, the web app shell, the Flutter app shell, the native camera plugin bridge (Dart to Kotlin and Swift, verified on the Android Emulator and the iOS Simulator), the emulator and cloud-macOS pipelines, and the coverage gate. Remaining: the technical spikes S1-S7. See the [roadmap](docs/product/roadmap.md) and [tasks](docs/tasks/README.md).
 
 Everything is built with a full automated test suite and verified on the Android Emulator and the iOS Simulator (via cloud macOS CI). No physical device or local Mac is required ([ADR-0013](docs/decisions/adr/0013-emulator-simulator-and-cloud-macos-verification.md)).
 

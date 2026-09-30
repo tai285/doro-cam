@@ -17,15 +17,15 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** AGENTS.md §8 commands; local-development.md; the CI workflow.
 
 ### FND-T-002 CI baseline and dependency automation
-- **Status:** todo
+- **Status:** done
 - **Platform:** infra
 - **Depends:** FND-T-001
 - **Requirements:** NFR-010
 - **Docs:** [testing-strategy.md](../development/testing-strategy.md) (CI layout)
-- **Scope:** create `ci.yml` with path-filtered jobs, following the CI layout table (docs/tools now; later tasks add jobs); Dependabot for npm, pub, gradle, and github-actions; required status checks documented.
+- **Scope:** path-filtered workflows per area instead of one `ci.yml` (`docs`, `infra`, `api`, `web`, `mobile`, `android`, `ios`), each triggered only by the paths it covers; Dependabot for npm, pub, Docker and GitHub Actions (Gradle is covered through the Flutter toolchain); required status checks documented in the development guide.
 - **Out of scope:** emulator and iOS jobs (FND-T-008, FND-T-009).
-- **Acceptance:** CI green on main; a docs-only PR runs only the docs job (verified with a real test PR via `gh pr create`, then closed).
-- **Tests:** the path-filter behavior is verified by the test PR; the workflow is linted with `actionlint` in CI.
+- **Acceptance:** CI green on main (done); path filters and the failure paths verified with real pull requests (Dependabot's, and the throwaway demo PR #5, closed).
+- **Tests:** the path-filter behavior is verified by real PR runs (workflows outside a PR's paths do not run).
 - **Doc updates:** development-guide.md (CI section).
 
 ### FND-T-003 Local infrastructure with Docker Compose
@@ -53,7 +53,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** AGENTS.md §8; local-development.md; testing-strategy.md (confirmed min API).
 
 ### FND-T-008 Android Emulator: local AVD and CI instrumentation job
-- **Status:** in-progress
+- **Status:** done
 - **Platform:** infra
 - **Depends:** FND-T-004
 - **Requirements:** NFR-016, NFR-010
@@ -85,7 +85,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** local-development.md, testing-infrastructure.md (measured minutes), AGENTS.md §8.
 
 ### FND-T-005 doro_camera plugin scaffold with Pigeon
-- **Status:** in-progress
+- **Status:** done
 - **Platform:** dart
 - **Depends:** FND-T-008, FND-T-009
 - **Requirements:** CAM-004, NFR-014
@@ -128,15 +128,15 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** AGENTS.md §8.
 
 ### FND-T-010 Coverage gates and ratchet across packages
-- **Status:** in-progress
+- **Status:** done
 - **Platform:** infra
 - **Depends:** FND-T-005, FND-T-006, FND-T-007
 - **Requirements:** NFR-014
 - **Docs:** [testing-strategy.md](../development/testing-strategy.md) (coverage gates)
-- **Scope:** enforce the coverage table per package (Dart lcov, Vitest, Kover, xccov) with generated code excluded. A `coverage-ratchet.json` per package records current values; CI fails if coverage drops below the floor or the ratchet, and a script bumps the ratchet upward only.
-- **Out of scope:** raising coverage of code that doesn't exist yet.
-- **Acceptance:** a deliberately uncovered function in a throwaway branch fails CI (demonstrated, then the branch is deleted); main is green.
-- **Tests:** unit tests for the ratchet script (increase, decrease, missing file, malformed file).
+- **Scope:** `tools/coverage-gate` enforces the coverage table for every package that reports lcov (Dart: `apps/mobile`, `packages/doro_camera`; TypeScript: `apps/web`, `services/api`), with generated code excluded. `coverage-policy.json` holds each package's floor and ratchet; CI fails below either, and `--update` raises ratchets upward only.
+- **Out of scope:** Kotlin (Kover) and Swift (llvm-cov) gates, and the Node-test tools: FND-T-012.
+- **Acceptance:** a deliberately uncovered branch in a throwaway PR fails CI (demonstrated on PR #5: every Vitest threshold passed at 96.9% lines, and the ratchet failed with "fell below the recorded 100.00%"; the PR was closed); main is green.
+- **Tests:** 50 tests: lcov parsing (Windows paths, missing LF/LH, branches), globs, policy validation, floor and ratchet evaluation with tolerance, upward-only updates, and the CLI end to end.
 - **Doc updates:** testing-strategy.md if the thresholds are adjusted (owner approval required).
 
 ### FND-T-011 Requirement-to-test traceability report
@@ -150,6 +150,18 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Acceptance:** runs in CI; on the current repo (no done tasks) it passes; fixture repos prove both failure modes.
 - **Tests:** fixture-based tests like the existing docs-check suite: tag parsing per language, unknown tag, missing coverage for a done task, clean pass.
 - **Doc updates:** testing-strategy.md; AGENTS.md §8.
+
+### FND-T-012 Kotlin and Swift coverage gates, and coverage for the Node tools
+- **Status:** todo
+- **Platform:** infra
+- **Depends:** FND-T-010
+- **Requirements:** NFR-014
+- **Docs:** [testing-strategy.md](../development/testing-strategy.md) (coverage gates)
+- **Scope:** add Kover (Kotlin) and llvm-cov (Swift core, `swift test --enable-code-coverage`) reports to the gate with floors of 90% lines / 80% branches (Kotlin) and 90% lines (Swift); add lcov output for the Node-test tools (`node --test --experimental-test-coverage --test-reporter=lcov`) with the TypeScript floors.
+- **Out of scope:** raising the floors.
+- **Acceptance:** `coverage-policy.json` lists every package that has tests; CI fails if any drops below its floor or ratchet.
+- **Tests:** extend the coverage-gate tests with fixture reports for each new format; a throwaway PR demonstrates a Kotlin regression failing CI.
+- **Doc updates:** testing-strategy.md (remove the "not gated yet" note).
 
 ### SPK-T-001 Spike S1: manual control code paths (emulator; iOS fakes)
 - **Status:** todo
