@@ -1,0 +1,66 @@
+name: ios
+
+# iOS builds and tests run only on cloud macOS (ADR-0013): there is no local Mac.
+# The repository is public, so GitHub-hosted macOS runners are free.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - "packages/doro_camera/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "scripts/ios-*.sh"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/doro_camera/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "scripts/ios-*.sh"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.47.5"
+
+jobs:
+  simulator:
+    name: iOS Simulator (unit + integration)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Boot simulator
+        id: sim
+        run: |
+          UDID="$(scripts/ios-simulator.sh)"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Integration tests on the simulator
+        working-directory: apps/mobile
+        run: flutter test integration_test -d "${{ steps.sim.outputs.udid }}"
+
+      - name: Build for the simulator (no codesign)
+        working-directory: apps/mobile
+        run: flutter build ios --simulator --debug --no-codesign
