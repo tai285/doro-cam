@@ -16,7 +16,7 @@
     "db:migrate": "node src/db/migrate-cli.ts"
   },
   "devDependencies": {
-    "@types/node": "24.19.0",
+    "@types/node": "26.6.3",
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "5.0.2",
     "drizzle-kit": "0.31.11",
