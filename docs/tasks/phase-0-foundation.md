@@ -115,7 +115,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** backend.md status; AGENTS.md §8.
 
 ### FND-T-007 React web scaffold
-- **Status:** todo
+- **Status:** done
 - **Platform:** web
 - **Depends:** FND-T-001
 - **Requirements:** NFR-007, NFR-014
@@ -123,7 +123,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Scope:** `apps/web` with Vite, React, TypeScript strict, React Router, TanStack Query, ESLint and Prettier, Vitest + Testing Library + axe, a Playwright config (Chromium, Firefox, WebKit), design-token CSS variables, `apps/web/AGENTS.md`, and a CI job.
 - **Out of scope:** real pages.
 - **Acceptance:** the build succeeds; tests pass with coverage gates; the Playwright smoke test passes on all three browsers in CI.
-- **Tests:** component tests for the shell and router; an axe check; a Playwright smoke test.
+- **Tests:** 57 unit/component tests at 100% coverage (every page renders, sets its title, has one h1 and one main, and passes axe; keyboard navigation and focus management; error boundary hides internals; query defaults; real-history App mount; WCAG contrast of the actual design tokens in light and dark) and a Playwright suite run in Chromium, Firefox, WebKit and a phone profile (25 pass; browser-specific cases skipped with a stated reason).
 - **Doc updates:** AGENTS.md §8.
 
 ### FND-T-010 Coverage gates and ratchet across packages

@@ -50,7 +50,7 @@ Layer rules are enforced by folder structure and lint rules where possible (see 
 |---|---|---|
 | Mobile | Flutter (Dart 3), Riverpod, go_router, drift, background_downloader | ADR-0001, ADR-0009 |
 | Camera native | Kotlin + CameraX (Camera2 interop / raw Camera2 where needed); Swift + AVFoundation; Pigeon | ADR-0001 |
-| Web | React, TypeScript, Vite, TanStack Query, React Router | ADR-0012 |
+| Web | React 19, TypeScript, Vite, TanStack Query, React Router 8 | ADR-0012 |
 | API | Fastify, TypeScript, Zod type provider, @fastify/swagger | ADR-0006, ADR-0012 |
 | Auth | Better Auth (self-hosted) | ADR-0011 |
 | DB | PostgreSQL 17+, Drizzle ORM and migrations | ADR-0007 |

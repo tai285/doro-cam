@@ -68,3 +68,6 @@ infrastructure/.data/
 
 # ---- Claude Code local settings ----
 .claude/settings.local.json
+
+# Web tooling caches
+.eslintcache

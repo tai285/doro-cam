@@ -115,3 +115,9 @@ Three tiers. The PR or report states which tier applies.
 - Mermaid diagrams show *stable* structure (containers, state machines, sequences). Don't diagram class-level details that change weekly.
 - Requirement IDs are defined only in [requirements.md](../product/requirements.md). Reference them everywhere else.
 - Research notes record evidence. Decisions go in ADRs.
+
+## Toolchain notes (learned while scaffolding)
+
+- **TypeScript 7 and ESLint:** typescript-eslint cannot load TypeScript 7 yet. Packages that lint (currently `apps/web`) alias `typescript` to `@typescript/typescript6` for the tools and keep TypeScript 7 as `@typescript/native`, which provides `tsc`. Packages without ESLint use `typescript@7` directly. Revisit when typescript-eslint supports TS 7.
+- **pnpm build scripts:** pnpm blocks dependency install scripts by default. Approved ones are recorded in `allowBuilds` in `pnpm-workspace.yaml` (currently only `esbuild`). Adding one needs a justification.
+- **First installs are slow on Windows** (antivirus scanning of `node_modules` and cold Vitest transforms can take minutes); later runs use caches and take seconds.

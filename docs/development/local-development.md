@@ -88,7 +88,7 @@ Both are bound to `127.0.0.1` only, and the credentials are public dev-only valu
 docker compose -f infrastructure/docker-compose.yml up -d
 pnpm --filter api dev          # API on :3000
 pnpm --filter api worker:dev   # worker
-pnpm --filter web dev          # web on :5173
+pnpm --filter @doro/web dev     # web on :5173
 cd apps/mobile && flutter run -d emulator-5554
 ```
 
