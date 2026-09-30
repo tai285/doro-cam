@@ -1,0 +1,70 @@
+# ---- OS / editors ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ---- Secrets / env ----
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.keystore
+*.jks
+key.properties
+google-services.json
+GoogleService-Info.plist
+
+# ---- Node / TypeScript ----
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.turbo/
+.vite/
+playwright-report/
+test-results/
+npm-debug.log*
+pnpm-debug.log*
+
+# ---- Flutter / Dart ----
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/generated_plugin_registrant.*
+
+# ---- Android ----
+.gradle/
+local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+*.apk
+*.aab
+.cxx/
+.externalNativeBuild/
+
+# ---- iOS / Xcode ----
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcuserdata/
+
+# ---- Local infrastructure data ----
+infrastructure/.data/
+
+# ---- Claude Code local settings ----
+.claude/settings.local.json

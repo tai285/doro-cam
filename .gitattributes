@@ -1,0 +1,26 @@
+# Normalize all text to LF in the repository (developed on Windows, built on Linux/macOS CI).
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary media and assets — never diff or normalize.
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.webp binary
+*.heic binary
+*.heif binary
+*.dng  binary
+*.mp4  binary
+*.mov  binary
+*.m4a  binary
+*.aac  binary
+*.ttf  binary
+*.otf  binary
+*.jar  binary
+
+# Generated 3D LUTs are text but large and machine-written.
+*.cube -diff linguist-generated
