@@ -16,7 +16,7 @@ The `doro_camera` plugin needs native iOS code (AVFoundation) that is unit-teste
 
 - The iOS plugin is **SwiftPM only**: `ios/doro_camera/Package.swift`, with no podspec.
 - The package (`ios/doro_camera/Package.swift`) has two targets. **`DoroCameraCore`** holds all logic that does not need Flutter, together with its XCTests. **`doro_camera`** is a thin Flutter glue layer: it implements the Pigeon host API and delegates to the core.
-- The glue target and its `doro-camera` product are declared **only when a sibling `FlutterFramework` package exists** (the manifest checks for it), which is the case inside an app build. Standalone, only the core is declared, so `swift test --package-path ios/doro_camera` works on any Mac runner: fast, deterministic, no simulator.
+- The glue target and its `doro-camera` product are declared **by default**, which is what Flutter's app build needs. Setting `DOROCAM_SWIFT_STANDALONE=1` leaves the glue out (it needs a `FlutterFramework` package that only exists inside an app build), so `DOROCAM_SWIFT_STANDALONE=1 swift test --package-path ios/doro_camera` works on any Mac runner: fast, deterministic, no simulator. An explicit switch is used because probing the file system for the sibling package does not work: SwiftPM resolves the symlinked plugin to its real path, where the sibling does not exist (our first attempt at detection failed in CI for exactly that reason).
 - The glue's behavior is verified end to end by the `integration_test` ping on the iOS Simulator.
 - The synthetic test camera flag (`DOROCAM_SYNTHETIC_CAMERA`) is defined for the **debug** configuration in the core package, and CI proves by scanning artifacts that debug builds contain the marker and release builds do not.
 - If another dependency requires CocoaPods, Flutter adds a Podfile for that dependency alongside SwiftPM. That is unaffected by this decision.
@@ -33,5 +33,5 @@ The `doro_camera` plugin needs native iOS code (AVFoundation) that is unit-teste
 - iOS unit tests are fast and independent of Flutter upgrades.
 - The glue layer must stay trivially thin; anything with a branch belongs in the core where it is tested.
 - The plugin cannot be consumed by an app that disables Swift Package Manager. That is acceptable: the only consumer is our app.
-- The manifest contains a small amount of logic (the `FlutterFramework` check). If a future Flutter release changes where that package lives, the manifest must follow.
+- SwiftPM may cache manifest evaluation: after switching `DOROCAM_SWIFT_STANDALONE` on a Mac, run `swift package clean` first. CI uses fresh runners, so it is unaffected.
 - The package also declares macOS 13 so the core compiles for `swift test`; it is never built for macOS in the app.

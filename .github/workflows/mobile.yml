@@ -73,6 +73,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+          # The root package.json names pnpm; this job does not install it and only runs a script.
+          package-manager-cache: false
 
       - name: Coverage gate (policy floors and ratchet)
         run: node tools/coverage-gate/src/cli.ts . --only apps/mobile,packages/doro_camera

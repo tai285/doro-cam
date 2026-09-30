@@ -5,15 +5,15 @@
 //   DoroCameraCore  Flutter-free logic. Unit-tested with plain `swift test`, no app and no simulator.
 //   doro_camera     Flutter glue (Pigeon host API + plugin registration). Needs FlutterFramework.
 //
-// FlutterFramework is a sibling package that Flutter's tooling provides inside an app build. When it
-// is absent (a standalone `swift test` of the core) the glue target and its product are left out.
+// FlutterFramework is a sibling package that only Flutter's tooling provides inside an app build, so
+// a standalone `swift test` of the core must leave the glue out: set DOROCAM_SWIFT_STANDALONE=1 for it.
+// (Probing the file system for the sibling does not work: SwiftPM resolves the symlinked plugin to its
+// real path, where the sibling does not exist. The default, unset, is what Flutter's build needs.)
 import Foundation
 import PackageDescription
 
 let flutterFrameworkPath = "../FlutterFramework"
-let insideFlutterApp = FileManager.default.fileExists(
-    atPath: Context.packageDirectory + "/" + flutterFrameworkPath
-)
+let insideFlutterApp = ProcessInfo.processInfo.environment["DOROCAM_SWIFT_STANDALONE"] != "1"
 
 // Debug builds contain the synthetic test camera (ADR-0013); Profile and Release builds never do.
 let syntheticCameraInDebug: [SwiftSetting] = [

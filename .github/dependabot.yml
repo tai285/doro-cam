@@ -1,0 +1,38 @@
+# Dependency updates (docs/development/development-guide.md, dependency policy).
+# Weekly and grouped, so review effort stays small. Every update runs the full CI before merging.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      typescript-tooling:
+        patterns: ["typescript", "@types/*", "@typescript/*", "eslint*", "typescript-eslint", "prettier", "vitest", "@vitest/*"]
+      aws-sdk:
+        patterns: ["@aws-sdk/*"]
+      react:
+        patterns: ["react", "react-dom", "react-router", "@types/react*", "@tanstack/*"]
+
+  - package-ecosystem: pub
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      flutter-runtime:
+        patterns: ["flutter_riverpod", "go_router", "cupertino_icons"]
+
+  - package-ecosystem: docker
+    directory: /services/api
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

@@ -12,7 +12,7 @@ lib/testing.dart                   FakeCameraPlatform for app tests (import only
 android/src/main/kotlin/           plugin + generated Messages.g.kt
 android/src/debug|release/kotlin/  SyntheticCameraBuild (marker exists only in debug)
 android/src/test|testDebug/kotlin/ JVM unit tests
-ios/doro_camera/Package.swift      the single SwiftPM package (no podspec); glue target only declared inside an app build
+ios/doro_camera/Package.swift      the single SwiftPM package (no podspec); DOROCAM_SWIFT_STANDALONE=1 leaves the glue out for `swift test`
 ios/doro_camera/Sources/doro_camera/      Swift glue (Flutter + Pigeon)
 ios/doro_camera/Sources/DoroCameraCore/   Flutter-free Swift logic
 ios/doro_camera/Tests/DoroCameraCoreTests/ XCTests of the core (run with `swift test`)
@@ -27,7 +27,7 @@ Load the toolchain first (`source scripts/dev-env.sh`).
 | Regenerate the bridge after editing `pigeons/camera_api.dart` | `dart run pigeon --input pigeons/camera_api.dart` (from this directory) |
 | Dart analyze / tests | `flutter analyze` · `flutter test --coverage` |
 | Kotlin unit tests (debug variant) | `cd apps/mobile/android && ./gradlew :doro_camera:testDebugUnitTest` |
-| Swift core tests (macOS only: CI runs them) | `swift test --package-path ios/doro_camera --enable-code-coverage` |
+| Swift core tests (macOS only: CI runs them) | `DOROCAM_SWIFT_STANDALONE=1 swift test --package-path ios/doro_camera --enable-code-coverage` |
 | End to end on the emulator / simulator | `cd apps/mobile && flutter test integration_test -d <device>` |
 | Check a build for the synthetic camera | `bash scripts/check-synthetic-camera.sh --expect-present\|--expect-absent <apk or .app>` (repo root) |
 

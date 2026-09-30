@@ -24,7 +24,7 @@ Tests must prove behavior:
 | Widget / screen | Widget tests: rendering per state, interactions, semantics labels; golden tests for Experience skins | `flutter_test` |
 | drift schema | DAO tests on real SQLite; **a migration test for every schema version step** | drift `SchemaVerifier` |
 | Pigeon message / platform mapping | Round-trip mapping tests on both sides (Dart and Kotlin/Swift) | `package:test`, JUnit, XCTest |
-| Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices). Kotlin runs through the app's Gradle project (`./gradlew :doro_camera:testDebugUnitTest` in `apps/mobile/android`); Swift logic lives in the Flutter-free `DoroCameraCore` target and runs with `swift test` on a macOS runner (ADR-0015) | kotlin-test (JUnit 5), XCTest |
+| Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices). Kotlin runs through the app's Gradle project (`./gradlew :doro_camera:testDebugUnitTest` in `apps/mobile/android`); Swift logic lives in the Flutter-free `DoroCameraCore` target and runs with `DOROCAM_SWIFT_STANDALONE=1 swift test` on a macOS runner (ADR-0015) | kotlin-test (JUnit 5), XCTest |
 | Native camera integration | Instrumented tests on the **Android Emulator**; XCTest plus the synthetic source on the **iOS Simulator** | AndroidX Test, XCTest |
 | App feature (end to end on mobile) | `integration_test` flows on the Android Emulator and iOS Simulator | `integration_test` |
 | API endpoint | Integration tests: success, validation error, 401, IDOR (404), idempotent replay, and every documented error code | Vitest + Fastify `inject` against the real Postgres/S3 from `pnpm infra:up` (an isolated database per test file) |

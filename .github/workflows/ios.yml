@@ -43,6 +43,8 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: swift test (Flutter-free core, no simulator needed)
+        env:
+          DOROCAM_SWIFT_STANDALONE: "1"
         run: swift test --package-path packages/doro_camera/ios/doro_camera --enable-code-coverage
 
   simulator:
