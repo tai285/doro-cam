@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -70,7 +70,7 @@ jobs:
           dart run pigeon --input pigeons/camera_api.dart
           git diff --exit-code -- lib/src/messages.g.dart android/src/main/kotlin ios/doro_camera/Sources
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           # The root package.json names pnpm; this job does not install it and only runs a script.
@@ -80,7 +80,7 @@ jobs:
         run: node tools/coverage-gate/src/cli.ts . --only apps/mobile,packages/doro_camera
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mobile-coverage
           path: |
