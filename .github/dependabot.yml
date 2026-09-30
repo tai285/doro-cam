@@ -7,6 +7,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # Node is pinned to the 24 LTS line everywhere (engines, CI, Dockerfile); its typings follow it.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       typescript-tooling:
         patterns: ["typescript", "@types/*", "@typescript/*", "eslint*", "typescript-eslint", "prettier", "vitest", "@vitest/*"]
@@ -28,6 +32,10 @@ updates:
     directory: /services/api
     schedule:
       interval: weekly
+    ignore:
+      # Stay on the Node 24 LTS line; move to the next LTS deliberately (an ADR-free but reviewed change).
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
