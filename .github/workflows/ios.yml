@@ -76,8 +76,25 @@ jobs:
           UDID="$(bash scripts/ios-simulator.sh)"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
+      # Starts the built app directly and prints what it does: makes a launch hang or crash visible
+      # (flutter test only says "Waiting for VM Service port to be available...").
+      - name: Launch diagnostics
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          xcrun simctl install "$UDID" apps/mobile/build/ios/iphonesimulator/Runner.app
+          xcrun simctl launch --console-pty --terminate-running-process "$UDID" com.dorocam.app > launch.log 2>&1 &
+          sleep 25
+          echo "--- console output of the launched app"; cat launch.log || true
+          echo "--- is it running?"; xcrun simctl spawn "$UDID" launchctl list | grep -i dorocam || echo "NOT RUNNING"
+          echo "--- system log for Runner (last 2 minutes)"
+          xcrun simctl spawn "$UDID" log show --last 2m --style compact --predicate 'process == "Runner"' 2>&1 | tail -80 || true
+          echo "--- crash reports"; ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null | tail -8 || true
+          xcrun simctl terminate "$UDID" com.dorocam.app || true
+
       - name: Integration tests on the simulator
-        timeout-minutes: 20
+        timeout-minutes: 10
         working-directory: apps/mobile
         run: flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
 
