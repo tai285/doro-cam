@@ -1,0 +1,111 @@
+name: android
+
+# Runs the app's integration tests on a real Android Emulator (ADR-0013). API 35 on every change;
+# the minimum supported API (28) nightly as an oldest-version regression.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - "packages/doro_camera/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "scripts/emulator-start.sh"
+      - ".github/workflows/android.yml"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/doro_camera/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "scripts/emulator-start.sh"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.47.5"
+
+jobs:
+  emulator:
+    name: Android Emulator (API ${{ matrix.api-level }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [35]
+        include:
+          # The oldest supported version only runs on the nightly schedule or by hand.
+          - api-level: 28
+            nightly-only: true
+    steps:
+      - name: Skip the nightly-only API level on ordinary changes
+        id: gate
+        run: |
+          if [ "${{ matrix.nightly-only }}" = "true" ] && [ "${{ github.event_name }}" != "schedule" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.gate.outputs.run == 'true'
+
+      - name: Enable KVM
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/setup-java@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: subosito/flutter-action@v2
+        if: steps.gate.outputs.run == 'true'
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve dependencies
+        if: steps.gate.outputs.run == 'true'
+        run: flutter pub get
+
+      - name: Integration tests on the emulator
+        if: steps.gate.outputs.run == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          target: google_apis
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -camera-back virtualscene -camera-front emulated
+          working-directory: apps/mobile
+          script: flutter test integration_test
+
+      - name: Build debug APK
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        working-directory: apps/mobile
+        run: flutter build apk --debug
+
+      - name: Upload debug APK (for optional field verification)
+        if: steps.gate.outputs.run == 'true' && matrix.api-level == 35
+        uses: actions/upload-artifact@v4
+        with:
+          name: doro-cam-debug-apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 14

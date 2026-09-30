@@ -53,7 +53,7 @@ Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in 
 - **Doc updates:** AGENTS.md §8; local-development.md; testing-strategy.md (confirmed min API).
 
 ### FND-T-008 Android Emulator: local AVD and CI instrumentation job
-- **Status:** todo
+- **Status:** in-progress
 - **Platform:** infra
 - **Depends:** FND-T-004
 - **Requirements:** NFR-016, NFR-010

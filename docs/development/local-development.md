@@ -53,7 +53,7 @@ source scripts/dev-env.sh        # Git Bash
 1. Create the standard AVD (the name is used by scripts and docs):
    `avdmanager create avd -n doro_api35 -k "system-images;android-35;google_apis;x86_64" -d pixel_7`
    then set `hw.camera.back=virtualscene`, `hw.camera.front=emulated`, `hw.ramSize=3072` in the AVD `config.ini`. (Done on this machine.)
-2. Run headless for tests: `emulator -avd doro_api35 -no-window -no-audio -no-snapshot-save -gpu swiftshader_indirect`. It boots in about 40-60 seconds here (`adb shell getprop sys.boot_completed` returns `1`).
+2. Run headless for tests: `bash scripts/emulator-start.sh` (boots `doro_api35`, waits for Android's boot-completed signal with a timeout, reuses an emulator that is already running, and prints the serial). It boots in about 40-60 seconds here. Stop it with `adb emu kill`.
 3. Run tests on it: `cd apps/mobile && flutter test integration_test -d emulator-5554`.
 4. The emulator reaches the host's local API and S3 (`10.0.2.2:9000`) without `adb reverse`.
 
