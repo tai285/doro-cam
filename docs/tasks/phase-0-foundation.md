@@ -5,12 +5,12 @@ Roadmap: [P0](../product/roadmap.md). Planning (docs, ADRs, docs checker, CI for
 Recommended order: FND-T-001 → (FND-T-003, FND-T-004, FND-T-006, FND-T-007 in parallel) → FND-T-008 and FND-T-009 → FND-T-005 → FND-T-010 → FND-T-011, with spikes as their dependencies allow.
 
 ### FND-T-001 Convert repo root to a pnpm workspace
-- **Status:** todo
+- **Status:** done
 - **Platform:** infra
 - **Depends:** none
 - **Requirements:** NFR-010
 - **Docs:** [development-guide.md](../development/development-guide.md), ADR-0012
-- **Scope:** enable Corepack + pnpm; add `pnpm-workspace.yaml` (`apps/web`, `services/*`, `packages/profiles`, `packages/api-contract`, `tools/*`); move `tools/docs-check` into a workspace package with its own `package.json`; replace `package-lock.json` with `pnpm-lock.yaml`; keep root scripts `test`, `typecheck`, `check:docs` working; update `docs.yml`.
+- **Scope:** install pnpm (user-level; Corepack needs admin here); add `pnpm-workspace.yaml` (`apps/web`, `services/*`, `packages/profiles`, `packages/api-contract`, `tools/*`); move `tools/docs-check` into a workspace package with its own `package.json`; replace `package-lock.json` with `pnpm-lock.yaml`; keep root scripts `test`, `typecheck`, `check:docs` working; update `docs.yml`.
 - **Out of scope:** creating the app packages themselves.
 - **Acceptance:** `pnpm install && pnpm test && pnpm typecheck && pnpm check:docs` pass locally and in CI; no `package-lock.json` remains.
 - **Tests:** all existing docs-check tests (35+) pass unchanged through pnpm, and the CI run shows the same counts.

@@ -20,19 +20,21 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
-      - name: Install tooling dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Type check tooling
-        run: npm run typecheck
+      - name: Type check
+        run: pnpm typecheck
 
-      - name: Test tooling
-        run: npm test
+      - name: Test
+        run: pnpm test
 
       - name: Check documentation integrity
-        run: npm run check:docs
+        run: pnpm check:docs

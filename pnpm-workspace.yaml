@@ -1,0 +1,6 @@
+packages:
+  - "apps/web"
+  - "services/*"
+  - "packages/profiles"
+  - "packages/api-contract"
+  - "tools/*"

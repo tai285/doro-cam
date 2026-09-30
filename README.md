@@ -33,6 +33,6 @@ Rationale for each choice: [docs/decisions/adr/](docs/decisions/adr/README.md).
 ## Repository checks
 
 ```sh
-npm test            # tests for repository tooling
-npm run check:docs  # documentation integrity (links, requirement IDs, ADRs, task graph)
+pnpm test           # tests for all TypeScript packages
+pnpm check:docs     # documentation integrity (links, requirement IDs, ADRs, task graph)
 ```

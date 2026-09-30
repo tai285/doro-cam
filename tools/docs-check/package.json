@@ -1,0 +1,15 @@
+{
+  "name": "@doro/docs-check",
+  "private": true,
+  "type": "module",
+  "description": "Documentation integrity checker: links, anchors, requirement IDs, ADRs, task graph, index reachability.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "check:docs": "node src/cli.ts ../.."
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "typescript": "7.0.2"
+  }
+}

@@ -13,17 +13,19 @@ Status: Living (partially planned) · Last updated: 2026-09-30 · Related: ADR-0
 | Hypervisor | present (WSL2/Hyper-V) | The Android Emulator must use WHPX (see below) |
 
 ```sh
-npm ci               # installs tooling devDependencies (typescript, @types/node)
-npm test             # tooling tests (node:test)
-npm run typecheck    # tsc --noEmit for tooling
-npm run check:docs   # documentation integrity
+pnpm install         # installs workspace dependencies (pnpm 12.8.1, pinned by packageManager)
+pnpm test            # tests in every TypeScript package
+pnpm typecheck       # tsc --noEmit in every TypeScript package
+pnpm check:docs      # documentation integrity
 ```
+
+pnpm is installed per user with `npm install -g pnpm` (Corepack's `enable` needs admin rights to write into the nvm-managed Node folder on this machine). If `pnpm` isn't found in a new shell, add `%APPDATA%
+pm` to `PATH`.
 
 ## Planned toolchain (installed by P0 tasks)
 
 | Tool | Needed for | Task |
 |---|---|---|
-| pnpm (via Corepack) | TS workspaces | FND-T-001 |
 | Flutter SDK (stable), JDK 17, Android SDK command-line tools | Mobile app and plugin | FND-T-004 |
 | Android Emulator + system image `system-images;android-35;google_apis;x86_64` (+ API 30 for nightly) | Emulator testing | FND-T-008 |
 | Cloud macOS: GitHub Actions `macos-*` runners (primary), Codemagic (overflow) | All iOS builds and tests (no local Mac) | FND-T-009 |

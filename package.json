@@ -2,17 +2,14 @@
   "name": "doro-cam",
   "private": true,
   "type": "module",
-  "description": "Doro Cam monorepo root (tooling only until FND-T-001 converts it to a pnpm workspace).",
+  "description": "Doro Cam monorepo root. TypeScript packages use pnpm workspaces; Dart packages use a pub workspace (ADR-0012).",
+  "packageManager": "pnpm@12.8.1",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test \"tools/docs-check/test/**/*.test.ts\"",
-    "typecheck": "tsc -p tools/docs-check/tsconfig.json",
-    "check:docs": "node tools/docs-check/src/cli.ts ."
-  },
-  "devDependencies": {
-    "@types/node": "24.19.0",
-    "typescript": "7.0.2"
+    "test": "pnpm -r --if-present run test",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "check:docs": "pnpm --filter @doro/docs-check run check:docs"
   }
 }
