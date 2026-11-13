@@ -192,7 +192,6 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
            let audioInput = try? AVCaptureDeviceInput(device: microphone), session.canAddInput(audioInput) {
             session.addInput(audioInput)
             let audio = AVCaptureAudioDataOutput()
-            audio.audioSettings = AudioConversion.captureSettings
             audio.setSampleBufferDelegate(self, queue: queue)
             if session.canAddOutput(audio) {
                 session.addOutput(audio)

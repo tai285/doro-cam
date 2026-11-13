@@ -65,25 +65,70 @@ final class FrameDownscaler {
 }
 
 enum AudioConversion {
-    /// The settings that make AVCaptureAudioDataOutput deliver mono 16-bit interleaved PCM at 44.1 kHz.
-    static let captureSettings: [String: Any] = [
-        AVFormatIDKey: kAudioFormatLinearPCM,
-        AVSampleRateKey: AudioChunk.sampleRate,
-        AVNumberOfChannelsKey: 1,
-        AVLinearPCMBitDepthKey: 16,
-        AVLinearPCMIsFloatKey: false,
-        AVLinearPCMIsBigEndianKey: false,
-        AVLinearPCMIsNonInterleaved: false,
-    ]
-
-    /// Extracts PCM bytes from a delivered audio sample buffer.
+    /// Converts whatever the microphone delivers (16-bit or float, any channel count, any rate, interleaved or
+    /// planar) to mono 16-bit PCM at 44.1 kHz. iOS does not let an AVCaptureAudioDataOutput choose its format
+    /// (`audioSettings` is macOS-only), so the conversion happens here.
     static func chunk(from sampleBuffer: CMSampleBuffer) -> AudioChunk? {
-        guard CMSampleBufferDataIsReady(sampleBuffer), let block = CMSampleBufferGetDataBuffer(sampleBuffer) else { return nil }
+        guard CMSampleBufferDataIsReady(sampleBuffer),
+              let block = CMSampleBufferGetDataBuffer(sampleBuffer),
+              let format = CMSampleBufferGetFormatDescription(sampleBuffer),
+              let streamPointer = CMAudioFormatDescriptionGetStreamBasicDescription(format) else { return nil }
+        let description = streamPointer.pointee
+        guard description.mFormatID == kAudioFormatLinearPCM, description.mChannelsPerFrame > 0, description.mSampleRate > 0 else { return nil }
+
         var length = 0
         var pointer: UnsafeMutablePointer<Int8>?
         guard CMBlockBufferGetDataPointer(block, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &length, dataPointerOut: &pointer) == kCMBlockBufferNoErr,
               let base = pointer, length > 0 else { return nil }
-        return AudioChunk(time: CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds, pcm: Data(bytes: base, count: length))
+        let raw = UnsafeRawPointer(base)
+
+        let channels = Int(description.mChannelsPerFrame)
+        let isFloat = (description.mFormatFlags & kAudioFormatFlagIsFloat) != 0
+        let planar = (description.mFormatFlags & kAudioFormatFlagIsNonInterleaved) != 0
+        let bytesPerSample = Int(description.mBitsPerChannel) / 8
+        guard bytesPerSample == 2 || bytesPerSample == 4 else { return nil }
+        let frames = CMSampleBufferGetNumSamples(sampleBuffer)
+        guard frames > 0, length >= frames * bytesPerSample * (planar ? channels : channels) else { return nil }
+
+        func sample(frame: Int, channel: Int) -> Float {
+            let index = planar ? channel * frames + frame : frame * channels + channel
+            let offset = index * bytesPerSample
+            if isFloat, bytesPerSample == 4 {
+                return raw.loadUnaligned(fromByteOffset: offset, as: Float.self)
+            }
+            if bytesPerSample == 2 {
+                return Float(raw.loadUnaligned(fromByteOffset: offset, as: Int16.self)) / 32768
+            }
+            return Float(raw.loadUnaligned(fromByteOffset: offset, as: Int32.self)) / 2_147_483_648
+        }
+
+        // mono = average of the channels
+        var mono = [Float](repeating: 0, count: frames)
+        for frame in 0..<frames {
+            var sum: Float = 0
+            for channel in 0..<channels { sum += sample(frame: frame, channel: channel) }
+            mono[frame] = sum / Float(channels)
+        }
+
+        // linear resampling to 44.1 kHz when the microphone runs at another rate
+        let ratio = description.mSampleRate / AudioChunk.sampleRate
+        let outCount = ratio == 1 ? frames : max(1, Int((Double(frames) / ratio).rounded()))
+        var pcm = Data(capacity: outCount * 2)
+        for i in 0..<outCount {
+            let value: Float
+            if ratio == 1 {
+                value = mono[i]
+            } else {
+                let position = Double(i) * ratio
+                let lower = min(Int(position), frames - 1)
+                let upper = min(lower + 1, frames - 1)
+                let fraction = Float(position - Double(lower))
+                value = mono[lower] * (1 - fraction) + mono[upper] * fraction
+            }
+            var int16 = Int16(max(-1, min(1, value)) * 32767)
+            withUnsafeBytes(of: &int16) { pcm.append(contentsOf: $0) }
+        }
+        return AudioChunk(time: CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds, pcm: pcm)
     }
 
     /// Wraps PCM bytes in a sample buffer so AVAssetWriter can encode them to AAC.
