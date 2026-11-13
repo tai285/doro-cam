@@ -17,4 +17,5 @@ for f in pnpm-lock.yaml package.json services/api/package.json apps/web/package.
   if [ -f "$f" ] && ! cmp -s "$f" "$WIN/$f"; then cp "$f" "$WIN/$f"; fi
 done
 if [ -d services/api/migrations ]; then rsync -a services/api/migrations/ "$WIN/services/api/migrations/"; fi
+if [ -f packages/api-contract/openapi.json ]; then mkdir -p "$WIN/packages/api-contract"; rsync -a packages/api-contract/openapi.json "$WIN/packages/api-contract/openapi.json"; fi
 exit $rc

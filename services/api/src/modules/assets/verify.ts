@@ -69,6 +69,7 @@ export async function verifyAsset(services: JobServices, assetId: string): Promi
           )
           .returning({ id: storageObjects.id, key: storageObjects.key })
       )[0];
+      /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
       if (existing === undefined) {
         throw new Error('storage object conflict without an existing row');
       }

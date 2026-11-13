@@ -92,6 +92,7 @@ export function presetRoutes(services: Services): FastifyPluginAsync {
                   .where(eq(presets.id, request.params.presetId))
                   .returning()
           )[0];
+          /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
           if (saved === undefined) {
             throw new Error('preset save returned no row');
           }

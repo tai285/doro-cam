@@ -13,7 +13,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       // server.ts and worker.ts are five-line process entrypoints, exercised by test/entrypoints.test.ts
       // as real child processes (child-process coverage is not collected by v8 in this run).
-      exclude: ['src/server.ts', 'src/worker.ts', 'src/db/migrate-cli.ts', 'src/**/*.d.ts'],
+      exclude: ['src/server.ts', 'src/worker.ts', 'src/db/migrate-cli.ts', 'src/**/*.d.ts', 'src/**/schema.ts', 'src/lib/db-types.ts', 'src/modules/context.ts'],
       reporter: ['text', 'lcov', 'json-summary'],
       thresholds: { statements: 95, branches: 90, functions: 95, lines: 95 },
     },

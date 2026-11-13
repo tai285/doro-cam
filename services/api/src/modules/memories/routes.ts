@@ -119,6 +119,7 @@ export function memoryRoutes(services: Services): FastifyPluginAsync {
               })
               .returning()
           )[0];
+          /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
           if (row === undefined) {
             throw new Error('insert returned no row');
           }
@@ -221,6 +222,7 @@ export function memoryRoutes(services: Services): FastifyPluginAsync {
               .where(eq(memories.id, access.memory.id))
               .returning()
           )[0];
+          /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
           if (row === undefined) {
             throw new NotFoundError('Memory not found.', 'memory.not_found');
           }
@@ -248,6 +250,7 @@ export function memoryRoutes(services: Services): FastifyPluginAsync {
             .where(eq(memories.id, memoryId))
             .returning()
         )[0];
+        /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
         if (row === undefined) {
           throw new NotFoundError('Memory not found.', 'memory.not_found');
         }

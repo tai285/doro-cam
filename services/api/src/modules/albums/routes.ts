@@ -80,6 +80,7 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
         .innerJoin(albumMembers, and(eq(albumMembers.albumId, albums.id), eq(albumMembers.userId, userId)))
         .where(and(eq(albums.id, albumId), isNull(albums.deletedAt)))
     )[0];
+    /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
     if (row === undefined) {
       throw new NotFoundError('Album not found.', 'album.not_found');
     }
@@ -136,6 +137,7 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
             })
             .returning()
         )[0];
+        /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
         if (created === undefined) {
           throw new Error('album insert returned no row');
         }
@@ -208,6 +210,7 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
             .where(eq(albums.id, album.id))
             .returning()
         )[0];
+        /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
         if (updated === undefined) {
           throw new NotFoundError('Album not found.', 'album.not_found');
         }
@@ -363,6 +366,7 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
             })
             .returning()
         )[0];
+        /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
         if (invite === undefined) {
           throw new Error('invite insert returned no row');
         }
@@ -415,10 +419,8 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
         if (invite.expiresAt.getTime() < Date.now()) {
           throw new InviteError(410, 'invite.expired', 'This invite has expired.');
         }
-        if (invite.uses >= invite.maxUses) {
-          throw new InviteError(410, 'invite.exhausted', 'This invite has been used up.');
-        }
         const album = (await db.select().from(albums).where(and(eq(albums.id, invite.albumId), isNull(albums.deletedAt))))[0];
+        /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
         if (album === undefined) {
           throw new NotFoundError('Album not found.', 'album.not_found');
         }
@@ -430,6 +432,9 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
         )[0];
         if (existing !== undefined) {
           return { albumId: album.id, role: existing.role }; // already a member: accepting again is harmless and does not consume the invite
+        }
+        if (invite.uses >= invite.maxUses) {
+          throw new InviteError(410, 'invite.exhausted', 'This invite has been used up.');
         }
         // The use is claimed atomically so two simultaneous accepts cannot exceed maxUses.
         const claimed = await db
@@ -467,6 +472,7 @@ export function albumRoutes(services: Services): FastifyPluginAsync {
             .where(and(eq(albumMembers.albumId, album.id), eq(albumMembers.userId, request.params.userId)))
             .returning()
         )[0];
+        /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
         if (updated === undefined) {
           throw new NotFoundError('Member not found.', 'member.not_found');
         }

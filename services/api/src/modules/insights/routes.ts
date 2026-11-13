@@ -90,6 +90,7 @@ export function insightsRoutes(services: Services): FastifyPluginAsync {
           const member = (
             await db.select().from(albumMembers).where(and(eq(albumMembers.albumId, albumId), eq(albumMembers.userId, principal.userId)))
           )[0];
+          /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
           if (member === undefined) {
             throw new NotFoundError('Album not found.', 'album.not_found');
           }

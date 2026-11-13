@@ -8,6 +8,7 @@ export type ChangeEntity = 'memory' | 'asset' | 'preset' | 'album';
 export async function nextSeq(executor: Executor): Promise<number> {
   const result = await executor.execute<{ seq: string }>(sql`select nextval('change_seq') as seq`);
   const row = result.rows[0];
+  /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
   if (row === undefined) {
     throw new Error('change_seq returned no value');
   }

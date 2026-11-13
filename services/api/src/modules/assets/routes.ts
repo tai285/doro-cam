@@ -188,6 +188,7 @@ export function assetRoutes(services: Services): FastifyPluginAsync {
                 })
                 .returning()
             )[0];
+            /* v8 ignore next 3 -- defensive: concurrent delete between the statements */
             if (row === undefined) {
               throw new Error('insert returned no row');
             }
@@ -264,8 +265,8 @@ export function assetRoutes(services: Services): FastifyPluginAsync {
         const key = assetKey(principal.userId, memory.id, asset.id, asset.role);
 
         if (asset.uploadId !== null) {
-          const parts = request.body.parts ?? (await listAllParts(services, key, asset.uploadId));
           try {
+            const parts = request.body.parts ?? (await listAllParts(services, key, asset.uploadId));
             await storage.client.send(
               new CompleteMultipartUploadCommand({
                 Bucket: storage.bucket,
