@@ -93,3 +93,13 @@ Grain uses a seeded noise function. The seed is derived from `memoryId`, so re-r
 - The JSON Schema validates all definitions in CI.
 - Compiler golden tests pass; LUTs are byte-stable across runs and OSes.
 - Parity thresholds are met for all MVP profiles on the Android Emulator and iOS Simulator GPU paths against the reference renderer (fixture images). Real-camera parity is field verification FV-007.
+
+## Implementation status (Dart engine)
+
+The profile engine is implemented in pure Dart under `apps/mobile/lib/profiles/` instead of a TypeScript `packages/profiles`, so the app, its tests and the reference renderer share one definition (updated 2026-11-13):
+
+- **Definitions:** `ImageProfile` (JSON-compatible, validated; forbidden-brand check for PRF-010) and `BuiltInProfiles` (`natural`, `warm-film`, `soft-film`, `instant-warm`, `mono-classic`, all version 1) with `ProfileRegistry` (old versions stay resolvable; unknown ids fall back to `natural`).
+- **Compilation:** `ColorPipeline` implements the normative order; `Lut3d.compile` produces the 33³ LUT, `.lut` (header `DLUT`, float16 LE) and `.cube` export, and an RGBA8 tiled texture (width 33², height 33; texel `x = b·33 + r`, `y = g`) for the GPU path. Goldens in `test/profiles/lut_render_test.dart` pin each profile's checksum.
+- **Effects:** `effects.dart` (vignette, grain; grain seeded by `seedFromMemoryId`, cell size relative to the short edge).
+- **Rendering:** `ProfileRenderer` is the CPU reference (`ColorPath.exact` and `ColorPath.lut`); `measureParity` reports ΔE2000 mean/p95. Tests assert mean ≤ 2.0 and p95 ≤ 4.0 for LUT vs exact, and a stricter bound for the 8-bit tiled-texture path, on the chart plus three procedural scenes.
+- **GPU preview:** `assets/shaders/profile.frag` + `ProfileShaderParams` (uniform order is tested against the shader source). Not yet verified on a GPU (emulator/device runs belong to the camera UI work); grain hashing in GLSL is not bit-identical to the CPU hash, so parity excludes grain.
