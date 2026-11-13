@@ -34,6 +34,16 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
+
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+  if (empty) {
+    return <Object?>[];
+  }
+  if (error == null) {
+    return <Object?>[result];
+  }
+  return <Object?>[error.code, error.message, error.details];
+}
 bool _deepEquals(Object? a, Object? b) {
   if (identical(a, b)) {
     return true;
@@ -96,6 +106,2106 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
+
+enum CameraFacingMessage {
+  back,
+  front,
+  external;
+}
+
+enum LensKindMessage {
+  ultraWide,
+  wide,
+  tele,
+  front,
+  other;
+}
+
+/// `synthetic` exists only in debug and test builds (ADR-0013).
+enum CameraSourceMessage {
+  hardware,
+  synthetic;
+}
+
+enum PhotoFormatMessage {
+  heif,
+  jpeg,
+  dng;
+}
+
+enum WbPresetMessage {
+  auto,
+  daylight,
+  cloudy,
+  shade,
+  tungsten,
+  fluorescent;
+}
+
+enum FlashModeMessage {
+  off,
+  auto,
+  on;
+}
+
+enum FocusModeMessage {
+  continuous,
+  auto,
+  manual;
+}
+
+enum FocusCalibrationMessage {
+  uncalibrated,
+  approximate,
+  calibrated;
+}
+
+enum StabilizationModeMessage {
+  off,
+  standard,
+  optical;
+}
+
+enum PermissionStatusMessage {
+  granted,
+  denied,
+  restricted,
+  notDetermined;
+}
+
+enum SessionStateMessage {
+  configuring,
+  previewing,
+  capturing,
+  recording,
+  suspended,
+  closed;
+}
+
+enum ThermalStateMessage {
+  nominal,
+  fair,
+  serious,
+  critical;
+}
+
+enum SessionEventKindMessage {
+  state,
+  applied,
+  error,
+  thermal,
+  orientation,
+  interrupted,
+  resumed;
+}
+
+class SizeMessage {
+  SizeMessage({
+    required this.width,
+    required this.height,
+  });
+
+  int width;
+
+  int height;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      width,
+      height,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SizeMessage decode(Object result) {
+    result as List<Object?>;
+    return SizeMessage(
+      width: result[0]! as int,
+      height: result[1]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SizeMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(width, other.width) && _deepEquals(height, other.height);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'SizeMessage(width: $width, height: $height)';
+  }
+}
+
+/// An inclusive integer range (ISO values, exposure durations in nanoseconds, Kelvin).
+class IntRangeMessage {
+  IntRangeMessage({
+    required this.min,
+    required this.max,
+  });
+
+  int min;
+
+  int max;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      min,
+      max,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static IntRangeMessage decode(Object result) {
+    result as List<Object?>;
+    return IntRangeMessage(
+      min: result[0]! as int,
+      max: result[1]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! IntRangeMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(min, other.min) && _deepEquals(max, other.max);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'IntRangeMessage(min: $min, max: $max)';
+  }
+}
+
+class DoubleRangeMessage {
+  DoubleRangeMessage({
+    required this.min,
+    required this.max,
+  });
+
+  double min;
+
+  double max;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      min,
+      max,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static DoubleRangeMessage decode(Object result) {
+    result as List<Object?>;
+    return DoubleRangeMessage(
+      min: result[0]! as double,
+      max: result[1]! as double,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! DoubleRangeMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(min, other.min) && _deepEquals(max, other.max);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'DoubleRangeMessage(min: $min, max: $max)';
+  }
+}
+
+class ExposureBiasCapabilityMessage {
+  ExposureBiasCapabilityMessage({
+    required this.range,
+    required this.step,
+  });
+
+  /// Range in EV stops (already multiplied by [step]).
+  DoubleRangeMessage range;
+
+  /// Size of one compensation step in EV.
+  double step;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      range,
+      step,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ExposureBiasCapabilityMessage decode(Object result) {
+    result as List<Object?>;
+    return ExposureBiasCapabilityMessage(
+      range: result[0]! as DoubleRangeMessage,
+      step: result[1]! as double,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ExposureBiasCapabilityMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(range, other.range) && _deepEquals(step, other.step);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ExposureBiasCapabilityMessage(range: $range, step: $step)';
+  }
+}
+
+class ManualFocusCapabilityMessage {
+  ManualFocusCapabilityMessage({
+    required this.minFocusDistanceDiopters,
+    required this.calibration,
+  });
+
+  /// Diopters of the closest focus distance (1 / metres). Manual focus accepts 0 (infinity) .. this.
+  double minFocusDistanceDiopters;
+
+  FocusCalibrationMessage calibration;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      minFocusDistanceDiopters,
+      calibration,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ManualFocusCapabilityMessage decode(Object result) {
+    result as List<Object?>;
+    return ManualFocusCapabilityMessage(
+      minFocusDistanceDiopters: result[0]! as double,
+      calibration: result[1]! as FocusCalibrationMessage,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ManualFocusCapabilityMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(minFocusDistanceDiopters, other.minFocusDistanceDiopters) && _deepEquals(calibration, other.calibration);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ManualFocusCapabilityMessage(minFocusDistanceDiopters: $minFocusDistanceDiopters, calibration: $calibration)';
+  }
+}
+
+class FocusCapabilitiesMessage {
+  FocusCapabilitiesMessage({
+    required this.auto,
+    required this.continuous,
+    required this.tapToFocus,
+    this.manual,
+  });
+
+  bool auto;
+
+  bool continuous;
+
+  bool tapToFocus;
+
+  ManualFocusCapabilityMessage? manual;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      auto,
+      continuous,
+      tapToFocus,
+      manual,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static FocusCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return FocusCapabilitiesMessage(
+      auto: result[0]! as bool,
+      continuous: result[1]! as bool,
+      tapToFocus: result[2]! as bool,
+      manual: result[3] as ManualFocusCapabilityMessage?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! FocusCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(auto, other.auto) && _deepEquals(continuous, other.continuous) && _deepEquals(tapToFocus, other.tapToFocus) && _deepEquals(manual, other.manual);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'FocusCapabilitiesMessage(auto: $auto, continuous: $continuous, tapToFocus: $tapToFocus, manual: $manual)';
+  }
+}
+
+class WhiteBalanceCapabilitiesMessage {
+  WhiteBalanceCapabilitiesMessage({
+    required this.presets,
+    this.kelvin,
+  });
+
+  List<WbPresetMessage> presets;
+
+  /// Non-null only when the device really supports manual colour gains (docs/specs/camera.md).
+  IntRangeMessage? kelvin;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      presets,
+      kelvin,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static WhiteBalanceCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return WhiteBalanceCapabilitiesMessage(
+      presets: (result[0]! as List<Object?>).cast<WbPresetMessage>(),
+      kelvin: result[1] as IntRangeMessage?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! WhiteBalanceCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(presets, other.presets) && _deepEquals(kelvin, other.kelvin);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'WhiteBalanceCapabilitiesMessage(presets: $presets, kelvin: $kelvin)';
+  }
+}
+
+class ZoomCapabilitiesMessage {
+  ZoomCapabilitiesMessage({
+    required this.min,
+    required this.max,
+    required this.opticalSteps,
+  });
+
+  double min;
+
+  double max;
+
+  /// Zoom ratios that correspond to real optical lenses (for example 1.0, 2.0). May be just [1.0].
+  List<double> opticalSteps;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      min,
+      max,
+      opticalSteps,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ZoomCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return ZoomCapabilitiesMessage(
+      min: result[0]! as double,
+      max: result[1]! as double,
+      opticalSteps: (result[2]! as List<Object?>).cast<double>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ZoomCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(min, other.min) && _deepEquals(max, other.max) && _deepEquals(opticalSteps, other.opticalSteps);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ZoomCapabilitiesMessage(min: $min, max: $max, opticalSteps: $opticalSteps)';
+  }
+}
+
+class StabilizationCapabilitiesMessage {
+  StabilizationCapabilitiesMessage({
+    required this.photo,
+    required this.video,
+  });
+
+  List<StabilizationModeMessage> photo;
+
+  List<StabilizationModeMessage> video;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      photo,
+      video,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static StabilizationCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return StabilizationCapabilitiesMessage(
+      photo: (result[0]! as List<Object?>).cast<StabilizationModeMessage>(),
+      video: (result[1]! as List<Object?>).cast<StabilizationModeMessage>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! StabilizationCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(photo, other.photo) && _deepEquals(video, other.video);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'StabilizationCapabilitiesMessage(photo: $photo, video: $video)';
+  }
+}
+
+class VideoSizeOptionMessage {
+  VideoSizeOptionMessage({
+    required this.size,
+    required this.fps,
+  });
+
+  SizeMessage size;
+
+  List<int> fps;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      size,
+      fps,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static VideoSizeOptionMessage decode(Object result) {
+    result as List<Object?>;
+    return VideoSizeOptionMessage(
+      size: result[0]! as SizeMessage,
+      fps: (result[1]! as List<Object?>).cast<int>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VideoSizeOptionMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(size, other.size) && _deepEquals(fps, other.fps);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'VideoSizeOptionMessage(size: $size, fps: $fps)';
+  }
+}
+
+class VideoCapabilitiesMessage {
+  VideoCapabilitiesMessage({
+    required this.options,
+    required this.audio,
+  });
+
+  List<VideoSizeOptionMessage> options;
+
+  bool audio;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      options,
+      audio,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static VideoCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return VideoCapabilitiesMessage(
+      options: (result[0]! as List<Object?>).cast<VideoSizeOptionMessage>(),
+      audio: result[1]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VideoCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(options, other.options) && _deepEquals(audio, other.audio);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'VideoCapabilitiesMessage(options: $options, audio: $audio)';
+  }
+}
+
+class LiveCapabilitiesMessage {
+  LiveCapabilitiesMessage({
+    required this.supported,
+    required this.maxPreBufferMs,
+    required this.audio,
+  });
+
+  bool supported;
+
+  int maxPreBufferMs;
+
+  bool audio;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      supported,
+      maxPreBufferMs,
+      audio,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static LiveCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return LiveCapabilitiesMessage(
+      supported: result[0]! as bool,
+      maxPreBufferMs: result[1]! as int,
+      audio: result[2]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! LiveCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(supported, other.supported) && _deepEquals(maxPreBufferMs, other.maxPreBufferMs) && _deepEquals(audio, other.audio);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'LiveCapabilitiesMessage(supported: $supported, maxPreBufferMs: $maxPreBufferMs, audio: $audio)';
+  }
+}
+
+class CameraDescriptorMessage {
+  CameraDescriptorMessage({
+    required this.id,
+    required this.facing,
+    required this.lensKind,
+    required this.isLogical,
+    required this.physicalIds,
+    required this.sensorOrientation,
+    required this.source,
+    required this.label,
+    this.focalLengthMm,
+    this.focalLength35mmEq,
+  });
+
+  String id;
+
+  CameraFacingMessage facing;
+
+  LensKindMessage lensKind;
+
+  bool isLogical;
+
+  List<String> physicalIds;
+
+  int sensorOrientation;
+
+  CameraSourceMessage source;
+
+  /// Short human label such as "Back camera" or "Back camera (wide)".
+  String label;
+
+  double? focalLengthMm;
+
+  double? focalLength35mmEq;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      facing,
+      lensKind,
+      isLogical,
+      physicalIds,
+      sensorOrientation,
+      source,
+      label,
+      focalLengthMm,
+      focalLength35mmEq,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static CameraDescriptorMessage decode(Object result) {
+    result as List<Object?>;
+    return CameraDescriptorMessage(
+      id: result[0]! as String,
+      facing: result[1]! as CameraFacingMessage,
+      lensKind: result[2]! as LensKindMessage,
+      isLogical: result[3]! as bool,
+      physicalIds: (result[4]! as List<Object?>).cast<String>(),
+      sensorOrientation: result[5]! as int,
+      source: result[6]! as CameraSourceMessage,
+      label: result[7]! as String,
+      focalLengthMm: result[8] as double?,
+      focalLength35mmEq: result[9] as double?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CameraDescriptorMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) && _deepEquals(facing, other.facing) && _deepEquals(lensKind, other.lensKind) && _deepEquals(isLogical, other.isLogical) && _deepEquals(physicalIds, other.physicalIds) && _deepEquals(sensorOrientation, other.sensorOrientation) && _deepEquals(source, other.source) && _deepEquals(label, other.label) && _deepEquals(focalLengthMm, other.focalLengthMm) && _deepEquals(focalLength35mmEq, other.focalLength35mmEq);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'CameraDescriptorMessage(id: $id, facing: $facing, lensKind: $lensKind, isLogical: $isLogical, physicalIds: $physicalIds, sensorOrientation: $sensorOrientation, source: $source, label: $label, focalLengthMm: $focalLengthMm, focalLength35mmEq: $focalLength35mmEq)';
+  }
+}
+
+class CameraCapabilitiesMessage {
+  CameraCapabilitiesMessage({
+    required this.cameraId,
+    this.iso,
+    this.exposureTimeNs,
+    this.exposureBias,
+    required this.apertures,
+    required this.focus,
+    required this.whiteBalance,
+    required this.zoom,
+    required this.flash,
+    required this.torch,
+    required this.photoFormats,
+    required this.photoSizes,
+    required this.stabilization,
+    required this.video,
+    required this.hdr,
+    required this.live,
+    required this.hardwareLevel,
+  });
+
+  String cameraId;
+
+  /// Null = no manual ISO.
+  IntRangeMessage? iso;
+
+  /// Nanoseconds. Null = no manual shutter.
+  IntRangeMessage? exposureTimeNs;
+
+  ExposureBiasCapabilityMessage? exposureBias;
+
+  /// Usually length 1, which means display only (CAM-013).
+  List<double> apertures;
+
+  FocusCapabilitiesMessage focus;
+
+  WhiteBalanceCapabilitiesMessage whiteBalance;
+
+  ZoomCapabilitiesMessage zoom;
+
+  List<FlashModeMessage> flash;
+
+  bool torch;
+
+  List<PhotoFormatMessage> photoFormats;
+
+  List<SizeMessage> photoSizes;
+
+  StabilizationCapabilitiesMessage stabilization;
+
+  VideoCapabilitiesMessage video;
+
+  bool hdr;
+
+  LiveCapabilitiesMessage live;
+
+  /// Android: LEGACY | LIMITED | FULL | LEVEL_3 | EXTERNAL. iOS: `n/a`.
+  String hardwareLevel;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      cameraId,
+      iso,
+      exposureTimeNs,
+      exposureBias,
+      apertures,
+      focus,
+      whiteBalance,
+      zoom,
+      flash,
+      torch,
+      photoFormats,
+      photoSizes,
+      stabilization,
+      video,
+      hdr,
+      live,
+      hardwareLevel,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static CameraCapabilitiesMessage decode(Object result) {
+    result as List<Object?>;
+    return CameraCapabilitiesMessage(
+      cameraId: result[0]! as String,
+      iso: result[1] as IntRangeMessage?,
+      exposureTimeNs: result[2] as IntRangeMessage?,
+      exposureBias: result[3] as ExposureBiasCapabilityMessage?,
+      apertures: (result[4]! as List<Object?>).cast<double>(),
+      focus: result[5]! as FocusCapabilitiesMessage,
+      whiteBalance: result[6]! as WhiteBalanceCapabilitiesMessage,
+      zoom: result[7]! as ZoomCapabilitiesMessage,
+      flash: (result[8]! as List<Object?>).cast<FlashModeMessage>(),
+      torch: result[9]! as bool,
+      photoFormats: (result[10]! as List<Object?>).cast<PhotoFormatMessage>(),
+      photoSizes: (result[11]! as List<Object?>).cast<SizeMessage>(),
+      stabilization: result[12]! as StabilizationCapabilitiesMessage,
+      video: result[13]! as VideoCapabilitiesMessage,
+      hdr: result[14]! as bool,
+      live: result[15]! as LiveCapabilitiesMessage,
+      hardwareLevel: result[16]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CameraCapabilitiesMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(cameraId, other.cameraId) && _deepEquals(iso, other.iso) && _deepEquals(exposureTimeNs, other.exposureTimeNs) && _deepEquals(exposureBias, other.exposureBias) && _deepEquals(apertures, other.apertures) && _deepEquals(focus, other.focus) && _deepEquals(whiteBalance, other.whiteBalance) && _deepEquals(zoom, other.zoom) && _deepEquals(flash, other.flash) && _deepEquals(torch, other.torch) && _deepEquals(photoFormats, other.photoFormats) && _deepEquals(photoSizes, other.photoSizes) && _deepEquals(stabilization, other.stabilization) && _deepEquals(video, other.video) && _deepEquals(hdr, other.hdr) && _deepEquals(live, other.live) && _deepEquals(hardwareLevel, other.hardwareLevel);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'CameraCapabilitiesMessage(cameraId: $cameraId, iso: $iso, exposureTimeNs: $exposureTimeNs, exposureBias: $exposureBias, apertures: $apertures, focus: $focus, whiteBalance: $whiteBalance, zoom: $zoom, flash: $flash, torch: $torch, photoFormats: $photoFormats, photoSizes: $photoSizes, stabilization: $stabilization, video: $video, hdr: $hdr, live: $live, hardwareLevel: $hardwareLevel)';
+  }
+}
+
+class SessionConfigMessage {
+  SessionConfigMessage({
+    required this.cameraId,
+    required this.photoFormat,
+    required this.live,
+    required this.audio,
+    this.previewSize,
+    this.photoSize,
+  });
+
+  String cameraId;
+
+  PhotoFormatMessage photoFormat;
+
+  /// Keep a rolling pre-shutter buffer so a capture can include motion (MOT-009).
+  bool live;
+
+  /// Record audio for motion and video. Requires microphone permission, else motion is silent (MOT-003).
+  bool audio;
+
+  SizeMessage? previewSize;
+
+  /// Null = the largest size the format supports (CAM-003).
+  SizeMessage? photoSize;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      cameraId,
+      photoFormat,
+      live,
+      audio,
+      previewSize,
+      photoSize,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SessionConfigMessage decode(Object result) {
+    result as List<Object?>;
+    return SessionConfigMessage(
+      cameraId: result[0]! as String,
+      photoFormat: result[1]! as PhotoFormatMessage,
+      live: result[2]! as bool,
+      audio: result[3]! as bool,
+      previewSize: result[4] as SizeMessage?,
+      photoSize: result[5] as SizeMessage?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SessionConfigMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(cameraId, other.cameraId) && _deepEquals(photoFormat, other.photoFormat) && _deepEquals(live, other.live) && _deepEquals(audio, other.audio) && _deepEquals(previewSize, other.previewSize) && _deepEquals(photoSize, other.photoSize);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'SessionConfigMessage(cameraId: $cameraId, photoFormat: $photoFormat, live: $live, audio: $audio, previewSize: $previewSize, photoSize: $photoSize)';
+  }
+}
+
+class SessionInfoMessage {
+  SessionInfoMessage({
+    required this.sessionId,
+    required this.textureId,
+    required this.cameraId,
+    required this.previewSize,
+    required this.photoSize,
+    required this.photoFormat,
+    required this.sensorOrientation,
+    required this.source,
+    required this.liveActive,
+    required this.audioActive,
+  });
+
+  int sessionId;
+
+  /// Flutter `Texture` id of the live preview.
+  int textureId;
+
+  String cameraId;
+
+  /// Size of the preview frames as delivered (before rotating for display).
+  SizeMessage previewSize;
+
+  SizeMessage photoSize;
+
+  /// The format actually used, which can differ from the request (typed fallback, docs/specs/camera.md).
+  PhotoFormatMessage photoFormat;
+
+  int sensorOrientation;
+
+  CameraSourceMessage source;
+
+  bool liveActive;
+
+  bool audioActive;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      sessionId,
+      textureId,
+      cameraId,
+      previewSize,
+      photoSize,
+      photoFormat,
+      sensorOrientation,
+      source,
+      liveActive,
+      audioActive,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SessionInfoMessage decode(Object result) {
+    result as List<Object?>;
+    return SessionInfoMessage(
+      sessionId: result[0]! as int,
+      textureId: result[1]! as int,
+      cameraId: result[2]! as String,
+      previewSize: result[3]! as SizeMessage,
+      photoSize: result[4]! as SizeMessage,
+      photoFormat: result[5]! as PhotoFormatMessage,
+      sensorOrientation: result[6]! as int,
+      source: result[7]! as CameraSourceMessage,
+      liveActive: result[8]! as bool,
+      audioActive: result[9]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SessionInfoMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(sessionId, other.sessionId) && _deepEquals(textureId, other.textureId) && _deepEquals(cameraId, other.cameraId) && _deepEquals(previewSize, other.previewSize) && _deepEquals(photoSize, other.photoSize) && _deepEquals(photoFormat, other.photoFormat) && _deepEquals(sensorOrientation, other.sensorOrientation) && _deepEquals(source, other.source) && _deepEquals(liveActive, other.liveActive) && _deepEquals(audioActive, other.audioActive);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'SessionInfoMessage(sessionId: $sessionId, textureId: $textureId, cameraId: $cameraId, previewSize: $previewSize, photoSize: $photoSize, photoFormat: $photoFormat, sensorOrientation: $sensorOrientation, source: $source, liveActive: $liveActive, audioActive: $audioActive)';
+  }
+}
+
+/// Already clamped to the capabilities by the Dart resolver. Native applies it as given.
+class ResolvedCaptureSettingsMessage {
+  ResolvedCaptureSettingsMessage({
+    this.iso,
+    this.exposureTimeNs,
+    this.exposureBiasEv,
+    required this.aeLock,
+    required this.focusMode,
+    this.focusDistanceDiopters,
+    required this.afLock,
+    this.whiteBalancePreset,
+    this.kelvin,
+    required this.zoomRatio,
+    required this.flash,
+    required this.torch,
+    this.stabilization,
+  });
+
+  /// Manual ISO; both [iso] and [exposureTimeNs] null = auto exposure.
+  int? iso;
+
+  /// Manual shutter in nanoseconds.
+  int? exposureTimeNs;
+
+  /// Exposure compensation in EV. Ignored by native when exposure is fully manual.
+  double? exposureBiasEv;
+
+  bool aeLock;
+
+  FocusModeMessage focusMode;
+
+  /// Only for [FocusModeMessage.manual].
+  double? focusDistanceDiopters;
+
+  bool afLock;
+
+  /// Null = auto white balance.
+  WbPresetMessage? whiteBalancePreset;
+
+  /// Takes precedence over [whiteBalancePreset].
+  int? kelvin;
+
+  double zoomRatio;
+
+  FlashModeMessage flash;
+
+  bool torch;
+
+  StabilizationModeMessage? stabilization;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      iso,
+      exposureTimeNs,
+      exposureBiasEv,
+      aeLock,
+      focusMode,
+      focusDistanceDiopters,
+      afLock,
+      whiteBalancePreset,
+      kelvin,
+      zoomRatio,
+      flash,
+      torch,
+      stabilization,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ResolvedCaptureSettingsMessage decode(Object result) {
+    result as List<Object?>;
+    return ResolvedCaptureSettingsMessage(
+      iso: result[0] as int?,
+      exposureTimeNs: result[1] as int?,
+      exposureBiasEv: result[2] as double?,
+      aeLock: result[3]! as bool,
+      focusMode: result[4]! as FocusModeMessage,
+      focusDistanceDiopters: result[5] as double?,
+      afLock: result[6]! as bool,
+      whiteBalancePreset: result[7] as WbPresetMessage?,
+      kelvin: result[8] as int?,
+      zoomRatio: result[9]! as double,
+      flash: result[10]! as FlashModeMessage,
+      torch: result[11]! as bool,
+      stabilization: result[12] as StabilizationModeMessage?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ResolvedCaptureSettingsMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(iso, other.iso) && _deepEquals(exposureTimeNs, other.exposureTimeNs) && _deepEquals(exposureBiasEv, other.exposureBiasEv) && _deepEquals(aeLock, other.aeLock) && _deepEquals(focusMode, other.focusMode) && _deepEquals(focusDistanceDiopters, other.focusDistanceDiopters) && _deepEquals(afLock, other.afLock) && _deepEquals(whiteBalancePreset, other.whiteBalancePreset) && _deepEquals(kelvin, other.kelvin) && _deepEquals(zoomRatio, other.zoomRatio) && _deepEquals(flash, other.flash) && _deepEquals(torch, other.torch) && _deepEquals(stabilization, other.stabilization);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ResolvedCaptureSettingsMessage(iso: $iso, exposureTimeNs: $exposureTimeNs, exposureBiasEv: $exposureBiasEv, aeLock: $aeLock, focusMode: $focusMode, focusDistanceDiopters: $focusDistanceDiopters, afLock: $afLock, whiteBalancePreset: $whiteBalancePreset, kelvin: $kelvin, zoomRatio: $zoomRatio, flash: $flash, torch: $torch, stabilization: $stabilization)';
+  }
+}
+
+/// What the device reported it actually used (CAM-050). Every value comes from the capture result.
+class AppliedSettingsMessage {
+  AppliedSettingsMessage({
+    this.iso,
+    this.exposureTimeNs,
+    this.exposureBiasEv,
+    this.aperture,
+    this.focalLengthMm,
+    this.focusDistanceDiopters,
+    this.focusMode,
+    this.whiteBalanceMode,
+    this.whiteBalanceGains,
+    this.estimatedKelvin,
+    required this.aeLocked,
+    required this.afLocked,
+    required this.zoomRatio,
+    this.flashFired,
+    this.flash,
+    this.stabilization,
+    required this.mismatches,
+  });
+
+  int? iso;
+
+  int? exposureTimeNs;
+
+  double? exposureBiasEv;
+
+  double? aperture;
+
+  double? focalLengthMm;
+
+  double? focusDistanceDiopters;
+
+  FocusModeMessage? focusMode;
+
+  /// `auto`, or `manual`, or a preset name.
+  String? whiteBalanceMode;
+
+  /// Red, green-even, green-odd, blue gains when the device reported them.
+  List<double>? whiteBalanceGains;
+
+  /// Estimated colour temperature derived from the gains. Never a hardware-reported value.
+  int? estimatedKelvin;
+
+  bool aeLocked;
+
+  bool afLocked;
+
+  double zoomRatio;
+
+  bool? flashFired;
+
+  FlashModeMessage? flash;
+
+  StabilizationModeMessage? stabilization;
+
+  /// Names of requested fields the device did not honour (for example `iso`), so Dart can downgrade
+  /// the capability after a persistent mismatch (docs/specs/camera.md acceptance criteria).
+  List<String> mismatches;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      iso,
+      exposureTimeNs,
+      exposureBiasEv,
+      aperture,
+      focalLengthMm,
+      focusDistanceDiopters,
+      focusMode,
+      whiteBalanceMode,
+      whiteBalanceGains,
+      estimatedKelvin,
+      aeLocked,
+      afLocked,
+      zoomRatio,
+      flashFired,
+      flash,
+      stabilization,
+      mismatches,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static AppliedSettingsMessage decode(Object result) {
+    result as List<Object?>;
+    return AppliedSettingsMessage(
+      iso: result[0] as int?,
+      exposureTimeNs: result[1] as int?,
+      exposureBiasEv: result[2] as double?,
+      aperture: result[3] as double?,
+      focalLengthMm: result[4] as double?,
+      focusDistanceDiopters: result[5] as double?,
+      focusMode: result[6] as FocusModeMessage?,
+      whiteBalanceMode: result[7] as String?,
+      whiteBalanceGains: (result[8] as List<Object?>?)?.cast<double>(),
+      estimatedKelvin: result[9] as int?,
+      aeLocked: result[10]! as bool,
+      afLocked: result[11]! as bool,
+      zoomRatio: result[12]! as double,
+      flashFired: result[13] as bool?,
+      flash: result[14] as FlashModeMessage?,
+      stabilization: result[15] as StabilizationModeMessage?,
+      mismatches: (result[16]! as List<Object?>).cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! AppliedSettingsMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(iso, other.iso) && _deepEquals(exposureTimeNs, other.exposureTimeNs) && _deepEquals(exposureBiasEv, other.exposureBiasEv) && _deepEquals(aperture, other.aperture) && _deepEquals(focalLengthMm, other.focalLengthMm) && _deepEquals(focusDistanceDiopters, other.focusDistanceDiopters) && _deepEquals(focusMode, other.focusMode) && _deepEquals(whiteBalanceMode, other.whiteBalanceMode) && _deepEquals(whiteBalanceGains, other.whiteBalanceGains) && _deepEquals(estimatedKelvin, other.estimatedKelvin) && _deepEquals(aeLocked, other.aeLocked) && _deepEquals(afLocked, other.afLocked) && _deepEquals(zoomRatio, other.zoomRatio) && _deepEquals(flashFired, other.flashFired) && _deepEquals(flash, other.flash) && _deepEquals(stabilization, other.stabilization) && _deepEquals(mismatches, other.mismatches);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'AppliedSettingsMessage(iso: $iso, exposureTimeNs: $exposureTimeNs, exposureBiasEv: $exposureBiasEv, aperture: $aperture, focalLengthMm: $focalLengthMm, focusDistanceDiopters: $focusDistanceDiopters, focusMode: $focusMode, whiteBalanceMode: $whiteBalanceMode, whiteBalanceGains: $whiteBalanceGains, estimatedKelvin: $estimatedKelvin, aeLocked: $aeLocked, afLocked: $afLocked, zoomRatio: $zoomRatio, flashFired: $flashFired, flash: $flash, stabilization: $stabilization, mismatches: $mismatches)';
+  }
+}
+
+class LocationMessage {
+  LocationMessage({
+    required this.latitude,
+    required this.longitude,
+    this.accuracyM,
+    this.altitudeM,
+  });
+
+  double latitude;
+
+  double longitude;
+
+  double? accuracyM;
+
+  double? altitudeM;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      latitude,
+      longitude,
+      accuracyM,
+      altitudeM,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static LocationMessage decode(Object result) {
+    result as List<Object?>;
+    return LocationMessage(
+      latitude: result[0]! as double,
+      longitude: result[1]! as double,
+      accuracyM: result[2] as double?,
+      altitudeM: result[3] as double?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! LocationMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(latitude, other.latitude) && _deepEquals(longitude, other.longitude) && _deepEquals(accuracyM, other.accuracyM) && _deepEquals(altitudeM, other.altitudeM);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'LocationMessage(latitude: $latitude, longitude: $longitude, accuracyM: $accuracyM, altitudeM: $altitudeM)';
+  }
+}
+
+/// Look applied when rendering the `rendered` JPEG (ADR-0004). Native does the pixel work.
+class RenderSpecMessage {
+  RenderSpecMessage({
+    this.lut,
+    this.lutSize,
+    required this.grain,
+    required this.vignette,
+    this.aspectRatio,
+    this.profileId,
+  });
+
+  /// Packed RGB bytes of a cube LUT (`lutSize`^3 entries, R fastest, 3 bytes per entry). Null = identity.
+  Uint8List? lut;
+
+  int? lutSize;
+
+  /// 0..1 film grain strength.
+  double grain;
+
+  /// 0..1 vignette strength.
+  double vignette;
+
+  /// `W:H` such as `3:2`. The ORIGINAL is never cropped (CAM-044); only the rendition is.
+  String? aspectRatio;
+
+  String? profileId;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      lut,
+      lutSize,
+      grain,
+      vignette,
+      aspectRatio,
+      profileId,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static RenderSpecMessage decode(Object result) {
+    result as List<Object?>;
+    return RenderSpecMessage(
+      lut: result[0] as Uint8List?,
+      lutSize: result[1] as int?,
+      grain: result[2]! as double,
+      vignette: result[3]! as double,
+      aspectRatio: result[4] as String?,
+      profileId: result[5] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! RenderSpecMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(lut, other.lut) && _deepEquals(lutSize, other.lutSize) && _deepEquals(grain, other.grain) && _deepEquals(vignette, other.vignette) && _deepEquals(aspectRatio, other.aspectRatio) && _deepEquals(profileId, other.profileId);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'RenderSpecMessage(lut: $lut, lutSize: $lutSize, grain: $grain, vignette: $vignette, aspectRatio: $aspectRatio, profileId: $profileId)';
+  }
+}
+
+class CaptureRequestMessage {
+  CaptureRequestMessage({
+    required this.memoryId,
+    required this.outputDir,
+    required this.originalName,
+    required this.renderedName,
+    required this.thumbnailName,
+    required this.displayName,
+    this.motionName,
+    required this.live,
+    required this.preRollMs,
+    required this.postRollMs,
+    required this.jpegQuality,
+    this.render,
+    this.location,
+    this.timestampEpochMs,
+  });
+
+  String memoryId;
+
+  /// Directory that exists and is writable. Native writes temp files then renames (NFR-002).
+  String outputDir;
+
+  /// File names (without directory). Dart owns naming.
+  String originalName;
+
+  String renderedName;
+
+  String thumbnailName;
+
+  String displayName;
+
+  String? motionName;
+
+  /// Include the pre/post-roll clip. Ignored (with `liveIncluded=false` in the result) when LIVE is off.
+  bool live;
+
+  /// Motion window before and after the shutter. Native may deliver more pre-roll (it must start on a
+  /// key frame) but never less than the buffer holds.
+  int preRollMs;
+
+  int postRollMs;
+
+  int jpegQuality;
+
+  RenderSpecMessage? render;
+
+  /// Written into EXIF only when the app passes it (PRIV-001).
+  LocationMessage? location;
+
+  /// Overrides the shutter timestamp; null = now.
+  int? timestampEpochMs;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      memoryId,
+      outputDir,
+      originalName,
+      renderedName,
+      thumbnailName,
+      displayName,
+      motionName,
+      live,
+      preRollMs,
+      postRollMs,
+      jpegQuality,
+      render,
+      location,
+      timestampEpochMs,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static CaptureRequestMessage decode(Object result) {
+    result as List<Object?>;
+    return CaptureRequestMessage(
+      memoryId: result[0]! as String,
+      outputDir: result[1]! as String,
+      originalName: result[2]! as String,
+      renderedName: result[3]! as String,
+      thumbnailName: result[4]! as String,
+      displayName: result[5]! as String,
+      motionName: result[6] as String?,
+      live: result[7]! as bool,
+      preRollMs: result[8]! as int,
+      postRollMs: result[9]! as int,
+      jpegQuality: result[10]! as int,
+      render: result[11] as RenderSpecMessage?,
+      location: result[12] as LocationMessage?,
+      timestampEpochMs: result[13] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CaptureRequestMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(memoryId, other.memoryId) && _deepEquals(outputDir, other.outputDir) && _deepEquals(originalName, other.originalName) && _deepEquals(renderedName, other.renderedName) && _deepEquals(thumbnailName, other.thumbnailName) && _deepEquals(displayName, other.displayName) && _deepEquals(motionName, other.motionName) && _deepEquals(live, other.live) && _deepEquals(preRollMs, other.preRollMs) && _deepEquals(postRollMs, other.postRollMs) && _deepEquals(jpegQuality, other.jpegQuality) && _deepEquals(render, other.render) && _deepEquals(location, other.location) && _deepEquals(timestampEpochMs, other.timestampEpochMs);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'CaptureRequestMessage(memoryId: $memoryId, outputDir: $outputDir, originalName: $originalName, renderedName: $renderedName, thumbnailName: $thumbnailName, displayName: $displayName, motionName: $motionName, live: $live, preRollMs: $preRollMs, postRollMs: $postRollMs, jpegQuality: $jpegQuality, render: $render, location: $location, timestampEpochMs: $timestampEpochMs)';
+  }
+}
+
+class MotionResultMessage {
+  MotionResultMessage({
+    required this.path,
+    required this.durationMs,
+    required this.preRollMs,
+    required this.postRollMs,
+    required this.keyFrameTimeMs,
+    required this.hasAudio,
+    required this.width,
+    required this.height,
+    required this.orientationDegrees,
+    required this.mime,
+  });
+
+  String path;
+
+  int durationMs;
+
+  int preRollMs;
+
+  int postRollMs;
+
+  /// Time of the shutter inside the clip.
+  int keyFrameTimeMs;
+
+  bool hasAudio;
+
+  int width;
+
+  int height;
+
+  int orientationDegrees;
+
+  String mime;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      path,
+      durationMs,
+      preRollMs,
+      postRollMs,
+      keyFrameTimeMs,
+      hasAudio,
+      width,
+      height,
+      orientationDegrees,
+      mime,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static MotionResultMessage decode(Object result) {
+    result as List<Object?>;
+    return MotionResultMessage(
+      path: result[0]! as String,
+      durationMs: result[1]! as int,
+      preRollMs: result[2]! as int,
+      postRollMs: result[3]! as int,
+      keyFrameTimeMs: result[4]! as int,
+      hasAudio: result[5]! as bool,
+      width: result[6]! as int,
+      height: result[7]! as int,
+      orientationDegrees: result[8]! as int,
+      mime: result[9]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MotionResultMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(path, other.path) && _deepEquals(durationMs, other.durationMs) && _deepEquals(preRollMs, other.preRollMs) && _deepEquals(postRollMs, other.postRollMs) && _deepEquals(keyFrameTimeMs, other.keyFrameTimeMs) && _deepEquals(hasAudio, other.hasAudio) && _deepEquals(width, other.width) && _deepEquals(height, other.height) && _deepEquals(orientationDegrees, other.orientationDegrees) && _deepEquals(mime, other.mime);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'MotionResultMessage(path: $path, durationMs: $durationMs, preRollMs: $preRollMs, postRollMs: $postRollMs, keyFrameTimeMs: $keyFrameTimeMs, hasAudio: $hasAudio, width: $width, height: $height, orientationDegrees: $orientationDegrees, mime: $mime)';
+  }
+}
+
+class CaptureResultMessage {
+  CaptureResultMessage({
+    required this.memoryId,
+    required this.originalPath,
+    required this.originalMime,
+    required this.width,
+    required this.height,
+    required this.orientationDegrees,
+    required this.applied,
+    required this.capturedAtEpochMs,
+    required this.source,
+    required this.liveIncluded,
+    required this.mirrored,
+    required this.renderFailed,
+    this.renderedPath,
+    this.thumbnailPath,
+    this.displayPath,
+    this.motion,
+  });
+
+  String memoryId;
+
+  String originalPath;
+
+  String originalMime;
+
+  int width;
+
+  int height;
+
+  /// Clockwise degrees to rotate the stored pixels for upright display (EXIF orientation).
+  int orientationDegrees;
+
+  AppliedSettingsMessage applied;
+
+  int capturedAtEpochMs;
+
+  CameraSourceMessage source;
+
+  bool liveIncluded;
+
+  /// Front camera photos are NOT mirrored in the file; this is true only when the preview was.
+  bool mirrored;
+
+  /// True when the original was saved but rendition steps failed (retry later; original is safe).
+  bool renderFailed;
+
+  String? renderedPath;
+
+  String? thumbnailPath;
+
+  String? displayPath;
+
+  MotionResultMessage? motion;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      memoryId,
+      originalPath,
+      originalMime,
+      width,
+      height,
+      orientationDegrees,
+      applied,
+      capturedAtEpochMs,
+      source,
+      liveIncluded,
+      mirrored,
+      renderFailed,
+      renderedPath,
+      thumbnailPath,
+      displayPath,
+      motion,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static CaptureResultMessage decode(Object result) {
+    result as List<Object?>;
+    return CaptureResultMessage(
+      memoryId: result[0]! as String,
+      originalPath: result[1]! as String,
+      originalMime: result[2]! as String,
+      width: result[3]! as int,
+      height: result[4]! as int,
+      orientationDegrees: result[5]! as int,
+      applied: result[6]! as AppliedSettingsMessage,
+      capturedAtEpochMs: result[7]! as int,
+      source: result[8]! as CameraSourceMessage,
+      liveIncluded: result[9]! as bool,
+      mirrored: result[10]! as bool,
+      renderFailed: result[11]! as bool,
+      renderedPath: result[12] as String?,
+      thumbnailPath: result[13] as String?,
+      displayPath: result[14] as String?,
+      motion: result[15] as MotionResultMessage?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CaptureResultMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(memoryId, other.memoryId) && _deepEquals(originalPath, other.originalPath) && _deepEquals(originalMime, other.originalMime) && _deepEquals(width, other.width) && _deepEquals(height, other.height) && _deepEquals(orientationDegrees, other.orientationDegrees) && _deepEquals(applied, other.applied) && _deepEquals(capturedAtEpochMs, other.capturedAtEpochMs) && _deepEquals(source, other.source) && _deepEquals(liveIncluded, other.liveIncluded) && _deepEquals(mirrored, other.mirrored) && _deepEquals(renderFailed, other.renderFailed) && _deepEquals(renderedPath, other.renderedPath) && _deepEquals(thumbnailPath, other.thumbnailPath) && _deepEquals(displayPath, other.displayPath) && _deepEquals(motion, other.motion);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'CaptureResultMessage(memoryId: $memoryId, originalPath: $originalPath, originalMime: $originalMime, width: $width, height: $height, orientationDegrees: $orientationDegrees, applied: $applied, capturedAtEpochMs: $capturedAtEpochMs, source: $source, liveIncluded: $liveIncluded, mirrored: $mirrored, renderFailed: $renderFailed, renderedPath: $renderedPath, thumbnailPath: $thumbnailPath, displayPath: $displayPath, motion: $motion)';
+  }
+}
+
+class VideoRequestMessage {
+  VideoRequestMessage({
+    required this.outputPath,
+    this.size,
+    this.fps,
+    required this.audio,
+    this.stabilization,
+  });
+
+  String outputPath;
+
+  SizeMessage? size;
+
+  int? fps;
+
+  bool audio;
+
+  StabilizationModeMessage? stabilization;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      outputPath,
+      size,
+      fps,
+      audio,
+      stabilization,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static VideoRequestMessage decode(Object result) {
+    result as List<Object?>;
+    return VideoRequestMessage(
+      outputPath: result[0]! as String,
+      size: result[1] as SizeMessage?,
+      fps: result[2] as int?,
+      audio: result[3]! as bool,
+      stabilization: result[4] as StabilizationModeMessage?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VideoRequestMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(outputPath, other.outputPath) && _deepEquals(size, other.size) && _deepEquals(fps, other.fps) && _deepEquals(audio, other.audio) && _deepEquals(stabilization, other.stabilization);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'VideoRequestMessage(outputPath: $outputPath, size: $size, fps: $fps, audio: $audio, stabilization: $stabilization)';
+  }
+}
+
+class VideoResultMessage {
+  VideoResultMessage({
+    required this.path,
+    required this.durationMs,
+    required this.width,
+    required this.height,
+    required this.hasAudio,
+    required this.bytes,
+    required this.orientationDegrees,
+    required this.mime,
+  });
+
+  String path;
+
+  int durationMs;
+
+  int width;
+
+  int height;
+
+  bool hasAudio;
+
+  int bytes;
+
+  int orientationDegrees;
+
+  String mime;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      path,
+      durationMs,
+      width,
+      height,
+      hasAudio,
+      bytes,
+      orientationDegrees,
+      mime,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static VideoResultMessage decode(Object result) {
+    result as List<Object?>;
+    return VideoResultMessage(
+      path: result[0]! as String,
+      durationMs: result[1]! as int,
+      width: result[2]! as int,
+      height: result[3]! as int,
+      hasAudio: result[4]! as bool,
+      bytes: result[5]! as int,
+      orientationDegrees: result[6]! as int,
+      mime: result[7]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VideoResultMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(path, other.path) && _deepEquals(durationMs, other.durationMs) && _deepEquals(width, other.width) && _deepEquals(height, other.height) && _deepEquals(hasAudio, other.hasAudio) && _deepEquals(bytes, other.bytes) && _deepEquals(orientationDegrees, other.orientationDegrees) && _deepEquals(mime, other.mime);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'VideoResultMessage(path: $path, durationMs: $durationMs, width: $width, height: $height, hasAudio: $hasAudio, bytes: $bytes, orientationDegrees: $orientationDegrees, mime: $mime)';
+  }
+}
+
+class PermissionsMessage {
+  PermissionsMessage({
+    required this.camera,
+    required this.microphone,
+    required this.cameraPermanentlyDenied,
+    required this.microphonePermanentlyDenied,
+  });
+
+  PermissionStatusMessage camera;
+
+  PermissionStatusMessage microphone;
+
+  /// True when Android will no longer show the system dialog: send the user to settings (CAM-052).
+  bool cameraPermanentlyDenied;
+
+  bool microphonePermanentlyDenied;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      camera,
+      microphone,
+      cameraPermanentlyDenied,
+      microphonePermanentlyDenied,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static PermissionsMessage decode(Object result) {
+    result as List<Object?>;
+    return PermissionsMessage(
+      camera: result[0]! as PermissionStatusMessage,
+      microphone: result[1]! as PermissionStatusMessage,
+      cameraPermanentlyDenied: result[2]! as bool,
+      microphonePermanentlyDenied: result[3]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PermissionsMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(camera, other.camera) && _deepEquals(microphone, other.microphone) && _deepEquals(cameraPermanentlyDenied, other.cameraPermanentlyDenied) && _deepEquals(microphonePermanentlyDenied, other.microphonePermanentlyDenied);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'PermissionsMessage(camera: $camera, microphone: $microphone, cameraPermanentlyDenied: $cameraPermanentlyDenied, microphonePermanentlyDenied: $microphonePermanentlyDenied)';
+  }
+}
+
+class SessionEventMessage {
+  SessionEventMessage({
+    required this.sessionId,
+    required this.kind,
+    this.state,
+    this.applied,
+    this.errorCode,
+    this.errorMessage,
+    this.thermal,
+    this.orientationDegrees,
+  });
+
+  int sessionId;
+
+  SessionEventKindMessage kind;
+
+  SessionStateMessage? state;
+
+  AppliedSettingsMessage? applied;
+
+  String? errorCode;
+
+  String? errorMessage;
+
+  ThermalStateMessage? thermal;
+
+  /// Device orientation from the sensor, 0/90/180/270 (CAM edge case: capture follows the sensor).
+  int? orientationDegrees;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      sessionId,
+      kind,
+      state,
+      applied,
+      errorCode,
+      errorMessage,
+      thermal,
+      orientationDegrees,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SessionEventMessage decode(Object result) {
+    result as List<Object?>;
+    return SessionEventMessage(
+      sessionId: result[0]! as int,
+      kind: result[1]! as SessionEventKindMessage,
+      state: result[2] as SessionStateMessage?,
+      applied: result[3] as AppliedSettingsMessage?,
+      errorCode: result[4] as String?,
+      errorMessage: result[5] as String?,
+      thermal: result[6] as ThermalStateMessage?,
+      orientationDegrees: result[7] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SessionEventMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(sessionId, other.sessionId) && _deepEquals(kind, other.kind) && _deepEquals(state, other.state) && _deepEquals(applied, other.applied) && _deepEquals(errorCode, other.errorCode) && _deepEquals(errorMessage, other.errorMessage) && _deepEquals(thermal, other.thermal) && _deepEquals(orientationDegrees, other.orientationDegrees);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'SessionEventMessage(sessionId: $sessionId, kind: $kind, state: $state, applied: $applied, errorCode: $errorCode, errorMessage: $errorMessage, thermal: $thermal, orientationDegrees: $orientationDegrees)';
+  }
+}
 
 /// Answer to a `ping`: proves the bridge works in both directions and reports what the native side is.
 class PingResultMessage {
@@ -171,8 +2281,128 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is PingResultMessage) {
+    }    else if (value is CameraFacingMessage) {
       buffer.putUint8(129);
+      writeValue(buffer, value.index);
+    }    else if (value is LensKindMessage) {
+      buffer.putUint8(130);
+      writeValue(buffer, value.index);
+    }    else if (value is CameraSourceMessage) {
+      buffer.putUint8(131);
+      writeValue(buffer, value.index);
+    }    else if (value is PhotoFormatMessage) {
+      buffer.putUint8(132);
+      writeValue(buffer, value.index);
+    }    else if (value is WbPresetMessage) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.index);
+    }    else if (value is FlashModeMessage) {
+      buffer.putUint8(134);
+      writeValue(buffer, value.index);
+    }    else if (value is FocusModeMessage) {
+      buffer.putUint8(135);
+      writeValue(buffer, value.index);
+    }    else if (value is FocusCalibrationMessage) {
+      buffer.putUint8(136);
+      writeValue(buffer, value.index);
+    }    else if (value is StabilizationModeMessage) {
+      buffer.putUint8(137);
+      writeValue(buffer, value.index);
+    }    else if (value is PermissionStatusMessage) {
+      buffer.putUint8(138);
+      writeValue(buffer, value.index);
+    }    else if (value is SessionStateMessage) {
+      buffer.putUint8(139);
+      writeValue(buffer, value.index);
+    }    else if (value is ThermalStateMessage) {
+      buffer.putUint8(140);
+      writeValue(buffer, value.index);
+    }    else if (value is SessionEventKindMessage) {
+      buffer.putUint8(141);
+      writeValue(buffer, value.index);
+    }    else if (value is SizeMessage) {
+      buffer.putUint8(142);
+      writeValue(buffer, value.encode());
+    }    else if (value is IntRangeMessage) {
+      buffer.putUint8(143);
+      writeValue(buffer, value.encode());
+    }    else if (value is DoubleRangeMessage) {
+      buffer.putUint8(144);
+      writeValue(buffer, value.encode());
+    }    else if (value is ExposureBiasCapabilityMessage) {
+      buffer.putUint8(145);
+      writeValue(buffer, value.encode());
+    }    else if (value is ManualFocusCapabilityMessage) {
+      buffer.putUint8(146);
+      writeValue(buffer, value.encode());
+    }    else if (value is FocusCapabilitiesMessage) {
+      buffer.putUint8(147);
+      writeValue(buffer, value.encode());
+    }    else if (value is WhiteBalanceCapabilitiesMessage) {
+      buffer.putUint8(148);
+      writeValue(buffer, value.encode());
+    }    else if (value is ZoomCapabilitiesMessage) {
+      buffer.putUint8(149);
+      writeValue(buffer, value.encode());
+    }    else if (value is StabilizationCapabilitiesMessage) {
+      buffer.putUint8(150);
+      writeValue(buffer, value.encode());
+    }    else if (value is VideoSizeOptionMessage) {
+      buffer.putUint8(151);
+      writeValue(buffer, value.encode());
+    }    else if (value is VideoCapabilitiesMessage) {
+      buffer.putUint8(152);
+      writeValue(buffer, value.encode());
+    }    else if (value is LiveCapabilitiesMessage) {
+      buffer.putUint8(153);
+      writeValue(buffer, value.encode());
+    }    else if (value is CameraDescriptorMessage) {
+      buffer.putUint8(154);
+      writeValue(buffer, value.encode());
+    }    else if (value is CameraCapabilitiesMessage) {
+      buffer.putUint8(155);
+      writeValue(buffer, value.encode());
+    }    else if (value is SessionConfigMessage) {
+      buffer.putUint8(156);
+      writeValue(buffer, value.encode());
+    }    else if (value is SessionInfoMessage) {
+      buffer.putUint8(157);
+      writeValue(buffer, value.encode());
+    }    else if (value is ResolvedCaptureSettingsMessage) {
+      buffer.putUint8(158);
+      writeValue(buffer, value.encode());
+    }    else if (value is AppliedSettingsMessage) {
+      buffer.putUint8(159);
+      writeValue(buffer, value.encode());
+    }    else if (value is LocationMessage) {
+      buffer.putUint8(160);
+      writeValue(buffer, value.encode());
+    }    else if (value is RenderSpecMessage) {
+      buffer.putUint8(161);
+      writeValue(buffer, value.encode());
+    }    else if (value is CaptureRequestMessage) {
+      buffer.putUint8(162);
+      writeValue(buffer, value.encode());
+    }    else if (value is MotionResultMessage) {
+      buffer.putUint8(163);
+      writeValue(buffer, value.encode());
+    }    else if (value is CaptureResultMessage) {
+      buffer.putUint8(164);
+      writeValue(buffer, value.encode());
+    }    else if (value is VideoRequestMessage) {
+      buffer.putUint8(165);
+      writeValue(buffer, value.encode());
+    }    else if (value is VideoResultMessage) {
+      buffer.putUint8(166);
+      writeValue(buffer, value.encode());
+    }    else if (value is PermissionsMessage) {
+      buffer.putUint8(167);
+      writeValue(buffer, value.encode());
+    }    else if (value is SessionEventMessage) {
+      buffer.putUint8(168);
+      writeValue(buffer, value.encode());
+    }    else if (value is PingResultMessage) {
+      buffer.putUint8(169);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -183,6 +2413,99 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : CameraFacingMessage.values[value];
+      case 130:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : LensKindMessage.values[value];
+      case 131:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : CameraSourceMessage.values[value];
+      case 132:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : PhotoFormatMessage.values[value];
+      case 133:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : WbPresetMessage.values[value];
+      case 134:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : FlashModeMessage.values[value];
+      case 135:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : FocusModeMessage.values[value];
+      case 136:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : FocusCalibrationMessage.values[value];
+      case 137:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : StabilizationModeMessage.values[value];
+      case 138:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : PermissionStatusMessage.values[value];
+      case 139:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SessionStateMessage.values[value];
+      case 140:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : ThermalStateMessage.values[value];
+      case 141:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SessionEventKindMessage.values[value];
+      case 142:
+        return SizeMessage.decode(readValue(buffer)!);
+      case 143:
+        return IntRangeMessage.decode(readValue(buffer)!);
+      case 144:
+        return DoubleRangeMessage.decode(readValue(buffer)!);
+      case 145:
+        return ExposureBiasCapabilityMessage.decode(readValue(buffer)!);
+      case 146:
+        return ManualFocusCapabilityMessage.decode(readValue(buffer)!);
+      case 147:
+        return FocusCapabilitiesMessage.decode(readValue(buffer)!);
+      case 148:
+        return WhiteBalanceCapabilitiesMessage.decode(readValue(buffer)!);
+      case 149:
+        return ZoomCapabilitiesMessage.decode(readValue(buffer)!);
+      case 150:
+        return StabilizationCapabilitiesMessage.decode(readValue(buffer)!);
+      case 151:
+        return VideoSizeOptionMessage.decode(readValue(buffer)!);
+      case 152:
+        return VideoCapabilitiesMessage.decode(readValue(buffer)!);
+      case 153:
+        return LiveCapabilitiesMessage.decode(readValue(buffer)!);
+      case 154:
+        return CameraDescriptorMessage.decode(readValue(buffer)!);
+      case 155:
+        return CameraCapabilitiesMessage.decode(readValue(buffer)!);
+      case 156:
+        return SessionConfigMessage.decode(readValue(buffer)!);
+      case 157:
+        return SessionInfoMessage.decode(readValue(buffer)!);
+      case 158:
+        return ResolvedCaptureSettingsMessage.decode(readValue(buffer)!);
+      case 159:
+        return AppliedSettingsMessage.decode(readValue(buffer)!);
+      case 160:
+        return LocationMessage.decode(readValue(buffer)!);
+      case 161:
+        return RenderSpecMessage.decode(readValue(buffer)!);
+      case 162:
+        return CaptureRequestMessage.decode(readValue(buffer)!);
+      case 163:
+        return MotionResultMessage.decode(readValue(buffer)!);
+      case 164:
+        return CaptureResultMessage.decode(readValue(buffer)!);
+      case 165:
+        return VideoRequestMessage.decode(readValue(buffer)!);
+      case 166:
+        return VideoResultMessage.decode(readValue(buffer)!);
+      case 167:
+        return PermissionsMessage.decode(readValue(buffer)!);
+      case 168:
+        return SessionEventMessage.decode(readValue(buffer)!);
+      case 169:
         return PingResultMessage.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -224,5 +2547,322 @@ class CameraHostApi {
     )
     ;
     return pigeonVar_replyValue! as PingResultMessage;
+  }
+
+  Future<PermissionsMessage> checkPermissions() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.checkPermissions$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as PermissionsMessage;
+  }
+
+  Future<PermissionsMessage> requestPermissions(bool camera, bool microphone) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.requestPermissions$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[camera, microphone]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as PermissionsMessage;
+  }
+
+  Future<void> openAppSettings() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.openAppSettings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  Future<List<CameraDescriptorMessage>> listCameras() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.listCameras$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<CameraDescriptorMessage>();
+  }
+
+  Future<CameraCapabilitiesMessage> getCapabilities(String cameraId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.getCapabilities$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[cameraId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as CameraCapabilitiesMessage;
+  }
+
+  Future<SessionInfoMessage> openSession(SessionConfigMessage config) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.openSession$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[config]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as SessionInfoMessage;
+  }
+
+  /// Idempotent.
+  Future<void> closeSession(int sessionId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.closeSession$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Applies settings to the running preview and returns what the device reported.
+  Future<AppliedSettingsMessage> applySettings(int sessionId, ResolvedCaptureSettingsMessage settings) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.applySettings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId, settings]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as AppliedSettingsMessage;
+  }
+
+  /// Tap-to-focus and tap-to-meter at a normalised preview point (0..1, 0..1).
+  Future<void> focusAt(int sessionId, double x, double y) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.focusAt$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId, x, y]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  Future<void> setLive(int sessionId, bool enabled) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.setLive$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId, enabled]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  Future<CaptureResultMessage> capture(int sessionId, CaptureRequestMessage request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.capture$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId, request]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as CaptureResultMessage;
+  }
+
+  Future<void> startVideo(int sessionId, VideoRequestMessage request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.startVideo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId, request]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  Future<VideoResultMessage> stopVideo(int sessionId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.stopVideo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as VideoResultMessage;
+  }
+
+  /// App backgrounded or another interruption: stop preview and LIVE buffering (NFR-012).
+  Future<void> suspendSession(int sessionId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.suspendSession$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  Future<void> resumeSession(int sessionId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.doro_camera.CameraHostApi.resumeSession$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sessionId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+}
+
+abstract class CameraEventsApi {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  void onSessionEvent(SessionEventMessage event);
+
+  static void setUp(CameraEventsApi? api, {
+    BinaryMessenger? binaryMessenger, 
+    String messageChannelSuffix = '',
+  }) 
+{
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.doro_camera.CameraEventsApi.onSessionEvent$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final SessionEventMessage arg_event = args[0]! as SessionEventMessage;
+          try {
+            api.onSessionEvent(arg_event);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
   }
 }

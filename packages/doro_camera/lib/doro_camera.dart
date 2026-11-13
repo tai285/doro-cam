@@ -5,3 +5,4 @@ export 'src/camera_exception.dart';
 export 'src/camera_platform.dart' show CameraPlatform;
 export 'src/doro_camera.dart';
 export 'src/ping_result.dart';
+export 'src/types.dart';

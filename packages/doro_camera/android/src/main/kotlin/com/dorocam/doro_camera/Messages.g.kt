@@ -13,7 +13,16 @@ import io.flutter.plugin.common.StandardMethodCodec
 import io.flutter.plugin.common.StandardMessageCodec
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 private object MessagesPigeonUtils {
+
+  fun createConnectionError(channelName: String): FlutterError {
+    return FlutterError("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")  }
 
   fun wrapResult(result: Any?): List<Any?> {
     return listOf(result)
@@ -192,6 +201,1835 @@ class FlutterError (
   val details: Any? = null
 ) : RuntimeException()
 
+enum class CameraFacingMessage(val raw: Int) {
+  BACK(0),
+  FRONT(1),
+  EXTERNAL(2);
+
+  companion object {
+    fun ofRaw(raw: Int): CameraFacingMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class LensKindMessage(val raw: Int) {
+  ULTRA_WIDE(0),
+  WIDE(1),
+  TELE(2),
+  FRONT(3),
+  OTHER(4);
+
+  companion object {
+    fun ofRaw(raw: Int): LensKindMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** `synthetic` exists only in debug and test builds (ADR-0013). */
+enum class CameraSourceMessage(val raw: Int) {
+  HARDWARE(0),
+  SYNTHETIC(1);
+
+  companion object {
+    fun ofRaw(raw: Int): CameraSourceMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class PhotoFormatMessage(val raw: Int) {
+  HEIF(0),
+  JPEG(1),
+  DNG(2);
+
+  companion object {
+    fun ofRaw(raw: Int): PhotoFormatMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class WbPresetMessage(val raw: Int) {
+  AUTO(0),
+  DAYLIGHT(1),
+  CLOUDY(2),
+  SHADE(3),
+  TUNGSTEN(4),
+  FLUORESCENT(5);
+
+  companion object {
+    fun ofRaw(raw: Int): WbPresetMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class FlashModeMessage(val raw: Int) {
+  OFF(0),
+  AUTO(1),
+  ON(2);
+
+  companion object {
+    fun ofRaw(raw: Int): FlashModeMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class FocusModeMessage(val raw: Int) {
+  CONTINUOUS(0),
+  AUTO(1),
+  MANUAL(2);
+
+  companion object {
+    fun ofRaw(raw: Int): FocusModeMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class FocusCalibrationMessage(val raw: Int) {
+  UNCALIBRATED(0),
+  APPROXIMATE(1),
+  CALIBRATED(2);
+
+  companion object {
+    fun ofRaw(raw: Int): FocusCalibrationMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class StabilizationModeMessage(val raw: Int) {
+  OFF(0),
+  STANDARD(1),
+  OPTICAL(2);
+
+  companion object {
+    fun ofRaw(raw: Int): StabilizationModeMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class PermissionStatusMessage(val raw: Int) {
+  GRANTED(0),
+  DENIED(1),
+  RESTRICTED(2),
+  NOT_DETERMINED(3);
+
+  companion object {
+    fun ofRaw(raw: Int): PermissionStatusMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class SessionStateMessage(val raw: Int) {
+  CONFIGURING(0),
+  PREVIEWING(1),
+  CAPTURING(2),
+  RECORDING(3),
+  SUSPENDED(4),
+  CLOSED(5);
+
+  companion object {
+    fun ofRaw(raw: Int): SessionStateMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class ThermalStateMessage(val raw: Int) {
+  NOMINAL(0),
+  FAIR(1),
+  SERIOUS(2),
+  CRITICAL(3);
+
+  companion object {
+    fun ofRaw(raw: Int): ThermalStateMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class SessionEventKindMessage(val raw: Int) {
+  STATE(0),
+  APPLIED(1),
+  ERROR(2),
+  THERMAL(3),
+  ORIENTATION(4),
+  INTERRUPTED(5),
+  RESUMED(6);
+
+  companion object {
+    fun ofRaw(raw: Int): SessionEventKindMessage? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SizeMessage (
+  val width: Long,
+  val height: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SizeMessage {
+      val width = pigeonVar_list[0] as Long
+      val height = pigeonVar_list[1] as Long
+      return SizeMessage(width, height)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      width,
+      height,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SizeMessage
+    return MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    return result
+  }
+  override fun toString(): String {
+    return "SizeMessage(width=$width, height=$height)"
+  }
+}
+
+/**
+ * An inclusive integer range (ISO values, exposure durations in nanoseconds, Kelvin).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class IntRangeMessage (
+  val min: Long,
+  val max: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): IntRangeMessage {
+      val min = pigeonVar_list[0] as Long
+      val max = pigeonVar_list[1] as Long
+      return IntRangeMessage(min, max)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      min,
+      max,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as IntRangeMessage
+    return MessagesPigeonUtils.deepEquals(this.min, other.min) && MessagesPigeonUtils.deepEquals(this.max, other.max)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.min)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.max)
+    return result
+  }
+  override fun toString(): String {
+    return "IntRangeMessage(min=$min, max=$max)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class DoubleRangeMessage (
+  val min: Double,
+  val max: Double
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): DoubleRangeMessage {
+      val min = pigeonVar_list[0] as Double
+      val max = pigeonVar_list[1] as Double
+      return DoubleRangeMessage(min, max)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      min,
+      max,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as DoubleRangeMessage
+    return MessagesPigeonUtils.deepEquals(this.min, other.min) && MessagesPigeonUtils.deepEquals(this.max, other.max)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.min)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.max)
+    return result
+  }
+  override fun toString(): String {
+    return "DoubleRangeMessage(min=$min, max=$max)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ExposureBiasCapabilityMessage (
+  /** Range in EV stops (already multiplied by [step]). */
+  val range: DoubleRangeMessage,
+  /** Size of one compensation step in EV. */
+  val step: Double
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ExposureBiasCapabilityMessage {
+      val range = pigeonVar_list[0] as DoubleRangeMessage
+      val step = pigeonVar_list[1] as Double
+      return ExposureBiasCapabilityMessage(range, step)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      range,
+      step,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ExposureBiasCapabilityMessage
+    return MessagesPigeonUtils.deepEquals(this.range, other.range) && MessagesPigeonUtils.deepEquals(this.step, other.step)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.range)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.step)
+    return result
+  }
+  override fun toString(): String {
+    return "ExposureBiasCapabilityMessage(range=$range, step=$step)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ManualFocusCapabilityMessage (
+  /** Diopters of the closest focus distance (1 / metres). Manual focus accepts 0 (infinity) .. this. */
+  val minFocusDistanceDiopters: Double,
+  val calibration: FocusCalibrationMessage
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ManualFocusCapabilityMessage {
+      val minFocusDistanceDiopters = pigeonVar_list[0] as Double
+      val calibration = pigeonVar_list[1] as FocusCalibrationMessage
+      return ManualFocusCapabilityMessage(minFocusDistanceDiopters, calibration)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      minFocusDistanceDiopters,
+      calibration,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ManualFocusCapabilityMessage
+    return MessagesPigeonUtils.deepEquals(this.minFocusDistanceDiopters, other.minFocusDistanceDiopters) && MessagesPigeonUtils.deepEquals(this.calibration, other.calibration)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.minFocusDistanceDiopters)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.calibration)
+    return result
+  }
+  override fun toString(): String {
+    return "ManualFocusCapabilityMessage(minFocusDistanceDiopters=$minFocusDistanceDiopters, calibration=$calibration)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class FocusCapabilitiesMessage (
+  val auto: Boolean,
+  val continuous: Boolean,
+  val tapToFocus: Boolean,
+  val manual: ManualFocusCapabilityMessage? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): FocusCapabilitiesMessage {
+      val auto = pigeonVar_list[0] as Boolean
+      val continuous = pigeonVar_list[1] as Boolean
+      val tapToFocus = pigeonVar_list[2] as Boolean
+      val manual = pigeonVar_list[3] as ManualFocusCapabilityMessage?
+      return FocusCapabilitiesMessage(auto, continuous, tapToFocus, manual)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      auto,
+      continuous,
+      tapToFocus,
+      manual,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as FocusCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.auto, other.auto) && MessagesPigeonUtils.deepEquals(this.continuous, other.continuous) && MessagesPigeonUtils.deepEquals(this.tapToFocus, other.tapToFocus) && MessagesPigeonUtils.deepEquals(this.manual, other.manual)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.auto)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.continuous)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.tapToFocus)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.manual)
+    return result
+  }
+  override fun toString(): String {
+    return "FocusCapabilitiesMessage(auto=$auto, continuous=$continuous, tapToFocus=$tapToFocus, manual=$manual)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class WhiteBalanceCapabilitiesMessage (
+  val presets: List<WbPresetMessage>,
+  /** Non-null only when the device really supports manual colour gains (docs/specs/camera.md). */
+  val kelvin: IntRangeMessage? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): WhiteBalanceCapabilitiesMessage {
+      val presets = pigeonVar_list[0] as List<WbPresetMessage>
+      val kelvin = pigeonVar_list[1] as IntRangeMessage?
+      return WhiteBalanceCapabilitiesMessage(presets, kelvin)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      presets,
+      kelvin,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as WhiteBalanceCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.presets, other.presets) && MessagesPigeonUtils.deepEquals(this.kelvin, other.kelvin)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.presets)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.kelvin)
+    return result
+  }
+  override fun toString(): String {
+    return "WhiteBalanceCapabilitiesMessage(presets=$presets, kelvin=$kelvin)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ZoomCapabilitiesMessage (
+  val min: Double,
+  val max: Double,
+  /** Zoom ratios that correspond to real optical lenses (for example 1.0, 2.0). May be just [1.0]. */
+  val opticalSteps: List<Double>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ZoomCapabilitiesMessage {
+      val min = pigeonVar_list[0] as Double
+      val max = pigeonVar_list[1] as Double
+      val opticalSteps = pigeonVar_list[2] as List<Double>
+      return ZoomCapabilitiesMessage(min, max, opticalSteps)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      min,
+      max,
+      opticalSteps,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ZoomCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.min, other.min) && MessagesPigeonUtils.deepEquals(this.max, other.max) && MessagesPigeonUtils.deepEquals(this.opticalSteps, other.opticalSteps)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.min)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.max)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.opticalSteps)
+    return result
+  }
+  override fun toString(): String {
+    return "ZoomCapabilitiesMessage(min=$min, max=$max, opticalSteps=$opticalSteps)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class StabilizationCapabilitiesMessage (
+  val photo: List<StabilizationModeMessage>,
+  val video: List<StabilizationModeMessage>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): StabilizationCapabilitiesMessage {
+      val photo = pigeonVar_list[0] as List<StabilizationModeMessage>
+      val video = pigeonVar_list[1] as List<StabilizationModeMessage>
+      return StabilizationCapabilitiesMessage(photo, video)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      photo,
+      video,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as StabilizationCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.photo, other.photo) && MessagesPigeonUtils.deepEquals(this.video, other.video)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photo)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.video)
+    return result
+  }
+  override fun toString(): String {
+    return "StabilizationCapabilitiesMessage(photo=$photo, video=$video)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class VideoSizeOptionMessage (
+  val size: SizeMessage,
+  val fps: List<Long>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VideoSizeOptionMessage {
+      val size = pigeonVar_list[0] as SizeMessage
+      val fps = pigeonVar_list[1] as List<Long>
+      return VideoSizeOptionMessage(size, fps)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      size,
+      fps,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as VideoSizeOptionMessage
+    return MessagesPigeonUtils.deepEquals(this.size, other.size) && MessagesPigeonUtils.deepEquals(this.fps, other.fps)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.size)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.fps)
+    return result
+  }
+  override fun toString(): String {
+    return "VideoSizeOptionMessage(size=$size, fps=$fps)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class VideoCapabilitiesMessage (
+  val options: List<VideoSizeOptionMessage>,
+  val audio: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VideoCapabilitiesMessage {
+      val options = pigeonVar_list[0] as List<VideoSizeOptionMessage>
+      val audio = pigeonVar_list[1] as Boolean
+      return VideoCapabilitiesMessage(options, audio)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      options,
+      audio,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as VideoCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.options, other.options) && MessagesPigeonUtils.deepEquals(this.audio, other.audio)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.options)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.audio)
+    return result
+  }
+  override fun toString(): String {
+    return "VideoCapabilitiesMessage(options=$options, audio=$audio)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class LiveCapabilitiesMessage (
+  val supported: Boolean,
+  val maxPreBufferMs: Long,
+  val audio: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): LiveCapabilitiesMessage {
+      val supported = pigeonVar_list[0] as Boolean
+      val maxPreBufferMs = pigeonVar_list[1] as Long
+      val audio = pigeonVar_list[2] as Boolean
+      return LiveCapabilitiesMessage(supported, maxPreBufferMs, audio)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      supported,
+      maxPreBufferMs,
+      audio,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as LiveCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.supported, other.supported) && MessagesPigeonUtils.deepEquals(this.maxPreBufferMs, other.maxPreBufferMs) && MessagesPigeonUtils.deepEquals(this.audio, other.audio)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.supported)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.maxPreBufferMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.audio)
+    return result
+  }
+  override fun toString(): String {
+    return "LiveCapabilitiesMessage(supported=$supported, maxPreBufferMs=$maxPreBufferMs, audio=$audio)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class CameraDescriptorMessage (
+  val id: String,
+  val facing: CameraFacingMessage,
+  val lensKind: LensKindMessage,
+  val isLogical: Boolean,
+  val physicalIds: List<String>,
+  val sensorOrientation: Long,
+  val source: CameraSourceMessage,
+  /** Short human label such as "Back camera" or "Back camera (wide)". */
+  val label: String,
+  val focalLengthMm: Double? = null,
+  val focalLength35mmEq: Double? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CameraDescriptorMessage {
+      val id = pigeonVar_list[0] as String
+      val facing = pigeonVar_list[1] as CameraFacingMessage
+      val lensKind = pigeonVar_list[2] as LensKindMessage
+      val isLogical = pigeonVar_list[3] as Boolean
+      val physicalIds = pigeonVar_list[4] as List<String>
+      val sensorOrientation = pigeonVar_list[5] as Long
+      val source = pigeonVar_list[6] as CameraSourceMessage
+      val label = pigeonVar_list[7] as String
+      val focalLengthMm = pigeonVar_list[8] as Double?
+      val focalLength35mmEq = pigeonVar_list[9] as Double?
+      return CameraDescriptorMessage(id, facing, lensKind, isLogical, physicalIds, sensorOrientation, source, label, focalLengthMm, focalLength35mmEq)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      facing,
+      lensKind,
+      isLogical,
+      physicalIds,
+      sensorOrientation,
+      source,
+      label,
+      focalLengthMm,
+      focalLength35mmEq,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as CameraDescriptorMessage
+    return MessagesPigeonUtils.deepEquals(this.id, other.id) && MessagesPigeonUtils.deepEquals(this.facing, other.facing) && MessagesPigeonUtils.deepEquals(this.lensKind, other.lensKind) && MessagesPigeonUtils.deepEquals(this.isLogical, other.isLogical) && MessagesPigeonUtils.deepEquals(this.physicalIds, other.physicalIds) && MessagesPigeonUtils.deepEquals(this.sensorOrientation, other.sensorOrientation) && MessagesPigeonUtils.deepEquals(this.source, other.source) && MessagesPigeonUtils.deepEquals(this.label, other.label) && MessagesPigeonUtils.deepEquals(this.focalLengthMm, other.focalLengthMm) && MessagesPigeonUtils.deepEquals(this.focalLength35mmEq, other.focalLength35mmEq)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.id)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.facing)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.lensKind)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.isLogical)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.physicalIds)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sensorOrientation)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.source)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.label)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focalLengthMm)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focalLength35mmEq)
+    return result
+  }
+  override fun toString(): String {
+    return "CameraDescriptorMessage(id=$id, facing=$facing, lensKind=$lensKind, isLogical=$isLogical, physicalIds=$physicalIds, sensorOrientation=$sensorOrientation, source=$source, label=$label, focalLengthMm=$focalLengthMm, focalLength35mmEq=$focalLength35mmEq)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class CameraCapabilitiesMessage (
+  val cameraId: String,
+  /** Null = no manual ISO. */
+  val iso: IntRangeMessage? = null,
+  /** Nanoseconds. Null = no manual shutter. */
+  val exposureTimeNs: IntRangeMessage? = null,
+  val exposureBias: ExposureBiasCapabilityMessage? = null,
+  /** Usually length 1, which means display only (CAM-013). */
+  val apertures: List<Double>,
+  val focus: FocusCapabilitiesMessage,
+  val whiteBalance: WhiteBalanceCapabilitiesMessage,
+  val zoom: ZoomCapabilitiesMessage,
+  val flash: List<FlashModeMessage>,
+  val torch: Boolean,
+  val photoFormats: List<PhotoFormatMessage>,
+  val photoSizes: List<SizeMessage>,
+  val stabilization: StabilizationCapabilitiesMessage,
+  val video: VideoCapabilitiesMessage,
+  val hdr: Boolean,
+  val live: LiveCapabilitiesMessage,
+  /** Android: LEGACY | LIMITED | FULL | LEVEL_3 | EXTERNAL. iOS: `n/a`. */
+  val hardwareLevel: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CameraCapabilitiesMessage {
+      val cameraId = pigeonVar_list[0] as String
+      val iso = pigeonVar_list[1] as IntRangeMessage?
+      val exposureTimeNs = pigeonVar_list[2] as IntRangeMessage?
+      val exposureBias = pigeonVar_list[3] as ExposureBiasCapabilityMessage?
+      val apertures = pigeonVar_list[4] as List<Double>
+      val focus = pigeonVar_list[5] as FocusCapabilitiesMessage
+      val whiteBalance = pigeonVar_list[6] as WhiteBalanceCapabilitiesMessage
+      val zoom = pigeonVar_list[7] as ZoomCapabilitiesMessage
+      val flash = pigeonVar_list[8] as List<FlashModeMessage>
+      val torch = pigeonVar_list[9] as Boolean
+      val photoFormats = pigeonVar_list[10] as List<PhotoFormatMessage>
+      val photoSizes = pigeonVar_list[11] as List<SizeMessage>
+      val stabilization = pigeonVar_list[12] as StabilizationCapabilitiesMessage
+      val video = pigeonVar_list[13] as VideoCapabilitiesMessage
+      val hdr = pigeonVar_list[14] as Boolean
+      val live = pigeonVar_list[15] as LiveCapabilitiesMessage
+      val hardwareLevel = pigeonVar_list[16] as String
+      return CameraCapabilitiesMessage(cameraId, iso, exposureTimeNs, exposureBias, apertures, focus, whiteBalance, zoom, flash, torch, photoFormats, photoSizes, stabilization, video, hdr, live, hardwareLevel)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      cameraId,
+      iso,
+      exposureTimeNs,
+      exposureBias,
+      apertures,
+      focus,
+      whiteBalance,
+      zoom,
+      flash,
+      torch,
+      photoFormats,
+      photoSizes,
+      stabilization,
+      video,
+      hdr,
+      live,
+      hardwareLevel,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as CameraCapabilitiesMessage
+    return MessagesPigeonUtils.deepEquals(this.cameraId, other.cameraId) && MessagesPigeonUtils.deepEquals(this.iso, other.iso) && MessagesPigeonUtils.deepEquals(this.exposureTimeNs, other.exposureTimeNs) && MessagesPigeonUtils.deepEquals(this.exposureBias, other.exposureBias) && MessagesPigeonUtils.deepEquals(this.apertures, other.apertures) && MessagesPigeonUtils.deepEquals(this.focus, other.focus) && MessagesPigeonUtils.deepEquals(this.whiteBalance, other.whiteBalance) && MessagesPigeonUtils.deepEquals(this.zoom, other.zoom) && MessagesPigeonUtils.deepEquals(this.flash, other.flash) && MessagesPigeonUtils.deepEquals(this.torch, other.torch) && MessagesPigeonUtils.deepEquals(this.photoFormats, other.photoFormats) && MessagesPigeonUtils.deepEquals(this.photoSizes, other.photoSizes) && MessagesPigeonUtils.deepEquals(this.stabilization, other.stabilization) && MessagesPigeonUtils.deepEquals(this.video, other.video) && MessagesPigeonUtils.deepEquals(this.hdr, other.hdr) && MessagesPigeonUtils.deepEquals(this.live, other.live) && MessagesPigeonUtils.deepEquals(this.hardwareLevel, other.hardwareLevel)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.cameraId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.iso)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.exposureTimeNs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.exposureBias)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.apertures)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focus)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.whiteBalance)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.zoom)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.flash)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.torch)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photoFormats)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photoSizes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.stabilization)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.video)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.hdr)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.live)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.hardwareLevel)
+    return result
+  }
+  override fun toString(): String {
+    return "CameraCapabilitiesMessage(cameraId=$cameraId, iso=$iso, exposureTimeNs=$exposureTimeNs, exposureBias=$exposureBias, apertures=$apertures, focus=$focus, whiteBalance=$whiteBalance, zoom=$zoom, flash=$flash, torch=$torch, photoFormats=$photoFormats, photoSizes=$photoSizes, stabilization=$stabilization, video=$video, hdr=$hdr, live=$live, hardwareLevel=$hardwareLevel)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SessionConfigMessage (
+  val cameraId: String,
+  val photoFormat: PhotoFormatMessage,
+  /** Keep a rolling pre-shutter buffer so a capture can include motion (MOT-009). */
+  val live: Boolean,
+  /** Record audio for motion and video. Requires microphone permission, else motion is silent (MOT-003). */
+  val audio: Boolean,
+  val previewSize: SizeMessage? = null,
+  /** Null = the largest size the format supports (CAM-003). */
+  val photoSize: SizeMessage? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SessionConfigMessage {
+      val cameraId = pigeonVar_list[0] as String
+      val photoFormat = pigeonVar_list[1] as PhotoFormatMessage
+      val live = pigeonVar_list[2] as Boolean
+      val audio = pigeonVar_list[3] as Boolean
+      val previewSize = pigeonVar_list[4] as SizeMessage?
+      val photoSize = pigeonVar_list[5] as SizeMessage?
+      return SessionConfigMessage(cameraId, photoFormat, live, audio, previewSize, photoSize)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      cameraId,
+      photoFormat,
+      live,
+      audio,
+      previewSize,
+      photoSize,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SessionConfigMessage
+    return MessagesPigeonUtils.deepEquals(this.cameraId, other.cameraId) && MessagesPigeonUtils.deepEquals(this.photoFormat, other.photoFormat) && MessagesPigeonUtils.deepEquals(this.live, other.live) && MessagesPigeonUtils.deepEquals(this.audio, other.audio) && MessagesPigeonUtils.deepEquals(this.previewSize, other.previewSize) && MessagesPigeonUtils.deepEquals(this.photoSize, other.photoSize)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.cameraId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photoFormat)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.live)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.audio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.previewSize)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photoSize)
+    return result
+  }
+  override fun toString(): String {
+    return "SessionConfigMessage(cameraId=$cameraId, photoFormat=$photoFormat, live=$live, audio=$audio, previewSize=$previewSize, photoSize=$photoSize)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SessionInfoMessage (
+  val sessionId: Long,
+  /** Flutter `Texture` id of the live preview. */
+  val textureId: Long,
+  val cameraId: String,
+  /** Size of the preview frames as delivered (before rotating for display). */
+  val previewSize: SizeMessage,
+  val photoSize: SizeMessage,
+  /** The format actually used, which can differ from the request (typed fallback, docs/specs/camera.md). */
+  val photoFormat: PhotoFormatMessage,
+  val sensorOrientation: Long,
+  val source: CameraSourceMessage,
+  val liveActive: Boolean,
+  val audioActive: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SessionInfoMessage {
+      val sessionId = pigeonVar_list[0] as Long
+      val textureId = pigeonVar_list[1] as Long
+      val cameraId = pigeonVar_list[2] as String
+      val previewSize = pigeonVar_list[3] as SizeMessage
+      val photoSize = pigeonVar_list[4] as SizeMessage
+      val photoFormat = pigeonVar_list[5] as PhotoFormatMessage
+      val sensorOrientation = pigeonVar_list[6] as Long
+      val source = pigeonVar_list[7] as CameraSourceMessage
+      val liveActive = pigeonVar_list[8] as Boolean
+      val audioActive = pigeonVar_list[9] as Boolean
+      return SessionInfoMessage(sessionId, textureId, cameraId, previewSize, photoSize, photoFormat, sensorOrientation, source, liveActive, audioActive)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      sessionId,
+      textureId,
+      cameraId,
+      previewSize,
+      photoSize,
+      photoFormat,
+      sensorOrientation,
+      source,
+      liveActive,
+      audioActive,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SessionInfoMessage
+    return MessagesPigeonUtils.deepEquals(this.sessionId, other.sessionId) && MessagesPigeonUtils.deepEquals(this.textureId, other.textureId) && MessagesPigeonUtils.deepEquals(this.cameraId, other.cameraId) && MessagesPigeonUtils.deepEquals(this.previewSize, other.previewSize) && MessagesPigeonUtils.deepEquals(this.photoSize, other.photoSize) && MessagesPigeonUtils.deepEquals(this.photoFormat, other.photoFormat) && MessagesPigeonUtils.deepEquals(this.sensorOrientation, other.sensorOrientation) && MessagesPigeonUtils.deepEquals(this.source, other.source) && MessagesPigeonUtils.deepEquals(this.liveActive, other.liveActive) && MessagesPigeonUtils.deepEquals(this.audioActive, other.audioActive)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sessionId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.textureId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.cameraId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.previewSize)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photoSize)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.photoFormat)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sensorOrientation)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.source)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.liveActive)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.audioActive)
+    return result
+  }
+  override fun toString(): String {
+    return "SessionInfoMessage(sessionId=$sessionId, textureId=$textureId, cameraId=$cameraId, previewSize=$previewSize, photoSize=$photoSize, photoFormat=$photoFormat, sensorOrientation=$sensorOrientation, source=$source, liveActive=$liveActive, audioActive=$audioActive)"
+  }
+}
+
+/**
+ * Already clamped to the capabilities by the Dart resolver. Native applies it as given.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ResolvedCaptureSettingsMessage (
+  /** Manual ISO; both [iso] and [exposureTimeNs] null = auto exposure. */
+  val iso: Long? = null,
+  /** Manual shutter in nanoseconds. */
+  val exposureTimeNs: Long? = null,
+  /** Exposure compensation in EV. Ignored by native when exposure is fully manual. */
+  val exposureBiasEv: Double? = null,
+  val aeLock: Boolean,
+  val focusMode: FocusModeMessage,
+  /** Only for [FocusModeMessage.manual]. */
+  val focusDistanceDiopters: Double? = null,
+  val afLock: Boolean,
+  /** Null = auto white balance. */
+  val whiteBalancePreset: WbPresetMessage? = null,
+  /** Takes precedence over [whiteBalancePreset]. */
+  val kelvin: Long? = null,
+  val zoomRatio: Double,
+  val flash: FlashModeMessage,
+  val torch: Boolean,
+  val stabilization: StabilizationModeMessage? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ResolvedCaptureSettingsMessage {
+      val iso = pigeonVar_list[0] as Long?
+      val exposureTimeNs = pigeonVar_list[1] as Long?
+      val exposureBiasEv = pigeonVar_list[2] as Double?
+      val aeLock = pigeonVar_list[3] as Boolean
+      val focusMode = pigeonVar_list[4] as FocusModeMessage
+      val focusDistanceDiopters = pigeonVar_list[5] as Double?
+      val afLock = pigeonVar_list[6] as Boolean
+      val whiteBalancePreset = pigeonVar_list[7] as WbPresetMessage?
+      val kelvin = pigeonVar_list[8] as Long?
+      val zoomRatio = pigeonVar_list[9] as Double
+      val flash = pigeonVar_list[10] as FlashModeMessage
+      val torch = pigeonVar_list[11] as Boolean
+      val stabilization = pigeonVar_list[12] as StabilizationModeMessage?
+      return ResolvedCaptureSettingsMessage(iso, exposureTimeNs, exposureBiasEv, aeLock, focusMode, focusDistanceDiopters, afLock, whiteBalancePreset, kelvin, zoomRatio, flash, torch, stabilization)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      iso,
+      exposureTimeNs,
+      exposureBiasEv,
+      aeLock,
+      focusMode,
+      focusDistanceDiopters,
+      afLock,
+      whiteBalancePreset,
+      kelvin,
+      zoomRatio,
+      flash,
+      torch,
+      stabilization,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ResolvedCaptureSettingsMessage
+    return MessagesPigeonUtils.deepEquals(this.iso, other.iso) && MessagesPigeonUtils.deepEquals(this.exposureTimeNs, other.exposureTimeNs) && MessagesPigeonUtils.deepEquals(this.exposureBiasEv, other.exposureBiasEv) && MessagesPigeonUtils.deepEquals(this.aeLock, other.aeLock) && MessagesPigeonUtils.deepEquals(this.focusMode, other.focusMode) && MessagesPigeonUtils.deepEquals(this.focusDistanceDiopters, other.focusDistanceDiopters) && MessagesPigeonUtils.deepEquals(this.afLock, other.afLock) && MessagesPigeonUtils.deepEquals(this.whiteBalancePreset, other.whiteBalancePreset) && MessagesPigeonUtils.deepEquals(this.kelvin, other.kelvin) && MessagesPigeonUtils.deepEquals(this.zoomRatio, other.zoomRatio) && MessagesPigeonUtils.deepEquals(this.flash, other.flash) && MessagesPigeonUtils.deepEquals(this.torch, other.torch) && MessagesPigeonUtils.deepEquals(this.stabilization, other.stabilization)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.iso)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.exposureTimeNs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.exposureBiasEv)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.aeLock)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focusMode)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focusDistanceDiopters)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.afLock)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.whiteBalancePreset)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.kelvin)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.zoomRatio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.flash)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.torch)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.stabilization)
+    return result
+  }
+  override fun toString(): String {
+    return "ResolvedCaptureSettingsMessage(iso=$iso, exposureTimeNs=$exposureTimeNs, exposureBiasEv=$exposureBiasEv, aeLock=$aeLock, focusMode=$focusMode, focusDistanceDiopters=$focusDistanceDiopters, afLock=$afLock, whiteBalancePreset=$whiteBalancePreset, kelvin=$kelvin, zoomRatio=$zoomRatio, flash=$flash, torch=$torch, stabilization=$stabilization)"
+  }
+}
+
+/**
+ * What the device reported it actually used (CAM-050). Every value comes from the capture result.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class AppliedSettingsMessage (
+  val iso: Long? = null,
+  val exposureTimeNs: Long? = null,
+  val exposureBiasEv: Double? = null,
+  val aperture: Double? = null,
+  val focalLengthMm: Double? = null,
+  val focusDistanceDiopters: Double? = null,
+  val focusMode: FocusModeMessage? = null,
+  /** `auto`, or `manual`, or a preset name. */
+  val whiteBalanceMode: String? = null,
+  /** Red, green-even, green-odd, blue gains when the device reported them. */
+  val whiteBalanceGains: List<Double>? = null,
+  /** Estimated colour temperature derived from the gains. Never a hardware-reported value. */
+  val estimatedKelvin: Long? = null,
+  val aeLocked: Boolean,
+  val afLocked: Boolean,
+  val zoomRatio: Double,
+  val flashFired: Boolean? = null,
+  val flash: FlashModeMessage? = null,
+  val stabilization: StabilizationModeMessage? = null,
+  /**
+   * Names of requested fields the device did not honour (for example `iso`), so Dart can downgrade
+   * the capability after a persistent mismatch (docs/specs/camera.md acceptance criteria).
+   */
+  val mismatches: List<String>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AppliedSettingsMessage {
+      val iso = pigeonVar_list[0] as Long?
+      val exposureTimeNs = pigeonVar_list[1] as Long?
+      val exposureBiasEv = pigeonVar_list[2] as Double?
+      val aperture = pigeonVar_list[3] as Double?
+      val focalLengthMm = pigeonVar_list[4] as Double?
+      val focusDistanceDiopters = pigeonVar_list[5] as Double?
+      val focusMode = pigeonVar_list[6] as FocusModeMessage?
+      val whiteBalanceMode = pigeonVar_list[7] as String?
+      val whiteBalanceGains = pigeonVar_list[8] as List<Double>?
+      val estimatedKelvin = pigeonVar_list[9] as Long?
+      val aeLocked = pigeonVar_list[10] as Boolean
+      val afLocked = pigeonVar_list[11] as Boolean
+      val zoomRatio = pigeonVar_list[12] as Double
+      val flashFired = pigeonVar_list[13] as Boolean?
+      val flash = pigeonVar_list[14] as FlashModeMessage?
+      val stabilization = pigeonVar_list[15] as StabilizationModeMessage?
+      val mismatches = pigeonVar_list[16] as List<String>
+      return AppliedSettingsMessage(iso, exposureTimeNs, exposureBiasEv, aperture, focalLengthMm, focusDistanceDiopters, focusMode, whiteBalanceMode, whiteBalanceGains, estimatedKelvin, aeLocked, afLocked, zoomRatio, flashFired, flash, stabilization, mismatches)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      iso,
+      exposureTimeNs,
+      exposureBiasEv,
+      aperture,
+      focalLengthMm,
+      focusDistanceDiopters,
+      focusMode,
+      whiteBalanceMode,
+      whiteBalanceGains,
+      estimatedKelvin,
+      aeLocked,
+      afLocked,
+      zoomRatio,
+      flashFired,
+      flash,
+      stabilization,
+      mismatches,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as AppliedSettingsMessage
+    return MessagesPigeonUtils.deepEquals(this.iso, other.iso) && MessagesPigeonUtils.deepEquals(this.exposureTimeNs, other.exposureTimeNs) && MessagesPigeonUtils.deepEquals(this.exposureBiasEv, other.exposureBiasEv) && MessagesPigeonUtils.deepEquals(this.aperture, other.aperture) && MessagesPigeonUtils.deepEquals(this.focalLengthMm, other.focalLengthMm) && MessagesPigeonUtils.deepEquals(this.focusDistanceDiopters, other.focusDistanceDiopters) && MessagesPigeonUtils.deepEquals(this.focusMode, other.focusMode) && MessagesPigeonUtils.deepEquals(this.whiteBalanceMode, other.whiteBalanceMode) && MessagesPigeonUtils.deepEquals(this.whiteBalanceGains, other.whiteBalanceGains) && MessagesPigeonUtils.deepEquals(this.estimatedKelvin, other.estimatedKelvin) && MessagesPigeonUtils.deepEquals(this.aeLocked, other.aeLocked) && MessagesPigeonUtils.deepEquals(this.afLocked, other.afLocked) && MessagesPigeonUtils.deepEquals(this.zoomRatio, other.zoomRatio) && MessagesPigeonUtils.deepEquals(this.flashFired, other.flashFired) && MessagesPigeonUtils.deepEquals(this.flash, other.flash) && MessagesPigeonUtils.deepEquals(this.stabilization, other.stabilization) && MessagesPigeonUtils.deepEquals(this.mismatches, other.mismatches)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.iso)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.exposureTimeNs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.exposureBiasEv)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.aperture)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focalLengthMm)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focusDistanceDiopters)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.focusMode)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.whiteBalanceMode)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.whiteBalanceGains)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.estimatedKelvin)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.aeLocked)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.afLocked)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.zoomRatio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.flashFired)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.flash)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.stabilization)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mismatches)
+    return result
+  }
+  override fun toString(): String {
+    return "AppliedSettingsMessage(iso=$iso, exposureTimeNs=$exposureTimeNs, exposureBiasEv=$exposureBiasEv, aperture=$aperture, focalLengthMm=$focalLengthMm, focusDistanceDiopters=$focusDistanceDiopters, focusMode=$focusMode, whiteBalanceMode=$whiteBalanceMode, whiteBalanceGains=$whiteBalanceGains, estimatedKelvin=$estimatedKelvin, aeLocked=$aeLocked, afLocked=$afLocked, zoomRatio=$zoomRatio, flashFired=$flashFired, flash=$flash, stabilization=$stabilization, mismatches=$mismatches)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class LocationMessage (
+  val latitude: Double,
+  val longitude: Double,
+  val accuracyM: Double? = null,
+  val altitudeM: Double? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): LocationMessage {
+      val latitude = pigeonVar_list[0] as Double
+      val longitude = pigeonVar_list[1] as Double
+      val accuracyM = pigeonVar_list[2] as Double?
+      val altitudeM = pigeonVar_list[3] as Double?
+      return LocationMessage(latitude, longitude, accuracyM, altitudeM)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      latitude,
+      longitude,
+      accuracyM,
+      altitudeM,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as LocationMessage
+    return MessagesPigeonUtils.deepEquals(this.latitude, other.latitude) && MessagesPigeonUtils.deepEquals(this.longitude, other.longitude) && MessagesPigeonUtils.deepEquals(this.accuracyM, other.accuracyM) && MessagesPigeonUtils.deepEquals(this.altitudeM, other.altitudeM)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.latitude)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.longitude)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.accuracyM)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.altitudeM)
+    return result
+  }
+  override fun toString(): String {
+    return "LocationMessage(latitude=$latitude, longitude=$longitude, accuracyM=$accuracyM, altitudeM=$altitudeM)"
+  }
+}
+
+/**
+ * Look applied when rendering the `rendered` JPEG (ADR-0004). Native does the pixel work.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class RenderSpecMessage (
+  /** Packed RGB bytes of a cube LUT (`lutSize`^3 entries, R fastest, 3 bytes per entry). Null = identity. */
+  val lut: ByteArray? = null,
+  val lutSize: Long? = null,
+  /** 0..1 film grain strength. */
+  val grain: Double,
+  /** 0..1 vignette strength. */
+  val vignette: Double,
+  /** `W:H` such as `3:2`. The ORIGINAL is never cropped (CAM-044); only the rendition is. */
+  val aspectRatio: String? = null,
+  val profileId: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): RenderSpecMessage {
+      val lut = pigeonVar_list[0] as ByteArray?
+      val lutSize = pigeonVar_list[1] as Long?
+      val grain = pigeonVar_list[2] as Double
+      val vignette = pigeonVar_list[3] as Double
+      val aspectRatio = pigeonVar_list[4] as String?
+      val profileId = pigeonVar_list[5] as String?
+      return RenderSpecMessage(lut, lutSize, grain, vignette, aspectRatio, profileId)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      lut,
+      lutSize,
+      grain,
+      vignette,
+      aspectRatio,
+      profileId,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as RenderSpecMessage
+    return MessagesPigeonUtils.deepEquals(this.lut, other.lut) && MessagesPigeonUtils.deepEquals(this.lutSize, other.lutSize) && MessagesPigeonUtils.deepEquals(this.grain, other.grain) && MessagesPigeonUtils.deepEquals(this.vignette, other.vignette) && MessagesPigeonUtils.deepEquals(this.aspectRatio, other.aspectRatio) && MessagesPigeonUtils.deepEquals(this.profileId, other.profileId)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.lut)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.lutSize)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.grain)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.vignette)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.aspectRatio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.profileId)
+    return result
+  }
+  override fun toString(): String {
+    return "RenderSpecMessage(lut=${lut?.contentToString()}, lutSize=$lutSize, grain=$grain, vignette=$vignette, aspectRatio=$aspectRatio, profileId=$profileId)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class CaptureRequestMessage (
+  val memoryId: String,
+  /** Directory that exists and is writable. Native writes temp files then renames (NFR-002). */
+  val outputDir: String,
+  /** File names (without directory). Dart owns naming. */
+  val originalName: String,
+  val renderedName: String,
+  val thumbnailName: String,
+  val displayName: String,
+  val motionName: String? = null,
+  /** Include the pre/post-roll clip. Ignored (with `liveIncluded=false` in the result) when LIVE is off. */
+  val live: Boolean,
+  /**
+   * Motion window before and after the shutter. Native may deliver more pre-roll (it must start on a
+   * key frame) but never less than the buffer holds.
+   */
+  val preRollMs: Long,
+  val postRollMs: Long,
+  val jpegQuality: Long,
+  val render: RenderSpecMessage? = null,
+  /** Written into EXIF only when the app passes it (PRIV-001). */
+  val location: LocationMessage? = null,
+  /** Overrides the shutter timestamp; null = now. */
+  val timestampEpochMs: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CaptureRequestMessage {
+      val memoryId = pigeonVar_list[0] as String
+      val outputDir = pigeonVar_list[1] as String
+      val originalName = pigeonVar_list[2] as String
+      val renderedName = pigeonVar_list[3] as String
+      val thumbnailName = pigeonVar_list[4] as String
+      val displayName = pigeonVar_list[5] as String
+      val motionName = pigeonVar_list[6] as String?
+      val live = pigeonVar_list[7] as Boolean
+      val preRollMs = pigeonVar_list[8] as Long
+      val postRollMs = pigeonVar_list[9] as Long
+      val jpegQuality = pigeonVar_list[10] as Long
+      val render = pigeonVar_list[11] as RenderSpecMessage?
+      val location = pigeonVar_list[12] as LocationMessage?
+      val timestampEpochMs = pigeonVar_list[13] as Long?
+      return CaptureRequestMessage(memoryId, outputDir, originalName, renderedName, thumbnailName, displayName, motionName, live, preRollMs, postRollMs, jpegQuality, render, location, timestampEpochMs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      memoryId,
+      outputDir,
+      originalName,
+      renderedName,
+      thumbnailName,
+      displayName,
+      motionName,
+      live,
+      preRollMs,
+      postRollMs,
+      jpegQuality,
+      render,
+      location,
+      timestampEpochMs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as CaptureRequestMessage
+    return MessagesPigeonUtils.deepEquals(this.memoryId, other.memoryId) && MessagesPigeonUtils.deepEquals(this.outputDir, other.outputDir) && MessagesPigeonUtils.deepEquals(this.originalName, other.originalName) && MessagesPigeonUtils.deepEquals(this.renderedName, other.renderedName) && MessagesPigeonUtils.deepEquals(this.thumbnailName, other.thumbnailName) && MessagesPigeonUtils.deepEquals(this.displayName, other.displayName) && MessagesPigeonUtils.deepEquals(this.motionName, other.motionName) && MessagesPigeonUtils.deepEquals(this.live, other.live) && MessagesPigeonUtils.deepEquals(this.preRollMs, other.preRollMs) && MessagesPigeonUtils.deepEquals(this.postRollMs, other.postRollMs) && MessagesPigeonUtils.deepEquals(this.jpegQuality, other.jpegQuality) && MessagesPigeonUtils.deepEquals(this.render, other.render) && MessagesPigeonUtils.deepEquals(this.location, other.location) && MessagesPigeonUtils.deepEquals(this.timestampEpochMs, other.timestampEpochMs)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.memoryId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.outputDir)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.originalName)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.renderedName)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.thumbnailName)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.displayName)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.motionName)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.live)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.preRollMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.postRollMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.jpegQuality)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.render)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.location)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.timestampEpochMs)
+    return result
+  }
+  override fun toString(): String {
+    return "CaptureRequestMessage(memoryId=$memoryId, outputDir=$outputDir, originalName=$originalName, renderedName=$renderedName, thumbnailName=$thumbnailName, displayName=$displayName, motionName=$motionName, live=$live, preRollMs=$preRollMs, postRollMs=$postRollMs, jpegQuality=$jpegQuality, render=$render, location=$location, timestampEpochMs=$timestampEpochMs)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class MotionResultMessage (
+  val path: String,
+  val durationMs: Long,
+  val preRollMs: Long,
+  val postRollMs: Long,
+  /** Time of the shutter inside the clip. */
+  val keyFrameTimeMs: Long,
+  val hasAudio: Boolean,
+  val width: Long,
+  val height: Long,
+  val orientationDegrees: Long,
+  val mime: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MotionResultMessage {
+      val path = pigeonVar_list[0] as String
+      val durationMs = pigeonVar_list[1] as Long
+      val preRollMs = pigeonVar_list[2] as Long
+      val postRollMs = pigeonVar_list[3] as Long
+      val keyFrameTimeMs = pigeonVar_list[4] as Long
+      val hasAudio = pigeonVar_list[5] as Boolean
+      val width = pigeonVar_list[6] as Long
+      val height = pigeonVar_list[7] as Long
+      val orientationDegrees = pigeonVar_list[8] as Long
+      val mime = pigeonVar_list[9] as String
+      return MotionResultMessage(path, durationMs, preRollMs, postRollMs, keyFrameTimeMs, hasAudio, width, height, orientationDegrees, mime)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      path,
+      durationMs,
+      preRollMs,
+      postRollMs,
+      keyFrameTimeMs,
+      hasAudio,
+      width,
+      height,
+      orientationDegrees,
+      mime,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as MotionResultMessage
+    return MessagesPigeonUtils.deepEquals(this.path, other.path) && MessagesPigeonUtils.deepEquals(this.durationMs, other.durationMs) && MessagesPigeonUtils.deepEquals(this.preRollMs, other.preRollMs) && MessagesPigeonUtils.deepEquals(this.postRollMs, other.postRollMs) && MessagesPigeonUtils.deepEquals(this.keyFrameTimeMs, other.keyFrameTimeMs) && MessagesPigeonUtils.deepEquals(this.hasAudio, other.hasAudio) && MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height) && MessagesPigeonUtils.deepEquals(this.orientationDegrees, other.orientationDegrees) && MessagesPigeonUtils.deepEquals(this.mime, other.mime)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.path)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.durationMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.preRollMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.postRollMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.keyFrameTimeMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.hasAudio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.orientationDegrees)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mime)
+    return result
+  }
+  override fun toString(): String {
+    return "MotionResultMessage(path=$path, durationMs=$durationMs, preRollMs=$preRollMs, postRollMs=$postRollMs, keyFrameTimeMs=$keyFrameTimeMs, hasAudio=$hasAudio, width=$width, height=$height, orientationDegrees=$orientationDegrees, mime=$mime)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class CaptureResultMessage (
+  val memoryId: String,
+  val originalPath: String,
+  val originalMime: String,
+  val width: Long,
+  val height: Long,
+  /** Clockwise degrees to rotate the stored pixels for upright display (EXIF orientation). */
+  val orientationDegrees: Long,
+  val applied: AppliedSettingsMessage,
+  val capturedAtEpochMs: Long,
+  val source: CameraSourceMessage,
+  val liveIncluded: Boolean,
+  /** Front camera photos are NOT mirrored in the file; this is true only when the preview was. */
+  val mirrored: Boolean,
+  /** True when the original was saved but rendition steps failed (retry later; original is safe). */
+  val renderFailed: Boolean,
+  val renderedPath: String? = null,
+  val thumbnailPath: String? = null,
+  val displayPath: String? = null,
+  val motion: MotionResultMessage? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CaptureResultMessage {
+      val memoryId = pigeonVar_list[0] as String
+      val originalPath = pigeonVar_list[1] as String
+      val originalMime = pigeonVar_list[2] as String
+      val width = pigeonVar_list[3] as Long
+      val height = pigeonVar_list[4] as Long
+      val orientationDegrees = pigeonVar_list[5] as Long
+      val applied = pigeonVar_list[6] as AppliedSettingsMessage
+      val capturedAtEpochMs = pigeonVar_list[7] as Long
+      val source = pigeonVar_list[8] as CameraSourceMessage
+      val liveIncluded = pigeonVar_list[9] as Boolean
+      val mirrored = pigeonVar_list[10] as Boolean
+      val renderFailed = pigeonVar_list[11] as Boolean
+      val renderedPath = pigeonVar_list[12] as String?
+      val thumbnailPath = pigeonVar_list[13] as String?
+      val displayPath = pigeonVar_list[14] as String?
+      val motion = pigeonVar_list[15] as MotionResultMessage?
+      return CaptureResultMessage(memoryId, originalPath, originalMime, width, height, orientationDegrees, applied, capturedAtEpochMs, source, liveIncluded, mirrored, renderFailed, renderedPath, thumbnailPath, displayPath, motion)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      memoryId,
+      originalPath,
+      originalMime,
+      width,
+      height,
+      orientationDegrees,
+      applied,
+      capturedAtEpochMs,
+      source,
+      liveIncluded,
+      mirrored,
+      renderFailed,
+      renderedPath,
+      thumbnailPath,
+      displayPath,
+      motion,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as CaptureResultMessage
+    return MessagesPigeonUtils.deepEquals(this.memoryId, other.memoryId) && MessagesPigeonUtils.deepEquals(this.originalPath, other.originalPath) && MessagesPigeonUtils.deepEquals(this.originalMime, other.originalMime) && MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height) && MessagesPigeonUtils.deepEquals(this.orientationDegrees, other.orientationDegrees) && MessagesPigeonUtils.deepEquals(this.applied, other.applied) && MessagesPigeonUtils.deepEquals(this.capturedAtEpochMs, other.capturedAtEpochMs) && MessagesPigeonUtils.deepEquals(this.source, other.source) && MessagesPigeonUtils.deepEquals(this.liveIncluded, other.liveIncluded) && MessagesPigeonUtils.deepEquals(this.mirrored, other.mirrored) && MessagesPigeonUtils.deepEquals(this.renderFailed, other.renderFailed) && MessagesPigeonUtils.deepEquals(this.renderedPath, other.renderedPath) && MessagesPigeonUtils.deepEquals(this.thumbnailPath, other.thumbnailPath) && MessagesPigeonUtils.deepEquals(this.displayPath, other.displayPath) && MessagesPigeonUtils.deepEquals(this.motion, other.motion)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.memoryId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.originalPath)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.originalMime)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.orientationDegrees)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.applied)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.capturedAtEpochMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.source)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.liveIncluded)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mirrored)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.renderFailed)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.renderedPath)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.thumbnailPath)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.displayPath)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.motion)
+    return result
+  }
+  override fun toString(): String {
+    return "CaptureResultMessage(memoryId=$memoryId, originalPath=$originalPath, originalMime=$originalMime, width=$width, height=$height, orientationDegrees=$orientationDegrees, applied=$applied, capturedAtEpochMs=$capturedAtEpochMs, source=$source, liveIncluded=$liveIncluded, mirrored=$mirrored, renderFailed=$renderFailed, renderedPath=$renderedPath, thumbnailPath=$thumbnailPath, displayPath=$displayPath, motion=$motion)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class VideoRequestMessage (
+  val outputPath: String,
+  val size: SizeMessage? = null,
+  val fps: Long? = null,
+  val audio: Boolean,
+  val stabilization: StabilizationModeMessage? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VideoRequestMessage {
+      val outputPath = pigeonVar_list[0] as String
+      val size = pigeonVar_list[1] as SizeMessage?
+      val fps = pigeonVar_list[2] as Long?
+      val audio = pigeonVar_list[3] as Boolean
+      val stabilization = pigeonVar_list[4] as StabilizationModeMessage?
+      return VideoRequestMessage(outputPath, size, fps, audio, stabilization)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      outputPath,
+      size,
+      fps,
+      audio,
+      stabilization,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as VideoRequestMessage
+    return MessagesPigeonUtils.deepEquals(this.outputPath, other.outputPath) && MessagesPigeonUtils.deepEquals(this.size, other.size) && MessagesPigeonUtils.deepEquals(this.fps, other.fps) && MessagesPigeonUtils.deepEquals(this.audio, other.audio) && MessagesPigeonUtils.deepEquals(this.stabilization, other.stabilization)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.outputPath)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.size)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.fps)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.audio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.stabilization)
+    return result
+  }
+  override fun toString(): String {
+    return "VideoRequestMessage(outputPath=$outputPath, size=$size, fps=$fps, audio=$audio, stabilization=$stabilization)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class VideoResultMessage (
+  val path: String,
+  val durationMs: Long,
+  val width: Long,
+  val height: Long,
+  val hasAudio: Boolean,
+  val bytes: Long,
+  val orientationDegrees: Long,
+  val mime: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VideoResultMessage {
+      val path = pigeonVar_list[0] as String
+      val durationMs = pigeonVar_list[1] as Long
+      val width = pigeonVar_list[2] as Long
+      val height = pigeonVar_list[3] as Long
+      val hasAudio = pigeonVar_list[4] as Boolean
+      val bytes = pigeonVar_list[5] as Long
+      val orientationDegrees = pigeonVar_list[6] as Long
+      val mime = pigeonVar_list[7] as String
+      return VideoResultMessage(path, durationMs, width, height, hasAudio, bytes, orientationDegrees, mime)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      path,
+      durationMs,
+      width,
+      height,
+      hasAudio,
+      bytes,
+      orientationDegrees,
+      mime,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as VideoResultMessage
+    return MessagesPigeonUtils.deepEquals(this.path, other.path) && MessagesPigeonUtils.deepEquals(this.durationMs, other.durationMs) && MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height) && MessagesPigeonUtils.deepEquals(this.hasAudio, other.hasAudio) && MessagesPigeonUtils.deepEquals(this.bytes, other.bytes) && MessagesPigeonUtils.deepEquals(this.orientationDegrees, other.orientationDegrees) && MessagesPigeonUtils.deepEquals(this.mime, other.mime)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.path)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.durationMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.hasAudio)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.bytes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.orientationDegrees)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mime)
+    return result
+  }
+  override fun toString(): String {
+    return "VideoResultMessage(path=$path, durationMs=$durationMs, width=$width, height=$height, hasAudio=$hasAudio, bytes=$bytes, orientationDegrees=$orientationDegrees, mime=$mime)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class PermissionsMessage (
+  val camera: PermissionStatusMessage,
+  val microphone: PermissionStatusMessage,
+  /** True when Android will no longer show the system dialog: send the user to settings (CAM-052). */
+  val cameraPermanentlyDenied: Boolean,
+  val microphonePermanentlyDenied: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PermissionsMessage {
+      val camera = pigeonVar_list[0] as PermissionStatusMessage
+      val microphone = pigeonVar_list[1] as PermissionStatusMessage
+      val cameraPermanentlyDenied = pigeonVar_list[2] as Boolean
+      val microphonePermanentlyDenied = pigeonVar_list[3] as Boolean
+      return PermissionsMessage(camera, microphone, cameraPermanentlyDenied, microphonePermanentlyDenied)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      camera,
+      microphone,
+      cameraPermanentlyDenied,
+      microphonePermanentlyDenied,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as PermissionsMessage
+    return MessagesPigeonUtils.deepEquals(this.camera, other.camera) && MessagesPigeonUtils.deepEquals(this.microphone, other.microphone) && MessagesPigeonUtils.deepEquals(this.cameraPermanentlyDenied, other.cameraPermanentlyDenied) && MessagesPigeonUtils.deepEquals(this.microphonePermanentlyDenied, other.microphonePermanentlyDenied)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.camera)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.microphone)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.cameraPermanentlyDenied)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.microphonePermanentlyDenied)
+    return result
+  }
+  override fun toString(): String {
+    return "PermissionsMessage(camera=$camera, microphone=$microphone, cameraPermanentlyDenied=$cameraPermanentlyDenied, microphonePermanentlyDenied=$microphonePermanentlyDenied)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SessionEventMessage (
+  val sessionId: Long,
+  val kind: SessionEventKindMessage,
+  val state: SessionStateMessage? = null,
+  val applied: AppliedSettingsMessage? = null,
+  val errorCode: String? = null,
+  val errorMessage: String? = null,
+  val thermal: ThermalStateMessage? = null,
+  /** Device orientation from the sensor, 0/90/180/270 (CAM edge case: capture follows the sensor). */
+  val orientationDegrees: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SessionEventMessage {
+      val sessionId = pigeonVar_list[0] as Long
+      val kind = pigeonVar_list[1] as SessionEventKindMessage
+      val state = pigeonVar_list[2] as SessionStateMessage?
+      val applied = pigeonVar_list[3] as AppliedSettingsMessage?
+      val errorCode = pigeonVar_list[4] as String?
+      val errorMessage = pigeonVar_list[5] as String?
+      val thermal = pigeonVar_list[6] as ThermalStateMessage?
+      val orientationDegrees = pigeonVar_list[7] as Long?
+      return SessionEventMessage(sessionId, kind, state, applied, errorCode, errorMessage, thermal, orientationDegrees)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      sessionId,
+      kind,
+      state,
+      applied,
+      errorCode,
+      errorMessage,
+      thermal,
+      orientationDegrees,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SessionEventMessage
+    return MessagesPigeonUtils.deepEquals(this.sessionId, other.sessionId) && MessagesPigeonUtils.deepEquals(this.kind, other.kind) && MessagesPigeonUtils.deepEquals(this.state, other.state) && MessagesPigeonUtils.deepEquals(this.applied, other.applied) && MessagesPigeonUtils.deepEquals(this.errorCode, other.errorCode) && MessagesPigeonUtils.deepEquals(this.errorMessage, other.errorMessage) && MessagesPigeonUtils.deepEquals(this.thermal, other.thermal) && MessagesPigeonUtils.deepEquals(this.orientationDegrees, other.orientationDegrees)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sessionId)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.kind)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.state)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.applied)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.errorCode)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.errorMessage)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.thermal)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.orientationDegrees)
+    return result
+  }
+  override fun toString(): String {
+    return "SessionEventMessage(sessionId=$sessionId, kind=$kind, state=$state, applied=$applied, errorCode=$errorCode, errorMessage=$errorMessage, thermal=$thermal, orientationDegrees=$orientationDegrees)"
+  }
+}
+
 /**
  * Answer to a `ping`: proves the bridge works in both directions and reports what the native side is.
  *
@@ -255,6 +2093,206 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
       129.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          CameraFacingMessage.ofRaw(it.toInt())
+        }
+      }
+      130.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          LensKindMessage.ofRaw(it.toInt())
+        }
+      }
+      131.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          CameraSourceMessage.ofRaw(it.toInt())
+        }
+      }
+      132.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          PhotoFormatMessage.ofRaw(it.toInt())
+        }
+      }
+      133.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          WbPresetMessage.ofRaw(it.toInt())
+        }
+      }
+      134.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          FlashModeMessage.ofRaw(it.toInt())
+        }
+      }
+      135.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          FocusModeMessage.ofRaw(it.toInt())
+        }
+      }
+      136.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          FocusCalibrationMessage.ofRaw(it.toInt())
+        }
+      }
+      137.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          StabilizationModeMessage.ofRaw(it.toInt())
+        }
+      }
+      138.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          PermissionStatusMessage.ofRaw(it.toInt())
+        }
+      }
+      139.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          SessionStateMessage.ofRaw(it.toInt())
+        }
+      }
+      140.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          ThermalStateMessage.ofRaw(it.toInt())
+        }
+      }
+      141.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          SessionEventKindMessage.ofRaw(it.toInt())
+        }
+      }
+      142.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SizeMessage.fromList(it)
+        }
+      }
+      143.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          IntRangeMessage.fromList(it)
+        }
+      }
+      144.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          DoubleRangeMessage.fromList(it)
+        }
+      }
+      145.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ExposureBiasCapabilityMessage.fromList(it)
+        }
+      }
+      146.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ManualFocusCapabilityMessage.fromList(it)
+        }
+      }
+      147.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          FocusCapabilitiesMessage.fromList(it)
+        }
+      }
+      148.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          WhiteBalanceCapabilitiesMessage.fromList(it)
+        }
+      }
+      149.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ZoomCapabilitiesMessage.fromList(it)
+        }
+      }
+      150.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          StabilizationCapabilitiesMessage.fromList(it)
+        }
+      }
+      151.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoSizeOptionMessage.fromList(it)
+        }
+      }
+      152.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoCapabilitiesMessage.fromList(it)
+        }
+      }
+      153.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          LiveCapabilitiesMessage.fromList(it)
+        }
+      }
+      154.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CameraDescriptorMessage.fromList(it)
+        }
+      }
+      155.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CameraCapabilitiesMessage.fromList(it)
+        }
+      }
+      156.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SessionConfigMessage.fromList(it)
+        }
+      }
+      157.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SessionInfoMessage.fromList(it)
+        }
+      }
+      158.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ResolvedCaptureSettingsMessage.fromList(it)
+        }
+      }
+      159.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AppliedSettingsMessage.fromList(it)
+        }
+      }
+      160.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          LocationMessage.fromList(it)
+        }
+      }
+      161.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          RenderSpecMessage.fromList(it)
+        }
+      }
+      162.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CaptureRequestMessage.fromList(it)
+        }
+      }
+      163.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MotionResultMessage.fromList(it)
+        }
+      }
+      164.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CaptureResultMessage.fromList(it)
+        }
+      }
+      165.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoRequestMessage.fromList(it)
+        }
+      }
+      166.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoResultMessage.fromList(it)
+        }
+      }
+      167.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PermissionsMessage.fromList(it)
+        }
+      }
+      168.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SessionEventMessage.fromList(it)
+        }
+      }
+      169.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PingResultMessage.fromList(it)
         }
@@ -264,8 +2302,168 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is PingResultMessage -> {
+      is CameraFacingMessage -> {
         stream.write(129)
+        writeValue(stream, value.raw.toLong())
+      }
+      is LensKindMessage -> {
+        stream.write(130)
+        writeValue(stream, value.raw.toLong())
+      }
+      is CameraSourceMessage -> {
+        stream.write(131)
+        writeValue(stream, value.raw.toLong())
+      }
+      is PhotoFormatMessage -> {
+        stream.write(132)
+        writeValue(stream, value.raw.toLong())
+      }
+      is WbPresetMessage -> {
+        stream.write(133)
+        writeValue(stream, value.raw.toLong())
+      }
+      is FlashModeMessage -> {
+        stream.write(134)
+        writeValue(stream, value.raw.toLong())
+      }
+      is FocusModeMessage -> {
+        stream.write(135)
+        writeValue(stream, value.raw.toLong())
+      }
+      is FocusCalibrationMessage -> {
+        stream.write(136)
+        writeValue(stream, value.raw.toLong())
+      }
+      is StabilizationModeMessage -> {
+        stream.write(137)
+        writeValue(stream, value.raw.toLong())
+      }
+      is PermissionStatusMessage -> {
+        stream.write(138)
+        writeValue(stream, value.raw.toLong())
+      }
+      is SessionStateMessage -> {
+        stream.write(139)
+        writeValue(stream, value.raw.toLong())
+      }
+      is ThermalStateMessage -> {
+        stream.write(140)
+        writeValue(stream, value.raw.toLong())
+      }
+      is SessionEventKindMessage -> {
+        stream.write(141)
+        writeValue(stream, value.raw.toLong())
+      }
+      is SizeMessage -> {
+        stream.write(142)
+        writeValue(stream, value.toList())
+      }
+      is IntRangeMessage -> {
+        stream.write(143)
+        writeValue(stream, value.toList())
+      }
+      is DoubleRangeMessage -> {
+        stream.write(144)
+        writeValue(stream, value.toList())
+      }
+      is ExposureBiasCapabilityMessage -> {
+        stream.write(145)
+        writeValue(stream, value.toList())
+      }
+      is ManualFocusCapabilityMessage -> {
+        stream.write(146)
+        writeValue(stream, value.toList())
+      }
+      is FocusCapabilitiesMessage -> {
+        stream.write(147)
+        writeValue(stream, value.toList())
+      }
+      is WhiteBalanceCapabilitiesMessage -> {
+        stream.write(148)
+        writeValue(stream, value.toList())
+      }
+      is ZoomCapabilitiesMessage -> {
+        stream.write(149)
+        writeValue(stream, value.toList())
+      }
+      is StabilizationCapabilitiesMessage -> {
+        stream.write(150)
+        writeValue(stream, value.toList())
+      }
+      is VideoSizeOptionMessage -> {
+        stream.write(151)
+        writeValue(stream, value.toList())
+      }
+      is VideoCapabilitiesMessage -> {
+        stream.write(152)
+        writeValue(stream, value.toList())
+      }
+      is LiveCapabilitiesMessage -> {
+        stream.write(153)
+        writeValue(stream, value.toList())
+      }
+      is CameraDescriptorMessage -> {
+        stream.write(154)
+        writeValue(stream, value.toList())
+      }
+      is CameraCapabilitiesMessage -> {
+        stream.write(155)
+        writeValue(stream, value.toList())
+      }
+      is SessionConfigMessage -> {
+        stream.write(156)
+        writeValue(stream, value.toList())
+      }
+      is SessionInfoMessage -> {
+        stream.write(157)
+        writeValue(stream, value.toList())
+      }
+      is ResolvedCaptureSettingsMessage -> {
+        stream.write(158)
+        writeValue(stream, value.toList())
+      }
+      is AppliedSettingsMessage -> {
+        stream.write(159)
+        writeValue(stream, value.toList())
+      }
+      is LocationMessage -> {
+        stream.write(160)
+        writeValue(stream, value.toList())
+      }
+      is RenderSpecMessage -> {
+        stream.write(161)
+        writeValue(stream, value.toList())
+      }
+      is CaptureRequestMessage -> {
+        stream.write(162)
+        writeValue(stream, value.toList())
+      }
+      is MotionResultMessage -> {
+        stream.write(163)
+        writeValue(stream, value.toList())
+      }
+      is CaptureResultMessage -> {
+        stream.write(164)
+        writeValue(stream, value.toList())
+      }
+      is VideoRequestMessage -> {
+        stream.write(165)
+        writeValue(stream, value.toList())
+      }
+      is VideoResultMessage -> {
+        stream.write(166)
+        writeValue(stream, value.toList())
+      }
+      is PermissionsMessage -> {
+        stream.write(167)
+        writeValue(stream, value.toList())
+      }
+      is SessionEventMessage -> {
+        stream.write(168)
+        writeValue(stream, value.toList())
+      }
+      is PingResultMessage -> {
+        stream.write(169)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -273,9 +2471,29 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
   }
 }
 
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface CameraHostApi {
   fun ping(message: String): PingResultMessage
+  fun checkPermissions(): PermissionsMessage
+  suspend fun requestPermissions(camera: Boolean, microphone: Boolean): PermissionsMessage
+  fun openAppSettings()
+  fun listCameras(): List<CameraDescriptorMessage>
+  fun getCapabilities(cameraId: String): CameraCapabilitiesMessage
+  suspend fun openSession(config: SessionConfigMessage): SessionInfoMessage
+  /** Idempotent. */
+  suspend fun closeSession(sessionId: Long)
+  /** Applies settings to the running preview and returns what the device reported. */
+  suspend fun applySettings(sessionId: Long, settings: ResolvedCaptureSettingsMessage): AppliedSettingsMessage
+  /** Tap-to-focus and tap-to-meter at a normalised preview point (0..1, 0..1). */
+  suspend fun focusAt(sessionId: Long, x: Double, y: Double)
+  fun setLive(sessionId: Long, enabled: Boolean)
+  suspend fun capture(sessionId: Long, request: CaptureRequestMessage): CaptureResultMessage
+  suspend fun startVideo(sessionId: Long, request: VideoRequestMessage)
+  suspend fun stopVideo(sessionId: Long): VideoResultMessage
+  /** App backgrounded or another interruption: stop preview and LIVE buffering (NFR-012). */
+  suspend fun suspendSession(sessionId: Long)
+  suspend fun resumeSession(sessionId: Long)
 
   companion object {
     /** The codec used by CameraHostApi. */
@@ -302,6 +2520,317 @@ interface CameraHostApi {
         } else {
           channel.setMessageHandler(null)
         }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.checkPermissions$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.checkPermissions())
+            } catch (exception: Throwable) {
+              MessagesPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.requestPermissions$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val cameraArg = args[0] as Boolean
+            val microphoneArg = args[1] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.requestPermissions(cameraArg, microphoneArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.openAppSettings$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.openAppSettings()
+              listOf(null)
+            } catch (exception: Throwable) {
+              MessagesPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.listCameras$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.listCameras())
+            } catch (exception: Throwable) {
+              MessagesPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.getCapabilities$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val cameraIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.getCapabilities(cameraIdArg))
+            } catch (exception: Throwable) {
+              MessagesPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.openSession$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val configArg = args[0] as SessionConfigMessage
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.openSession(configArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.closeSession$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.closeSession(sessionIdArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.applySettings$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            val settingsArg = args[1] as ResolvedCaptureSettingsMessage
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.applySettings(sessionIdArg, settingsArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.focusAt$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            val xArg = args[1] as Double
+            val yArg = args[2] as Double
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.focusAt(sessionIdArg, xArg, yArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.setLive$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            val enabledArg = args[1] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setLive(sessionIdArg, enabledArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              MessagesPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.capture$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            val requestArg = args[1] as CaptureRequestMessage
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.capture(sessionIdArg, requestArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.startVideo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            val requestArg = args[1] as VideoRequestMessage
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.startVideo(sessionIdArg, requestArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.stopVideo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.stopVideo(sessionIdArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.suspendSession$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.suspendSession(sessionIdArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.doro_camera.CameraHostApi.resumeSession$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sessionIdArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.resumeSession(sessionIdArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/** Generated class from Pigeon that represents Flutter messages that can be called from Kotlin. */
+class CameraEventsApi(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by CameraEventsApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      MessagesPigeonCodec()
+    }
+  }
+  suspend fun onSessionEvent(eventArg: SessionEventMessage)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    return suspendCancellableCoroutine { continuation ->
+      val channelName = "dev.flutter.pigeon.doro_camera.CameraEventsApi.onSessionEvent$separatedMessageChannelSuffix"
+      val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+      channel.send(listOf(eventArg)) {
+        if (it is List<*>) {
+          if (it.size > 1) {
+            continuation.resumeWithException(FlutterError(it[0] as String, it[1] as String, it[2] as String?))
+          } else {
+            continuation.resume(Unit)
+          }
+        } else {
+          continuation.resumeWithException(MessagesPigeonUtils.createConnectionError(channelName))
+        } 
       }
     }
   }

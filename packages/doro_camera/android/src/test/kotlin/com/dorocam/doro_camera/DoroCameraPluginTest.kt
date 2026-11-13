@@ -46,7 +46,8 @@ internal class DoroCameraPluginTest {
         val plugin = DoroCameraPlugin(FakeEnvironment("15"))
 
         plugin.attach(messenger)
-        assertEquals(setOf(PING_CHANNEL), messenger.registeredChannels)
+        assertTrue(PING_CHANNEL in messenger.registeredChannels)
+        assertTrue(messenger.registeredChannels.size >= 14, "every host method must be registered")
 
         plugin.detach()
         assertTrue(messenger.registeredChannels.isEmpty())
@@ -93,7 +94,7 @@ internal class DoroCameraPluginTest {
     @Test
     fun `a FlutterError from the host becomes a code-message-details reply for Dart`() {
         val messenger = FakeBinaryMessenger()
-        val failing = object : CameraHostApi {
+        val failing = object : StubHostApi() {
             override fun ping(message: String): PingResultMessage =
                 throw FlutterError("permission_denied", "Camera permission was denied", null)
         }
@@ -107,7 +108,7 @@ internal class DoroCameraPluginTest {
     @Test
     fun `an unexpected exception becomes an error reply without crashing the channel`() {
         val messenger = FakeBinaryMessenger()
-        val failing = object : CameraHostApi {
+        val failing = object : StubHostApi() {
             override fun ping(message: String): PingResultMessage = throw IllegalStateException("bug")
         }
         CameraHostApi.setUp(messenger, failing)
