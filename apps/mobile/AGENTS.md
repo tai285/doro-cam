@@ -14,7 +14,7 @@ Load the toolchain first (`source scripts/dev-env.sh` or `. .\scripts\dev-env.ps
 | Integration tests on the Android Emulator | `flutter test integration_test -d emulator-5554` |
 | Debug APK | `flutter build apk --debug` |
 
-Start the emulator with AVD `doro_api35` (see [local-development.md](../../docs/development/local-development.md)). iOS is built and tested only in the cloud (`gh workflow run ios.yml`, ADR-0013).
+Start the emulator with AVD `doro_api35` (see [local-development.md](../../docs/development/local-development.md)). iOS cannot be built here (no Mac, no CI; ADR-0016), so it stays unverified and is logged in field-verification.md.
 
 ## Rules specific to this package
 

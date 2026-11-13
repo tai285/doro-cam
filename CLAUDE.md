@@ -10,9 +10,9 @@
 - **Subagents.** Use an Explore subagent for broad searches across the repo. Do not delegate decisions that the ADRs govern.
 - **Nested instructions.** Directories such as `apps/mobile/`, `services/api/`, and `packages/doro_camera/` get their own `AGENTS.md` once scaffolded. When working there, read that file too.
 - **Verification.** Before reporting completion, run the commands in AGENTS.md §8 plus the package-level test commands, and paste the actual result summary into your report.
-- **Emulators and cloud macOS, not phones.** You cannot operate the owner's phones.
-  - Verify Android behavior on the Android Emulator.
-  - Verify iOS behavior through the cloud macOS workflow (`gh workflow run ios.yml --ref <branch>`, then `gh run watch` and `gh run view --log-failed`).
-  - Log hardware-only aspects in `docs/development/field-verification.md`. Never present them as verified.
+- **No CI/CD (owner decision, 2026-11-13).** All GitHub Actions workflows were removed. Do not add or rely on any pipeline. Everything is verified locally.
+- **Tests run in WSL (Ubuntu), not Windows.** Run every test suite (unit, integration, Playwright e2e, Android emulator) inside WSL so there are no Windows environment issues. Use `wsl -e bash -lc '...'` from the Windows shell. The working tree lives on Windows, so a WSL-side clone or sync may be used for speed; the Windows tree remains the source of truth that gets committed.
+- **Emulators, not phones.** You cannot operate the owner's phones. Verify Android behavior on the Android Emulator (KVM is available in WSL). Without CI there is no macOS runner, so iOS code is written and unit-reviewed but cannot be built or run; record every iOS aspect as unverified in `docs/development/field-verification.md`. Never present it as verified.
+- **Standing permission to commit and push (owner decision, 2026-11-13).** In this repo, commit small logical changes and push to `main` without asking. Conventional Commits, lowercase, ≤72 chars. The owner is the sole author and contributor: no `Co-Authored-By`, no "Generated with", no AI attribution anywhere.
 - **Tests for everything.** Write tests before or with the code. Run them and quote the real results. Never weaken a test to get green.
-- **Windows host.** The shell may be PowerShell or Git Bash. Prefer commands that work in both, and keep generated files LF. Use Bash for `gh ... --jq` (PowerShell splits quoted jq expressions). The repo path contains a space, so quote it.
+- **Autonomy.** Do the work end to end, including installing tooling in WSL. Do not ask the owner to run commands.

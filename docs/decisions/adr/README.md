@@ -28,6 +28,7 @@ Statuses: `Proposed` · `Accepted` · `Superseded by ADR-NNNN` · `Deprecated`
 | [ADR-0010](0010-pg-boss-job-queue.md) | Background jobs with pg-boss on PostgreSQL | Accepted |
 | [ADR-0011](0011-self-hosted-auth-better-auth.md) | Self-hosted authentication with Better Auth | Accepted |
 | [ADR-0012](0012-monorepo-and-contract-generation.md) | Polyglot monorepo and OpenAPI contract generation | Accepted |
-| [ADR-0013](0013-emulator-simulator-and-cloud-macos-verification.md) | Verification on emulators, simulators and cloud macOS | Accepted |
+| [ADR-0013](0013-emulator-simulator-and-cloud-macos-verification.md) | Verification on emulators, simulators and cloud macOS | Partly superseded by ADR-0016 |
 | [ADR-0014](0014-garage-for-local-s3.md) | Garage as the local S3-compatible server | Accepted |
 | [ADR-0015](0015-ios-plugin-swiftpm-only-with-flutter-free-core.md) | iOS camera plugin is SwiftPM-only with a Flutter-free core target | Accepted |
+| [ADR-0016](0016-local-wsl-verification-no-ci.md) | Local WSL verification, no CI/CD | Accepted |

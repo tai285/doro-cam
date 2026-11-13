@@ -61,7 +61,7 @@ You do **not** need to read every document for every task.
 4. For anything touching more than one module, write a short plan first: affected files, approach, tests, and doc updates.
 5. Implement **only the requested scope**. Record discovered follow-ups as new tasks; do not implement them.
 6. Write tests for **every** function, class, widget, endpoint, job, migration, and feature you add or change, in the same change. Tag tests with the requirement IDs they cover (e.g. `[CAM-010]`). Tests must exercise real behavior. Obligations: [testing-strategy.md](docs/development/testing-strategy.md).
-7. Run the relevant tests, linters, type checks, and coverage gates until they are green. For mobile work, also run on the **Android Emulator** (locally or in CI) and the **iOS Simulator** via the cloud macOS workflow (`gh workflow run ios.yml`). See ADR-0013.
+7. Run the relevant tests, linters, type checks, and coverage gates until they are green. For mobile work, also run on the **Android Emulator** inside WSL. There is no CI and no macOS runner (ADR-0016): iOS code is written but unverified and is logged in field-verification.md.
 8. Review your own diff: no unrelated changes, no debug leftovers, no commented-out code.
 9. Update the docs the change affects (see §6), and update the task's status.
 10. Run `pnpm check:docs` and `pnpm check:traceability`. Both must report 0 errors.
@@ -146,8 +146,9 @@ App-level commands (Flutter, API, web) are added here by the scaffolding tasks a
 - The product name is **Doro Cam** (confirmed by the owner, 2026-09-30).
 - The owner develops on **Windows 11** (i5-12450H, 16 GB RAM, WSL2 and Docker Desktop). There is **no local Mac** (ADR-0013):
   - **Android:** use the Android Emulator AVD `doro_api35` locally (needs Windows Hypervisor Platform; ask the owner to enable it if `emulator -accel-check` fails) and in CI with KVM.
-  - **iOS:** every build and test runs on **cloud macOS** through GitHub Actions `ios.yml` (`bash scripts/ios-ci.sh` triggers it and waits). The repository is **public**, so macOS runners are free. One run takes about 9 minutes (Xcode 16.4, iPhone 16 Pro Max, iOS 18.6 simulator). Do not add an iOS workflow that uses a simulator runtime newer than the runner's Xcode: it hangs.
-  - **iOS Simulator has no camera.** Use the plugin's synthetic source in debug and test builds only.
+  - **iOS:** there is no Mac and no CI (ADR-0016), so iOS code cannot be built or run here. Write it carefully, keep its logic in the Flutter-free Swift core, and record it as unverified in field-verification.md.
+  - **All tests run in WSL (Ubuntu), never in Windows.** Toolchain lives in `~/dev` inside WSL (`source scripts/dev-env.sh`). Mirror the Windows tree with `bash scripts/wsl-sync.sh`, then run tests in `~/doro-cam`. Docker runs inside WSL (`dockerd`).
+  - **The synthetic camera source** exists for emulator and test builds only.
 - The owner's physical devices (**Honor X9c**, **iPhone 12 Pro Max**) are for optional field verification only. Agents never depend on them.
-- GitHub CLI: `gh` (on Windows at `C:\Program Files\GitHub CLI\gh.exe`), authenticated as `tai285`. The repo is `tai285/doro-cam` (private).
+- GitHub CLI: `gh` (on Windows at `C:\Program Files\GitHub CLI\gh.exe`), authenticated as `tai285`. The repo is `tai285/doro-cam` (public). Commits and pushes go to `main` and are authored solely by the owner, with no AI attribution (see CLAUDE.md).
 - Keep shell commands cross-platform or provide both PowerShell and POSIX variants. Line endings are LF (see `.gitattributes`).

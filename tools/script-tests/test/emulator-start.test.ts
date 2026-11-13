@@ -82,12 +82,19 @@ function run(scenario: Scenario) {
     chmodSync(file, 0o755);
   }
 
+  // A machine that really has the Android tools installed (such as the WSL dev box) must not leak them
+  // into a scenario that expects them to be absent, so drop every PATH entry that provides an omitted tool.
+  const inheritedPath = (process.env.PATH ?? '')
+    .split(path.delimiter)
+    .filter((entry) => !(scenario.without ?? []).some((tool) => existsSync(path.join(entry, tool))))
+    .join(path.delimiter);
+
   const result = spawnSync('bash', [toPosix(script), ...(scenario.args ?? [])], {
     encoding: 'utf8',
     timeout: 60_000,
     env: {
       ...process.env,
-      PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ''}`,
+      PATH: `${binDir}${path.delimiter}${inheritedPath}`,
       BOOT_TIMEOUT: '5',
       POLL_INTERVAL: '0.1',
       ...scenario.env,

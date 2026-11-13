@@ -1,6 +1,6 @@
 # ADR-0013: Verification on emulators, simulators and cloud macOS
 
-Status: Accepted
+Status: Accepted (CI and cloud-macOS parts superseded by ADR-0016)
 Date: 2026-09-30
 Related: NFR-009, NFR-010, NFR-014, NFR-015, NFR-016, ADR-0001, ADR-0002, [testing-strategy.md](../../development/testing-strategy.md), [testing-infrastructure.md](../../research/testing-infrastructure.md)
 
