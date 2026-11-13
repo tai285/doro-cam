@@ -45,6 +45,12 @@ public struct RenderedImage: Sendable {
     public let jpeg: Data
     public let width: Int
     public let height: Int
+
+    public init(jpeg: Data, width: Int, height: Int) {
+        self.jpeg = jpeg
+        self.width = width
+        self.height = height
+    }
 }
 
 public enum StillRenderer {

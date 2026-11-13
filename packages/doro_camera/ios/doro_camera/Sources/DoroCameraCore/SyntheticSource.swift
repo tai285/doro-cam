@@ -13,6 +13,14 @@ public struct SyntheticFrame: Equatable, Sendable {
     public let time: Double
     public let bgra: [UInt8]
     public let isFlash: Bool
+
+    public init(width: Int, height: Int, time: Double, bgra: [UInt8], isFlash: Bool) {
+        self.width = width
+        self.height = height
+        self.time = time
+        self.bgra = bgra
+        self.isFlash = isFlash
+    }
 }
 
 /// Generates frames and audio on a fixed schedule: a white flash frame every `flashPeriod` seconds

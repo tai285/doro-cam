@@ -6,6 +6,11 @@ public struct TimedRing<Element> {
     public struct Entry {
         public let time: Double
         public let element: Element
+
+        public init(time: Double, element: Element) {
+            self.time = time
+            self.element = element
+        }
     }
 
     public private(set) var entries: [Entry] = []
@@ -58,6 +63,15 @@ public struct MotionClipWindow: Equatable, Sendable {
     public let includesAudio: Bool
 
     public var durationSeconds: Double { endTime - startTime }
+
+    public init(startTime: Double, endTime: Double, shutterTime: Double, preRollSeconds: Double, postRollSeconds: Double, includesAudio: Bool) {
+        self.startTime = startTime
+        self.endTime = endTime
+        self.shutterTime = shutterTime
+        self.preRollSeconds = preRollSeconds
+        self.postRollSeconds = postRollSeconds
+        self.includesAudio = includesAudio
+    }
 }
 
 public enum MotionClipPlanner {

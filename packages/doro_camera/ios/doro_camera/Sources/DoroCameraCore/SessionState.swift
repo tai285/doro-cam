@@ -60,6 +60,11 @@ public enum SessionEffect: Equatable, Sendable {
 public struct Transition: Equatable, Sendable {
     public let state: SessionState
     public let effects: [SessionEffect]
+
+    public init(state: SessionState, effects: [SessionEffect]) {
+        self.state = state
+        self.effects = effects
+    }
 }
 
 /// Lifecycle of one camera session. Pure value-in, value-out.

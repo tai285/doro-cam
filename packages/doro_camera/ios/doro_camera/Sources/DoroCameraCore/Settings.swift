@@ -113,6 +113,34 @@ public struct EffectiveSettings: Equatable, Sendable {
     public var zoomFactor: Double
     public var flash: FlashMode
     public var torch: Bool
+
+    public init(
+        exposureMode: ExposureMode,
+        iso: Int?,
+        exposureTimeNs: Int64?,
+        exposureBiasEV: Double?,
+        exposureLocked: Bool,
+        focusMode: FocusMode,
+        focusDiopters: Double?,
+        focusLocked: Bool,
+        whiteBalance: WhiteBalanceMode,
+        zoomFactor: Double,
+        flash: FlashMode,
+        torch: Bool
+    ) {
+        self.exposureMode = exposureMode
+        self.iso = iso
+        self.exposureTimeNs = exposureTimeNs
+        self.exposureBiasEV = exposureBiasEV
+        self.exposureLocked = exposureLocked
+        self.focusMode = focusMode
+        self.focusDiopters = focusDiopters
+        self.focusLocked = focusLocked
+        self.whiteBalance = whiteBalance
+        self.zoomFactor = zoomFactor
+        self.flash = flash
+        self.torch = torch
+    }
 }
 
 public enum SettingsClamp {
