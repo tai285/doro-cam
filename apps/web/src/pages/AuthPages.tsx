@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type SyntheticEvent, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { api, ApiError } from '../api/client.ts';
@@ -39,6 +39,20 @@ export function SignInPage() {
     event.preventDefault();
     signIn.mutate();
   };
+  const config = useQuery({
+    queryKey: ['public-config'],
+    queryFn: api.config,
+    staleTime: 5 * 60_000,
+  });
+  const social = useMutation({
+    mutationFn: async (provider: 'google' | 'apple') => {
+      const result = await api.signInSocial(provider, `${window.location.origin}${from}`);
+      if (result.url === undefined) {
+        throw new Error('Sign-in with that provider is not available right now.');
+      }
+      window.location.assign(result.url);
+    },
+  });
   return (
     <form className="card narrow" onSubmit={submit} aria-labelledby="signin-title">
       <h1 id="signin-title">Sign in</h1>
@@ -60,10 +74,25 @@ export function SignInPage() {
         onChange={setPassword}
         required
       />
-      <ErrorNotice error={signIn.error === null ? null : friendly(signIn.error)} />
+      <ErrorNotice
+        error={signIn.error === null ? (social.error ?? null) : friendly(signIn.error)}
+      />
       <button type="submit" disabled={signIn.isPending}>
         {signIn.isPending ? 'Signing in…' : 'Sign in'}
       </button>
+      {(config.data?.socialProviders ?? []).map((provider) => (
+        <p key={provider}>
+          <button
+            type="button"
+            disabled={social.isPending}
+            onClick={() => {
+              social.mutate(provider);
+            }}
+          >
+            Continue with {provider === 'google' ? 'Google' : 'Apple'}
+          </button>
+        </p>
+      ))}
       <p>
         <Link to="/forgot-password">Forgot your password?</Link>
       </p>

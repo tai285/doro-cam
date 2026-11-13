@@ -33,6 +33,8 @@ const envSchema = z.object({
   DATABASE_URL: url(['postgres:', 'postgresql:']),
   S3_ENDPOINT: url(['http:', 'https:']),
   S3_REGION: z.string().trim().min(1).default('garage'),
+  /** The storage address clients (phones, browsers) can reach, when it differs from the one the API uses (for example http://garage:3900 inside Docker). */
+  S3_PUBLIC_ENDPOINT: url(['http:', 'https:']).optional(),
   S3_BUCKET: z
     .string()
     .trim()
@@ -42,6 +44,11 @@ const envSchema = z.object({
   AUTH_SECRET: z.string().trim().min(32, 'must be at least 32 characters').optional(),
   PUBLIC_BASE_URL: url(['http:', 'https:']).default('http://localhost:3000'),
   WEB_ORIGINS: z.string().trim().default('http://localhost:5173'),
+  GOOGLE_CLIENT_ID: z.string().trim().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().trim().min(1).optional(),
+  APPLE_CLIENT_ID: z.string().trim().min(1).optional(),
+  APPLE_CLIENT_SECRET: z.string().trim().min(1).optional(),
+  APPLE_APP_BUNDLE_IDENTIFIER: z.string().trim().min(1).optional(),
   AUTH_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(30),
   STORAGE_QUOTA_BYTES: z.coerce.number().int().positive().default(10 * 1024 ** 3),
 });
@@ -52,8 +59,14 @@ export interface AppConfig {
   server: { host: string; port: number };
   worker: { healthPort: number };
   database: { url: string };
-  s3: { endpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string };
-  auth: { secret: string; baseUrl: string; webOrigins: string[] };
+  s3: { endpoint: string; publicEndpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string };
+  auth: {
+    secret: string;
+    baseUrl: string;
+    webOrigins: string[];
+    /** Social sign-in is off unless a provider's credentials are configured (AUTH-002, AUTH-003). */
+    social: { google?: { clientId: string; clientSecret: string }; apple?: { clientId: string; clientSecret: string; appBundleIdentifier?: string } };
+  };
   limits: { storageQuotaBytes: number; authPerMinute: number };
 }
 
@@ -82,6 +95,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (e.NODE_ENV === 'production' && e.AUTH_SECRET === undefined) {
     throw new ConfigError('Invalid configuration:\n  - AUTH_SECRET: is required in production');
   }
+  const pair = (provider: string, id: string | undefined, secret: string | undefined): void => {
+    if ((id === undefined) !== (secret === undefined)) {
+      throw new ConfigError(`Invalid configuration:
+  - ${provider}: set both the client id and the client secret, or neither`);
+    }
+  };
+  pair('GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET', e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_SECRET);
+  pair('APPLE_CLIENT_ID/APPLE_CLIENT_SECRET', e.APPLE_CLIENT_ID, e.APPLE_CLIENT_SECRET);
   return {
     nodeEnv: e.NODE_ENV,
     logLevel: e.LOG_LEVEL,
@@ -90,6 +111,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     database: { url: e.DATABASE_URL },
     s3: {
       endpoint: e.S3_ENDPOINT,
+      publicEndpoint: e.S3_PUBLIC_ENDPOINT ?? e.S3_ENDPOINT,
       region: e.S3_REGION,
       bucket: e.S3_BUCKET,
       accessKeyId: e.S3_ACCESS_KEY_ID,
@@ -99,6 +121,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       secret: e.AUTH_SECRET ?? DEV_AUTH_SECRET,
       baseUrl: e.PUBLIC_BASE_URL.replace(/\/+$/, ''),
       webOrigins: e.WEB_ORIGINS.split(',').map((origin) => origin.trim()).filter((origin) => origin !== ''),
+      social: {
+        ...(e.GOOGLE_CLIENT_ID !== undefined && e.GOOGLE_CLIENT_SECRET !== undefined ? { google: { clientId: e.GOOGLE_CLIENT_ID, clientSecret: e.GOOGLE_CLIENT_SECRET } } : {}),
+        ...(e.APPLE_CLIENT_ID !== undefined && e.APPLE_CLIENT_SECRET !== undefined
+          ? { apple: { clientId: e.APPLE_CLIENT_ID, clientSecret: e.APPLE_CLIENT_SECRET, ...(e.APPLE_APP_BUNDLE_IDENTIFIER === undefined ? {} : { appBundleIdentifier: e.APPLE_APP_BUNDLE_IDENTIFIER }) } }
+          : {}),
+      },
     },
     limits: { storageQuotaBytes: e.STORAGE_QUOTA_BYTES, authPerMinute: e.AUTH_RATE_LIMIT_PER_MINUTE },
   };

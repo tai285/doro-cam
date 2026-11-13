@@ -105,6 +105,7 @@ describe('sign up', () => {
       name: 'Dorothy',
       email: 'dorothy@example.test',
       password: 'a-long-enough-password',
+      callbackURL: `${window.location.origin}/`,
     });
   });
 

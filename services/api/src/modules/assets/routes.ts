@@ -7,6 +7,9 @@ import {
   HeadObjectCommand,
   ListPartsCommand,
 } from '@aws-sdk/client-s3';
+import { readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import type { Readable } from 'node:stream';
 import { and, eq, sql } from 'drizzle-orm';
 import type { FastifyPluginAsync } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
@@ -22,6 +25,8 @@ import { assetKey, isServable } from '../memories/serialize.ts';
 import { clientAssetRoleSchema } from '../memories/schemas.ts';
 import { nextSeq, recordChange } from '../sync/change-log.ts';
 import { type ClientRole, checkUpload, planUpload } from './rules.ts';
+import { stripMetadata } from '../media/ffmpeg.ts';
+import { streamToBuffer, withTempDir } from '../media/transcode.ts';
 import { refreshStorageBytes } from './verify.ts';
 import { storageUsedBytes } from '../me/routes.ts';
 
@@ -386,6 +391,21 @@ export function assetRoutes(services: Services): FastifyPluginAsync {
         const object = await storage.client.send(new GetObjectCommand({ Bucket: storage.bucket, Key: key }));
         if (access.isOwner || access.canSeeLocation) {
           return reply.header('content-type', asset.mime).header('cache-control', 'private, no-store').send(object.Body);
+        }
+        if (asset.mime === 'video/mp4' || asset.mime === 'video/quicktime') {
+          // Container metadata (location atoms, creation time, device tags) is removed without re-encoding (PRIV-002).
+          const clean = await withTempDir(async (dir) => {
+            const input = path.join(dir, 'in');
+            const output = path.join(dir, 'out.mp4');
+            await writeFile(input, await streamToBuffer(object.Body as Readable));
+            try {
+              await stripMetadata(input, output);
+            } catch {
+              throw new ConflictError('This kind of file cannot be shared without location metadata.', 'asset.not_sanitizable');
+            }
+            return readFile(output);
+          });
+          return reply.header('content-type', 'video/mp4').header('cache-control', 'private, no-store').send(clean);
         }
         if (asset.mime !== 'image/jpeg') {
           throw new ConflictError('This kind of file cannot be shared without location metadata.', 'asset.not_sanitizable');

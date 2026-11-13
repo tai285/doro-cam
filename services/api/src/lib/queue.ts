@@ -6,6 +6,9 @@ export const JOBS = {
   derivativeFallback: 'derivative.fallback',
   memoryPurge: 'memory.purge',
   userDelete: 'user.delete',
+  motionTranscode: 'motion.transcode',
+  videoTranscode: 'video.transcode',
+  exportBuild: 'export.build',
   sweep: 'maintenance.sweep',
 } as const;
 

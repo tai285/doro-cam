@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { buildApp } from '../../src/app.ts';
 import { type AppConfig, loadConfig } from '../../src/config/env.ts';
 import { createDatabase, type Database } from '../../src/db/client.ts';
@@ -25,7 +25,10 @@ export interface Stack {
 }
 
 /** The real API on a private database, real Garage S3, an in-process job queue and an inspectable mail outbox. */
-export async function startStack(env: Record<string, string | undefined> = {}): Promise<Stack> {
+export async function startStack(
+  env: Record<string, string | undefined> = {},
+  options: { logStream?: NodeJS.WritableStream; extraModules?: (stack: { mailer: OutboxMailer; services: Services }) => FastifyPluginAsync[] } = {},
+): Promise<Stack> {
   const testDb: TestDatabase = await createTestDatabase();
   const config = loadConfig(baseEnv({ DATABASE_URL: testDb.url, AUTH_RATE_LIMIT_PER_MINUTE: '100000', ...env }));
   const database = createDatabase(config.database.url);
@@ -38,7 +41,10 @@ export async function startStack(env: Record<string, string | undefined> = {}): 
   for (const name of Object.values(JOBS) as JobName[]) {
     queue.register(name, handlers[name]);
   }
-  const app = await buildApp({ config, database, storage }, { modules: createModules(services) });
+  const app = await buildApp({ config, database, storage }, {
+    modules: [...createModules(services), ...(options.extraModules?.({ mailer, services }) ?? [])],
+    ...(options.logStream === undefined ? {} : { logStream: options.logStream }),
+  });
   await app.ready();
   return {
     app,

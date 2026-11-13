@@ -8,9 +8,11 @@ import {
 } from '@aws-sdk/client-s3';
 import { and, eq, inArray, isNotNull, isNull, lt, sql } from 'drizzle-orm';
 import sharp from 'sharp';
-import { assets, idempotencyKeys, memories, storageObjects, user, usersProfile } from '../../db/schema.ts';
+import { assets, dataExports, idempotencyKeys, memories, storageObjects, user, usersProfile } from '../../db/schema.ts';
 import { type JobHandler, type JobName, JOBS } from '../../lib/queue.ts';
 import { verifyAsset, refreshStorageBytes } from '../assets/verify.ts';
+import { buildExport } from '../exports/build.ts';
+import { transcodeAsset } from '../media/transcode.ts';
 import type { JobServices } from '../context.ts';
 import { DELETION_GRACE_DAYS } from '../me/routes.ts';
 import { assetKey } from '../memories/serialize.ts';
@@ -86,17 +88,19 @@ export async function deleteUser(services: JobServices, userId: string): Promise
     return false;
   }
   const { storage } = services;
-  let token: string | undefined;
-  do {
-    const page = await storage.client.send(
-      new ListObjectsV2Command({ Bucket: storage.bucket, Prefix: `o/${userId}/`, ...(token === undefined ? {} : { ContinuationToken: token }) }),
-    );
-    await deleteKeys(
-      services,
-      (page.Contents ?? []).flatMap((object) => (object.Key === undefined ? [] : [object.Key])),
-    );
-    token = page.IsTruncated === true ? page.NextContinuationToken : undefined;
-  } while (token !== undefined);
+  for (const prefix of [`o/${userId}/`, `exports/${userId}/`]) {
+    let token: string | undefined;
+    do {
+      const page = await storage.client.send(
+        new ListObjectsV2Command({ Bucket: storage.bucket, Prefix: prefix, ...(token === undefined ? {} : { ContinuationToken: token }) }),
+      );
+      await deleteKeys(
+        services,
+        (page.Contents ?? []).flatMap((object) => (object.Key === undefined ? [] : [object.Key])),
+      );
+      token = page.IsTruncated === true ? page.NextContinuationToken : undefined;
+    } while (token !== undefined);
+  }
   await db.delete(user).where(eq(user.id, userId)); // cascades to every row the user owns
   return true;
 }
@@ -194,10 +198,18 @@ export async function sweep(services: JobServices, now: Date = new Date()): Prom
     derived += (await deriveFallbacks(services, row.memoryId)).length;
   }
 
+  const staleExports = await db.select().from(dataExports).where(lt(dataExports.expiresAt, now));
+  for (const old of staleExports) {
+    if (old.objectKey !== null) {
+      await deleteKeys(services, [old.objectKey]);
+    }
+    await db.delete(dataExports).where(eq(dataExports.id, old.id));
+  }
+
   const prunedChanges = await pruneChanges(db, new Date(now.getTime() - CHANGE_RETENTION_DAYS * DAY_MS));
   const prunedKeys = (await db.delete(idempotencyKeys).where(lt(idempotencyKeys.createdAt, new Date(now.getTime() - DAY_MS))).returning({ key: idempotencyKeys.key })).length;
   void isNull;
-  return { purgedMemories: expired.length, deletedUsers: dueUsers.length, derivatives: derived, prunedChanges, prunedKeys };
+  return { purgedMemories: expired.length, deletedUsers: dueUsers.length, derivatives: derived, prunedChanges, prunedKeys, expiredExports: staleExports.length };
 }
 
 function stringField(payload: Record<string, unknown>, name: string): string {
@@ -221,6 +233,15 @@ export function createJobHandlers(services: JobServices): Record<JobName, JobHan
     },
     [JOBS.userDelete]: async (payload) => {
       await deleteUser(services, stringField(payload, 'userId'));
+    },
+    [JOBS.motionTranscode]: async (payload) => {
+      await transcodeAsset(services, stringField(payload, 'assetId'));
+    },
+    [JOBS.videoTranscode]: async (payload) => {
+      await transcodeAsset(services, stringField(payload, 'assetId'));
+    },
+    [JOBS.exportBuild]: async (payload) => {
+      await buildExport(services, stringField(payload, 'exportId'));
     },
     [JOBS.sweep]: async () => {
       await sweep(services);

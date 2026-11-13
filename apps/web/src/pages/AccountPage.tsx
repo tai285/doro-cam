@@ -5,7 +5,7 @@ import { api } from '../api/client.ts';
 import { useMe } from '../auth/RequireAuth.tsx';
 import { usePageTitle } from '../app/use-page-title.ts';
 import { ErrorNotice, Field, StorageMeter } from '../components/parts.tsx';
-import { formatDate } from '../lib/format.ts';
+import { formatBytes, formatDate } from '../lib/format.ts';
 
 /** Profile, storage, device sessions and account deletion (WEB-005, WEB-006, AUTH-004, PRIV-004). */
 export function AccountPage() {
@@ -15,6 +15,21 @@ export function AccountPage() {
   const navigate = useNavigate();
   const sessions = useQuery({ queryKey: ['sessions'], queryFn: api.sessions });
   const [password, setPassword] = useState('');
+  // While an export is being prepared, check again every couple of seconds.
+  const exports = useQuery({
+    queryKey: ['exports'],
+    queryFn: api.exports,
+    refetchInterval: (query) =>
+      query.state.data?.items.some(
+        (item) => item.status === 'pending' || item.status === 'building',
+      ) === true
+        ? 2000
+        : false,
+  });
+  const requestExport = useMutation({
+    mutationFn: () => api.requestExport(),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['exports'] }),
+  });
 
   const revoke = useMutation({
     mutationFn: (id: string) => api.revokeSession(id),
@@ -88,6 +103,49 @@ export function AccountPage() {
                     Sign out this device
                   </button>
                 </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="export-title" className="card">
+        <h2 id="export-title">Your data</h2>
+        <p>
+          Download everything you’ve captured: your original files plus a metadata file with
+          captions, settings and albums.
+        </p>
+        <button
+          type="button"
+          disabled={
+            requestExport.isPending ||
+            exports.data?.items.some(
+              (item) => item.status === 'pending' || item.status === 'building',
+            ) === true
+          }
+          onClick={() => {
+            requestExport.mutate();
+          }}
+        >
+          Request data export
+        </button>
+        <ErrorNotice error={exports.error ?? requestExport.error} />
+        <ul>
+          {exports.data?.items.map((item) => (
+            <li key={item.id}>
+              {formatDate(item.createdAt)} —{' '}
+              {item.status === 'ready' && item.download !== null ? (
+                <a href={item.download.url} download={item.download.filename}>
+                  Download ({formatBytes(item.bytes ?? 0)})
+                </a>
+              ) : item.status === 'failed' ? (
+                <span role="alert">
+                  Failed: {item.failureReason ?? 'unknown error'}. Try again.
+                </span>
+              ) : item.status === 'ready' ? (
+                <span>Expired. Request a new export.</span>
+              ) : (
+                <span role="status">Preparing your archive…</span>
               )}
             </li>
           ))}

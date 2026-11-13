@@ -35,6 +35,8 @@ export const assetRole = pgEnum('asset_role', [
   'motion_clip',
   'motion_web',
   'video_original',
+  'video_web',
+  'video_poster',
   'sanitized_original',
 ]);
 export const assetStatus = pgEnum('asset_status', ['pending', 'uploading', 'uploaded', 'verified', 'ready', 'failed']);

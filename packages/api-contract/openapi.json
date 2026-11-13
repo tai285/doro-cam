@@ -146,6 +146,45 @@
         }
       }
     },
+    "/v1/config": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "socialProviders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "google",
+                          "apple"
+                        ]
+                      }
+                    },
+                    "emailPassword": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    }
+                  },
+                  "required": [
+                    "socialProviders",
+                    "emailPassword"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/me": {
       "get": {
         "responses": {
@@ -661,6 +700,8 @@
                               "motion_clip",
                               "motion_web",
                               "video_original",
+                              "video_web",
+                              "video_poster",
                               "sanitized_original"
                             ]
                           },
@@ -908,6 +949,8 @@
                               "motion_clip",
                               "motion_web",
                               "video_original",
+                              "video_web",
+                              "video_poster",
                               "sanitized_original"
                             ]
                           },
@@ -1171,6 +1214,8 @@
                               "motion_clip",
                               "motion_web",
                               "video_original",
+                              "video_web",
+                              "video_poster",
                               "sanitized_original"
                             ]
                           },
@@ -1463,6 +1508,8 @@
                               "motion_clip",
                               "motion_web",
                               "video_original",
+                              "video_web",
+                              "video_poster",
                               "sanitized_original"
                             ]
                           },
@@ -1818,6 +1865,8 @@
                                     "motion_clip",
                                     "motion_web",
                                     "video_original",
+                                    "video_web",
+                                    "video_poster",
                                     "sanitized_original"
                                   ]
                                 },
@@ -2095,6 +2144,8 @@
                               "motion_clip",
                               "motion_web",
                               "video_original",
+                              "video_web",
+                              "video_poster",
                               "sanitized_original"
                             ]
                           },
@@ -2360,6 +2411,8 @@
                               "motion_clip",
                               "motion_web",
                               "video_original",
+                              "video_web",
+                              "video_poster",
                               "sanitized_original"
                             ]
                           },
@@ -4092,6 +4145,8 @@
                                     "motion_clip",
                                     "motion_web",
                                     "video_original",
+                                    "video_web",
+                                    "video_poster",
                                     "sanitized_original"
                                   ]
                                 },
@@ -5261,6 +5316,268 @@
                   },
                   "required": [
                     "presetId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/exports": {
+      "post": {
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "building",
+                        "ready",
+                        "failed"
+                      ]
+                    },
+                    "bytes": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "completedAt": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "type": "string"
+                    },
+                    "failureReason": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "download": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "filename": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "url",
+                        "expiresAt",
+                        "filename"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status",
+                    "bytes",
+                    "createdAt",
+                    "completedAt",
+                    "expiresAt",
+                    "failureReason",
+                    "download"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "building",
+                              "ready",
+                              "failed"
+                            ]
+                          },
+                          "bytes": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "completedAt": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "expiresAt": {
+                            "type": "string"
+                          },
+                          "failureReason": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "download": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "expiresAt": {
+                                "type": "string"
+                              },
+                              "filename": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "expiresAt",
+                              "filename"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "status",
+                          "bytes",
+                          "createdAt",
+                          "completedAt",
+                          "expiresAt",
+                          "failureReason",
+                          "download"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/exports/{exportId}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "exportId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "building",
+                        "ready",
+                        "failed"
+                      ]
+                    },
+                    "bytes": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "completedAt": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "type": "string"
+                    },
+                    "failureReason": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "download": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "filename": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "url",
+                        "expiresAt",
+                        "filename"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status",
+                    "bytes",
+                    "createdAt",
+                    "completedAt",
+                    "expiresAt",
+                    "failureReason",
+                    "download"
                   ],
                   "additionalProperties": false
                 }

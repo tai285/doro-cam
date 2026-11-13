@@ -16,7 +16,7 @@ function expiry(seconds: number): string {
 
 export async function presignPut(storage: Storage, key: string, contentType: string): Promise<SignedUrl> {
   const url = await getSignedUrl(
-    storage.client,
+    storage.presignClient,
     new PutObjectCommand({ Bucket: storage.bucket, Key: key, ContentType: contentType }),
     { expiresIn: UPLOAD_URL_TTL_SECONDS, signableHeaders: new Set(['content-type']) },
   );
@@ -25,7 +25,7 @@ export async function presignPut(storage: Storage, key: string, contentType: str
 
 export async function presignPart(storage: Storage, key: string, uploadId: string, partNumber: number): Promise<SignedUrl> {
   const url = await getSignedUrl(
-    storage.client,
+    storage.presignClient,
     new UploadPartCommand({ Bucket: storage.bucket, Key: key, UploadId: uploadId, PartNumber: partNumber }),
     { expiresIn: UPLOAD_URL_TTL_SECONDS },
   );
@@ -38,7 +38,7 @@ export async function presignGet(
   options: { filename?: string; contentType?: string } = {},
 ): Promise<SignedUrl> {
   const url = await getSignedUrl(
-    storage.client,
+    storage.presignClient,
     new GetObjectCommand({
       Bucket: storage.bucket,
       Key: key,

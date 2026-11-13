@@ -8,7 +8,9 @@ import { albumRoutes } from './albums/routes.ts';
 import { assetRoutes } from './assets/routes.ts';
 import { createAuth } from './auth/auth.ts';
 import { authRoutes, createGuard } from './auth/plugin.ts';
+import { authConfigRoutes } from './auth/providers.ts';
 import type { Services } from './context.ts';
+import { exportRoutes } from './exports/routes.ts';
 import { insightsRoutes } from './insights/routes.ts';
 import { meRoutes } from './me/routes.ts';
 import { memoryRoutes } from './memories/routes.ts';
@@ -32,6 +34,7 @@ export function createServices(deps: ServiceDeps): Services {
 export function createModules(services: Services): FastifyPluginAsync[] {
   return [
     authRoutes(services.auth, { signInPerMinute: services.config.limits.authPerMinute }),
+    authConfigRoutes(services.config),
     meRoutes(services),
     memoryRoutes(services),
     assetRoutes(services),
@@ -39,5 +42,6 @@ export function createModules(services: Services): FastifyPluginAsync[] {
     presetRoutes(services),
     albumRoutes(services),
     insightsRoutes(services),
+    exportRoutes(services),
   ];
 }

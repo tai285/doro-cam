@@ -15,6 +15,13 @@
       "when": 1794585843423,
       "tag": "0001_auth_memories_presets_albums",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794588014364,
+      "tag": "0002_video_roles_and_exports",
+      "breakpoints": true
     }
   ]
 }

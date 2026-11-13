@@ -75,3 +75,7 @@ Local: `media/{memoryId}/{assetId}.{ext}`. Server keys: `o/{ownerId}/{memoryId}/
 - Clips produced on the Android Emulator and the iOS Simulator (synthetic source) pass `ffprobe` validation. The web rendition plays in Chromium, Firefox, and WebKit under Playwright.
 - The sync tolerance is met in an automated test: synthetic input with a flash frame and a beep at the same timestamp, 20 runs, offsets measured after demuxing. The real microphone clap test is field verification FV-004.
 - Manifest round-trips: embed → extract equals the source.
+
+## Implemented derived assets (2026-11-14)
+
+`asset_role` gained `video_web` and `video_poster`. The worker jobs `motion.transcode` and `video.transcode` (one handler) create `motion_web`/`video_web`, a poster and a 512 px thumbnail, all marked `ready`. `export.build` writes archives under `exports/{ownerId}/{id}.zip`.

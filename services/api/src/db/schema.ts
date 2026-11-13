@@ -4,3 +4,4 @@ export * from '../modules/auth/schema.ts';
 export * from '../modules/memories/schema.ts';
 export * from '../modules/presets/schema.ts';
 export * from '../modules/albums/schema.ts';
+export * from '../modules/exports/schema.ts';

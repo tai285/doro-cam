@@ -9,6 +9,8 @@ export type AssetRole =
   | 'motion_clip'
   | 'motion_web'
   | 'video_original'
+  | 'video_web'
+  | 'video_poster'
   | 'sanitized_original';
 export type AssetStatus = 'pending' | 'uploading' | 'uploaded' | 'verified' | 'ready' | 'failed';
 export type AlbumRole = 'owner' | 'editor' | 'contributor' | 'viewer';
@@ -163,4 +165,20 @@ export interface DownloadLink {
   expiresAt: string;
   sanitized: boolean;
   filename: string;
+}
+
+export interface DataExport {
+  id: string;
+  status: 'pending' | 'building' | 'ready' | 'failed';
+  bytes: number | null;
+  createdAt: string;
+  completedAt: string | null;
+  expiresAt: string;
+  failureReason: string | null;
+  download: { url: string; expiresAt: string; filename: string } | null;
+}
+
+export interface PublicConfig {
+  socialProviders: Array<'google' | 'apple'>;
+  emailPassword: true;
 }

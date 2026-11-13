@@ -1,6 +1,6 @@
 # Spec: HTTP API
 
-Status: Draft · Last updated: 2026-09-30 · Related: ADR-0006, ADR-0012, [upload-sync.md](upload-sync.md), [sharing.md](sharing.md)
+Status: Implemented (P4–P10 endpoints) · Last updated: 2026-11-14 · Related: ADR-0006, ADR-0012, [upload-sync.md](upload-sync.md), [sharing.md](sharing.md)
 
 ## Authority
 
@@ -38,9 +38,25 @@ Until the API is scaffolded, this document is the contract. **Once `services/api
 | `GET/PUT/DELETE /v1/presets[/{id}]` | Preset sync | Post | WEB-008 |
 | `…/v1/albums…` | Albums, members, invites, items (see [sharing.md](sharing.md)) | P9 | SHR-001–SHR-007 |
 | `GET /v1/insights/*` | Analytics aggregates | P10 | ANL-001–ANL-005 |
+| `GET /v1/config` | Public sign-in options (which social providers are enabled) | P4 | AUTH-002, AUTH-003 |
+| `POST /v1/me/exports` · `GET /v1/me/exports[/{id}]` | Request, list and fetch a data export archive (zip of originals + metadata.json) | P10 | WEB-010, PRIV-006 |
+| `GET /v1/memories/{id}/assets/{assetId}/content` | Authorizing stream; serves metadata-stripped copies of images and videos to members who may not see location | P9 | PRIV-002 |
+| `POST /v1/memories/{id}/assets/{assetId}/upload/abort` | Abort an unfinished upload | P5 | SYNC-003 |
+| `POST /v1/memories/trash/empty` · `DELETE /v1/memories/{id}` | Purge trashed Memories | P4 | MEM-007 |
 | `GET /healthz` · `GET /readyz` | Health | P4 | NFR-013 |
 
 ## Acceptance criteria
 
 - Every endpoint has integration tests for success, validation failure, unauthenticated, and unauthorized (IDOR) cases.
 - OpenAPI is generated from the route schemas; the Dart and TS clients are generated from it; CI checks for drift.
+
+## Latency budgets (NFR-006)
+
+Baseline measured in-process against real Postgres (`services/api/test/observability.test.ts`, 2026-11-14, p95): register Memory 12 ms, `GET /v1/me` 6 ms, list 50 Memories 7 ms, Memory detail 5 ms. The test fails when p95 exceeds the budgets: register 120 ms, me 60 ms, list 120 ms, detail 80 ms. Budgets are deliberately wide: they catch regressions, not noise. Network and storage time are not included.
+
+## Media and exports
+
+- Verified motion clips and videos get a browser-playable H.264/AAC fast-start MP4 (`motion_web`, `video_web`), a poster (`video_poster`) and a thumbnail from the worker (ffmpeg). Files ffmpeg cannot read are skipped, never retried forever.
+- Members who may not see a Memory's location receive images re-encoded without EXIF/XMP and videos copied without container metadata, only through the `content` endpoint.
+- A data export is one zip per request (`export.in_progress` while one is being built), kept for 7 days.
+- Social sign-in is off unless a provider's id and secret are both configured.

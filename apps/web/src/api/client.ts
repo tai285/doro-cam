@@ -1,6 +1,7 @@
 import type {
   Album,
   AlbumMember,
+  DataExport,
   DeviceSession,
   DownloadLink,
   InsightsReport,
@@ -9,6 +10,7 @@ import type {
   MemoryPage,
   Preset,
   PresetSuggestion,
+  PublicConfig,
 } from './types.ts';
 
 /** Where the API lives. In development the Vite dev server and the API are different origins. */
@@ -107,9 +109,20 @@ export function mediaHref(url: string): string {
 export const api = {
   // auth (Better Auth, mounted under /v1/auth)
   signUp: (input: { name: string; email: string; password: string }) =>
-    request<unknown>('/v1/auth/sign-up/email', { method: 'POST', body: input }),
+    // After confirming the email the API sends the person back to the app, already signed in.
+    request<unknown>('/v1/auth/sign-up/email', {
+      method: 'POST',
+      body: { ...input, callbackURL: `${window.location.origin}/` },
+    }),
   signIn: (input: { email: string; password: string }) =>
     request<unknown>('/v1/auth/sign-in/email', { method: 'POST', body: input }),
+  config: () => request<PublicConfig>('/v1/config'),
+  /** Starts OAuth: the API answers with the provider's authorization URL, which the browser then opens. */
+  signInSocial: (provider: 'google' | 'apple', callbackURL: string) =>
+    request<{ url?: string; redirect?: boolean }>('/v1/auth/sign-in/social', {
+      method: 'POST',
+      body: { provider, callbackURL },
+    }),
   signOut: () => request<unknown>('/v1/auth/sign-out', { method: 'POST', body: {} }),
   requestPasswordReset: (email: string, redirectTo: string) =>
     request<unknown>('/v1/auth/request-password-reset', {
@@ -126,6 +139,10 @@ export const api = {
   requestDeletion: (password: string) =>
     request<{ scheduledFor: string }>('/v1/me/deletion', { method: 'POST', body: { password } }),
   cancelDeletion: () => request<undefined>('/v1/me/deletion', { method: 'DELETE' }),
+
+  // data export (WEB-010)
+  exports: () => request<{ items: DataExport[] }>('/v1/me/exports'),
+  requestExport: () => request<DataExport>('/v1/me/exports', { method: 'POST' }),
 
   // memories
   memories: (params: {

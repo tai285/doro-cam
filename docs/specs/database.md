@@ -1,6 +1,6 @@
 # Spec: PostgreSQL Schema
 
-Status: Draft (planned; the Drizzle schema becomes authoritative once written) · Last updated: 2026-09-30 · Related: ADR-0007, ADR-0010, [memory-domain.md](memory-domain.md)
+Status: Draft (planned; the Drizzle schema becomes authoritative once written) · Last updated: 2026-11-14 · Related: ADR-0007, ADR-0010, [memory-domain.md](memory-domain.md)
 
 ## Authority
 
@@ -89,6 +89,9 @@ Constraints: unique `(memory_id, role)` for singular roles (`photo_original`, `p
 
 ### P9: `albums`, `album_members`, `album_invites`, `album_items`
 As in [sharing.md](sharing.md). PKs are `(album_id, user_id)` and `(album_id, memory_id)`; indexes on `user_id` and `memory_id`.
+
+### `data_exports`
+`id, owner_id, status (pending|building|ready|failed), object_key, bytes, failure_reason, created_at, completed_at, expires_at`. Rows and archive objects are removed by the sweep after `expires_at` (7 days).
 
 ### pg-boss
 Uses its own `pgboss` schema, managed by the library (ADR-0010).

@@ -63,6 +63,7 @@ a {
 
 .site-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 

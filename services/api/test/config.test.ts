@@ -30,6 +30,7 @@ describe('loadConfig', () => {
       database: { url: REQUIRED.DATABASE_URL },
       s3: {
         endpoint: 'https://s3.example.com',
+        publicEndpoint: 'https://s3.example.com',
         region: 'garage',
         bucket: 'my-bucket',
         accessKeyId: 'AKIDEXAMPLE-KEY-ID',
@@ -39,6 +40,7 @@ describe('loadConfig', () => {
         secret: expect.stringMatching(/^dev-only/),
         baseUrl: 'http://localhost:3000',
         webOrigins: ['http://localhost:5173'],
+        social: {},
       },
       limits: { storageQuotaBytes: 10 * 1024 ** 3, authPerMinute: 30 },
     });

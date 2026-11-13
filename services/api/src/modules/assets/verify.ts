@@ -3,6 +3,7 @@ import type { Readable } from 'node:stream';
 import { DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { and, eq, sql } from 'drizzle-orm';
 import { assets, memories, storageObjects, usersProfile } from '../../db/schema.ts';
+import { JOBS } from '../../lib/queue.ts';
 import type { JobServices } from '../context.ts';
 import { nextSeq, recordChange } from '../sync/change-log.ts';
 
@@ -89,6 +90,12 @@ export async function verifyAsset(services: JobServices, assetId: string): Promi
   });
   if (duplicateKey !== null) {
     await storage.client.send(new DeleteObjectCommand({ Bucket: storage.bucket, Key: duplicateKey }));
+  }
+  // Browser-playable renditions and posters are made by the worker (VID-005, VID-006, MOT-006).
+  if (asset.role === 'motion_clip') {
+    await services.jobs.enqueue(JOBS.motionTranscode, { assetId });
+  } else if (asset.role === 'video_original') {
+    await services.jobs.enqueue(JOBS.videoTranscode, { assetId });
   }
   return 'verified';
 }

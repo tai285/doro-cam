@@ -10,6 +10,8 @@ export const assetRoleSchema = z.enum([
   'motion_clip',
   'motion_web',
   'video_original',
+  'video_web',
+  'video_poster',
   'sanitized_original',
 ]);
 export const assetStatusSchema = z.enum(['pending', 'uploading', 'uploaded', 'verified', 'ready', 'failed']);

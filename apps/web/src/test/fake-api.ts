@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import type {
   Album,
   AlbumMember,
+  DataExport,
   DeviceSession,
   InsightsReport,
   Me,
@@ -28,6 +29,8 @@ export interface FakeState {
   suggestions: PresetSuggestion[];
   insights: InsightsReport;
   tripProposals: string[];
+  exports: DataExport[];
+  socialProviders: Array<'google' | 'apple'>;
   /** Force the next response for a "METHOD /path" (exact) to fail with this status and error code. */
   failures: Map<string, { status: number; code: string; message?: string }>;
   calls: Call[];
@@ -193,6 +196,8 @@ export function installFakeApi(initial: Partial<FakeState> = {}): FakeApi {
     suggestions: [],
     insights: emptyInsights,
     tripProposals: [],
+    exports: [],
+    socialProviders: [],
     failures: new Map(),
     calls: [],
     ...initial,
@@ -237,6 +242,14 @@ export function installFakeApi(initial: Partial<FakeState> = {}): FakeApi {
     )
       return respond(200, { status: true });
 
+    if (method === 'GET' && path === '/v1/config')
+      return respond(200, { socialProviders: state.socialProviders, emailPassword: true });
+    if (method === 'POST' && path === '/v1/auth/sign-in/social')
+      return respond(200, {
+        url: `https://accounts.google.com/o/oauth2/v2/auth?provider=${String(body.provider)}`,
+        redirect: true,
+      });
+
     // everything below needs a session
     if (!state.signedIn) return error(401, 'auth.unauthenticated', 'Authentication is required.');
 
@@ -261,6 +274,25 @@ export function installFakeApi(initial: Partial<FakeState> = {}): FakeApi {
     if (method === 'DELETE' && path === '/v1/me/deletion') {
       state.me = { ...state.me, deletionRequestedAt: null, deletionScheduledFor: null };
       return respond(204);
+    }
+
+    if (path === '/v1/me/exports' && method === 'GET')
+      return respond(200, { items: state.exports });
+    if (path === '/v1/me/exports' && method === 'POST') {
+      if (state.exports.some((e) => e.status === 'pending' || e.status === 'building'))
+        return error(409, 'export.in_progress', 'An export is already being prepared.');
+      const created: DataExport = {
+        id: `e-${String(state.exports.length + 1)}`,
+        status: 'pending',
+        bytes: null,
+        createdAt: '2026-11-13T00:00:00.000Z',
+        completedAt: null,
+        expiresAt: '2026-11-20T00:00:00.000Z',
+        failureReason: null,
+        download: null,
+      };
+      state.exports = [created, ...state.exports];
+      return respond(202, created);
     }
 
     // ---- memories

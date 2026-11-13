@@ -120,8 +120,8 @@ export async function serializeMemory(
         durationMs: row.durationMs,
         failureReason: access.isOwner ? row.failureReason : null,
       })),
-    thumbnail: await mediaUrl(pickMedia(rows, 'thumbnail', 'photo_display', 'photo_rendered')),
-    display: await mediaUrl(pickMedia(rows, 'photo_display', 'photo_rendered', 'photo_original')),
+    thumbnail: await mediaUrl(pickMedia(rows, 'thumbnail', 'video_poster', 'photo_display', 'photo_rendered')),
+    display: await mediaUrl(pickMedia(rows, 'photo_display', 'photo_rendered', 'video_poster', 'photo_original')),
   };
 }
 

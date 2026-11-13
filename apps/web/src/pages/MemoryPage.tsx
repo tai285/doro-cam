@@ -50,16 +50,22 @@ export function captureRows(memory: Memory): Array<[string, string]> {
 }
 
 /** A Motion Memory clip. It is the user's own recording with ambient sound and no speech track to caption. */
-function MotionVideo(props: { src: string; poster: string | undefined; onEnded: () => void }) {
+function MotionVideo(props: {
+  src: string;
+  poster: string | undefined;
+  onEnded: () => void;
+  autoPlay: boolean;
+  label: string;
+}) {
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption
     <video
       src={props.src}
       poster={props.poster}
       controls
-      autoPlay
+      autoPlay={props.autoPlay}
       playsInline
-      aria-label="Motion playback"
+      aria-label={props.label}
       onEnded={props.onEnded}
     />
   );
@@ -114,20 +120,19 @@ export function MemoryPage() {
     },
   });
 
-  const motionAsset = memory?.assets.find(
-    (asset) =>
-      (asset.role === 'motion_web' || asset.role === 'motion_clip') &&
-      (asset.status === 'verified' || asset.status === 'ready'),
-  );
-  const motionAssetId =
+  // Prefer the browser-compatible rendition the worker makes; fall back to the uploaded clip.
+  const playable = (role: string) =>
     memory?.assets.find(
-      (asset) =>
-        asset.role === 'motion_web' && (asset.status === 'verified' || asset.status === 'ready'),
-    )?.id ?? motionAsset?.id;
+      (asset) => asset.role === role && (asset.status === 'verified' || asset.status === 'ready'),
+    )?.id;
+  const motionAssetId =
+    memory?.kind === 'video'
+      ? (playable('video_web') ?? playable('video_original'))
+      : (playable('motion_web') ?? playable('motion_clip'));
   const motion = useQuery({
     queryKey: ['motion-url', id, motionAssetId],
     queryFn: () => api.download(id, motionAssetId as string),
-    enabled: memory?.kind === 'motion' && motionAssetId !== undefined,
+    enabled: (memory?.kind === 'motion' || memory?.kind === 'video') && motionAssetId !== undefined,
     staleTime: 5 * 60_000,
   });
 
@@ -182,8 +187,18 @@ export function MemoryPage() {
 
       <div className="detail">
         <div className="media">
-          {playing && motion.data !== undefined ? (
+          {memory.kind === 'video' && motion.data !== undefined ? (
             <MotionVideo
+              autoPlay={false}
+              label="Video playback"
+              src={mediaHref(motion.data.url)}
+              poster={memory.display === null ? undefined : mediaHref(memory.display.url)}
+              onEnded={() => undefined}
+            />
+          ) : playing && motion.data !== undefined ? (
+            <MotionVideo
+              autoPlay
+              label="Motion playback"
               src={mediaHref(motion.data.url)}
               poster={memory.display === null ? undefined : mediaHref(memory.display.url)}
               onEnded={() => {

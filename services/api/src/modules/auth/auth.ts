@@ -57,6 +57,11 @@ export function createAuth({ config, database, mailer }: AuthDeps) {
       },
     },
     session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
+    // Social providers exist only when their credentials are configured; there are no defaults (AUTH-002, AUTH-003).
+    socialProviders: {
+      ...(config.auth.social.google === undefined ? {} : { google: config.auth.social.google }),
+      ...(config.auth.social.apple === undefined ? {} : { apple: config.auth.social.apple }),
+    },
     plugins: [bearer()],
     databaseHooks: {
       user: {

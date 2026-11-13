@@ -36,3 +36,7 @@ Let groups (e.g. "Japan Trip 2027" with members A–D) collect original-quality 
 
 - API integration tests cover every cell of the permission matrix, both allowed and denied.
 - A location-leak test: a Viewer requesting any asset of a Memory with location hidden receives a file whose metadata has no GPS tags, verified by parsing EXIF/MP4 atoms in the test.
+
+## Implemented behavior notes (2026-11-14)
+
+Trip proposals use the Memory's own capture time zone for the date range. Videos shared without location are served through the authorizing `content` endpoint with container metadata removed (ffmpeg `-map_metadata -1 -c copy`).
