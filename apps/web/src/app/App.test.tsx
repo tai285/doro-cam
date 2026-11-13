@@ -3,12 +3,14 @@ import { render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
+import { installFakeApi } from '../test/fake-api.ts';
 import { usePageTitle } from './use-page-title.ts';
 import { App } from './App.tsx';
 import { createQueryClient } from './query-client.ts';
 
 describe('App', () => {
   it('mounts with the browser router and follows real history navigation', async () => {
+    installFakeApi();
     window.history.pushState({}, '', '/');
     const user = userEvent.setup();
     render(<App />);
@@ -27,10 +29,22 @@ describe('App', () => {
     });
   });
 
+  it('[PRIV-003] sends a signed-out visitor to sign in instead of showing the library', async () => {
+    installFakeApi({ signedIn: false });
+    window.history.pushState({}, '', '/');
+    render(<App />);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/sign-in');
+  });
+
   it('deep-links straight to a page', async () => {
+    installFakeApi();
     window.history.pushState({}, '', '/memories/abc-123');
     render(<App />);
-    expect(await screen.findByText('abc-123')).toBeInTheDocument();
+    // The production query client retries once, so the 404 takes a moment to surface.
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Memory not found' }, { timeout: 5000 }),
+    ).toBeInTheDocument();
   });
 });
 

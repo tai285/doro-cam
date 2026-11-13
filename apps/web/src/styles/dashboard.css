@@ -1,0 +1,253 @@
+/* Dashboard components. Colors and spacing come from tokens.css only. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+button {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-raised);
+  color: var(--color-on-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+button[type='submit'],
+button[aria-pressed='true'] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.danger {
+  border-color: var(--color-recording);
+  color: var(--color-recording);
+  background: transparent;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-raised);
+  color: var(--color-on-surface);
+  font: inherit;
+}
+
+input[type='checkbox'] {
+  width: auto;
+  min-height: 0;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.card {
+  padding: var(--space-4);
+  margin: var(--space-3) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-raised);
+}
+
+.narrow {
+  max-width: 28rem;
+}
+
+.cards {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-3);
+}
+
+.cards .card {
+  margin: 0;
+}
+
+.notice.error {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-recording);
+  border-radius: var(--radius);
+  color: var(--color-recording);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+.grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+  gap: var(--space-2);
+}
+
+.tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--color-border);
+}
+
+.tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tile-placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--color-on-surface-muted);
+}
+
+.tile-badges {
+  position: absolute;
+  left: var(--space-1);
+  bottom: var(--space-1);
+  display: flex;
+  gap: var(--space-1);
+}
+
+.badge {
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--color-readout);
+  color: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.empty {
+  padding: var(--space-5) 0;
+}
+
+.detail {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+@media (max-width: 48rem) {
+  .detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.media img,
+.media video {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.meta {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-1);
+}
+
+.meta dt {
+  color: var(--color-on-surface-muted);
+}
+
+.meta dd {
+  margin: 0;
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.storage meter {
+  width: 100%;
+  max-width: 28rem;
+  height: 1rem;
+}
+
+.picker {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-4);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bar {
+  display: inline-block;
+  height: 0.75rem;
+  margin-right: var(--space-2);
+  border-radius: 999px;
+  background: var(--color-accent);
+  vertical-align: middle;
+  max-width: 60%;
+}

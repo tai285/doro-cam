@@ -62,7 +62,12 @@ describe('albums and sharing', () => {
 
   beforeAll(async () => {
     stack = await startStack();
-    [owner, editor, contributor, viewer, outsider] = await Promise.all(['Olive', 'Eddie', 'Connie', 'Vera', 'Otto'].map((name) => createUser(stack, name)));
+    const users = await Promise.all(['Olive', 'Eddie', 'Connie', 'Vera', 'Otto'].map((name) => createUser(stack, name)));
+    owner = users[0] as TestUser;
+    editor = users[1] as TestUser;
+    contributor = users[2] as TestUser;
+    viewer = users[3] as TestUser;
+    outsider = users[4] as TestUser;
   });
   afterAll(async () => {
     await stack.close();

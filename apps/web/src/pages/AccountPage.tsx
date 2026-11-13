@@ -1,12 +1,140 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type SyntheticEvent, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { api } from '../api/client.ts';
+import { useMe } from '../auth/RequireAuth.tsx';
 import { usePageTitle } from '../app/use-page-title.ts';
+import { ErrorNotice, Field, StorageMeter } from '../components/parts.tsx';
+import { formatDate } from '../lib/format.ts';
 
-/** Placeholder. Sessions, storage usage and account deletion arrive with P4 and P7. */
+/** Profile, storage, device sessions and account deletion (WEB-005, WEB-006, AUTH-004, PRIV-004). */
 export function AccountPage() {
   usePageTitle('Account');
+  const me = useMe();
+  const client = useQueryClient();
+  const navigate = useNavigate();
+  const sessions = useQuery({ queryKey: ['sessions'], queryFn: api.sessions });
+  const [password, setPassword] = useState('');
+
+  const revoke = useMutation({
+    mutationFn: (id: string) => api.revokeSession(id),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['sessions'] }),
+  });
+  const requestDeletion = useMutation({
+    mutationFn: () => api.requestDeletion(password),
+    onSuccess: async () => {
+      setPassword('');
+      await client.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+  const cancelDeletion = useMutation({
+    mutationFn: () => api.cancelDeletion(),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['me'] }),
+  });
+  const signOut = useMutation({
+    mutationFn: () => api.signOut(),
+    onSuccess: () => {
+      client.clear();
+      void navigate('/sign-in');
+    },
+  });
+
+  if (me.data === undefined || me.data === null) {
+    return <p role="status">Loading…</p>;
+  }
+  const account = me.data;
+  const submitDeletion = (event: SyntheticEvent) => {
+    event.preventDefault();
+    requestDeletion.mutate();
+  };
+
   return (
     <>
       <h1>Account</h1>
-      <p className="muted">Sign-in and account settings will appear here.</p>
+      <p>
+        {account.name} · {account.email}
+      </p>
+      <StorageMeter used={account.storage.usedBytes} quota={account.storage.quotaBytes} />
+      <p>
+        <button
+          type="button"
+          disabled={signOut.isPending}
+          onClick={() => {
+            signOut.mutate();
+          }}
+        >
+          Sign out
+        </button>
+      </p>
+
+      <section aria-labelledby="devices" className="card">
+        <h2 id="devices">Signed-in devices</h2>
+        <ErrorNotice error={sessions.error ?? revoke.error} />
+        <ul>
+          {sessions.data?.items.map((session) => (
+            <li key={session.id}>
+              {session.userAgent ?? 'Unknown device'} · since {formatDate(session.createdAt)}
+              {session.current ? (
+                <strong> (this device)</strong>
+              ) : (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      revoke.mutate(session.id);
+                    }}
+                  >
+                    Sign out this device
+                  </button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="delete-title" className="card">
+        <h2 id="delete-title">Delete account</h2>
+        {account.deletionScheduledFor === null ? (
+          <form onSubmit={submitDeletion}>
+            <p>
+              This permanently deletes your account, memories and media after a 7-day grace period.
+              You can cancel during that time.
+            </p>
+            <Field
+              id="delete-password"
+              label="Confirm your password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+              required
+            />
+            <ErrorNotice error={requestDeletion.error} />
+            <button type="submit" className="danger" disabled={requestDeletion.isPending}>
+              Delete my account
+            </button>
+          </form>
+        ) : (
+          <>
+            <p role="status">
+              Your account is scheduled for deletion on{' '}
+              <strong>{formatDate(account.deletionScheduledFor)}</strong>.
+            </p>
+            <button
+              type="button"
+              disabled={cancelDeletion.isPending}
+              onClick={() => {
+                cancelDeletion.mutate();
+              }}
+            >
+              Cancel deletion
+            </button>
+            <ErrorNotice error={cancelDeletion.error} />
+          </>
+        )}
+      </section>
     </>
   );
 }

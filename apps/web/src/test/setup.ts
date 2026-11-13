@@ -1,11 +1,13 @@
 import * as matchers from 'vitest-axe/matchers';
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, expect } from 'vitest';
+import { afterEach, expect, vi } from 'vitest';
 
 expect.extend(matchers);
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   document.title = '';
 });
