@@ -1,0 +1,101 @@
+name: ios
+
+# iOS builds and tests run on GitHub-hosted cloud macOS (ADR-0016): there is no local Mac.
+# Manual dispatch only: nothing runs on push or pull request. Trigger with scripts/ios-ci.sh.
+# The repository is public, so GitHub-hosted macOS runners are free.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.47.7"
+
+jobs:
+  core:
+    name: Swift core unit tests
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: swift test (Flutter-free core, no simulator needed)
+        env:
+          DOROCAM_SWIFT_STANDALONE: "1"
+        run: swift test --package-path packages/doro_camera/ios/doro_camera --enable-code-coverage
+
+  simulator:
+    name: iOS Simulator (unit + integration)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Build for the simulator (no codesign)
+        working-directory: apps/mobile
+        run: flutter build ios --simulator --debug --no-codesign
+
+      - name: Debug build contains the synthetic camera marker
+        run: bash scripts/check-synthetic-camera.sh --expect-present apps/mobile/build/ios/iphonesimulator/Runner.app
+
+      - name: Boot simulator
+        id: sim
+        run: |
+          UDID="$(bash scripts/ios-simulator.sh)"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      # Starts the built app directly and prints what it does: makes a launch hang or crash visible
+      # (flutter test only says "Waiting for VM Service port to be available...").
+      - name: Launch diagnostics
+        continue-on-error: true
+        timeout-minutes: 4
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          xcrun simctl install "$UDID" apps/mobile/build/ios/iphonesimulator/Runner.app
+          xcrun simctl launch --console-pty --terminate-running-process "$UDID" com.dorocam.app > launch.log 2>&1 &
+          sleep 25
+          echo "--- console output of the launched app"; cat launch.log || true
+          echo "--- is it running?"; xcrun simctl spawn "$UDID" launchctl list | grep -i dorocam || echo "NOT RUNNING"
+          echo "--- system log for Runner (last minute)"
+          bash scripts/run-with-retry.sh --attempts 1 --timeout 60 -- bash -c 'xcrun simctl spawn "$0" log show --last 1m --style compact --predicate "process == \"Runner\"" 2>&1 | tail -60' "$UDID" || true
+          echo "--- crash reports"; ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null | tail -8 || true
+          xcrun simctl terminate "$UDID" com.dorocam.app || true
+
+      # `flutter test` on the iOS Simulator sometimes stalls at "Waiting for VM Service port to be
+      # available..." (the tool never sees the app's connection URL). A stalled attempt is killed after
+      # 7 minutes and retried; a healthy run needs about 4 (docs/research/testing-infrastructure.md).
+      - name: Integration tests on the simulator
+        timeout-minutes: 30
+        working-directory: apps/mobile
+        run: bash ../../scripts/run-with-retry.sh --attempts 3 --timeout 420 -- flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
+
+      - name: Release build excludes the synthetic camera (ADR-0013)
+        working-directory: apps/mobile
+        run: |
+          flutter build ios --release --no-codesign
+          bash ../../scripts/check-synthetic-camera.sh --expect-absent build/ios/iphoneos/Runner.app
+
+      - name: Simulator diagnostics
+        if: failure() || cancelled()
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          echo "--- booted devices"; xcrun simctl list devices booted
+          echo "--- installed apps"; xcrun simctl listapps "$UDID" 2>&1 | grep -E "CFBundleIdentifier|CFBundleDisplayName" | head -20 || true
+          echo "--- Runner log (last 15 minutes)"
+          xcrun simctl spawn "$UDID" log show --last 15m --style compact \
+            --predicate 'process == "Runner" OR process == "runner" OR subsystem CONTAINS "flutter"' 2>&1 | tail -150 || true
+          echo "--- crash reports"; ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null | tail -10 || true

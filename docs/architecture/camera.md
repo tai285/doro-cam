@@ -114,15 +114,15 @@ Every layer is testable without a physical phone:
 | Dart app | `CameraPlatform` | `FakeCameraPlatform` (scriptable capabilities, results, errors, events) | Dart VM (unit and widget tests) |
 | Kotlin plugin | `CameraCharacteristicsSource`, `CaptureRequestSink`, `Clock` | Fixture characteristics, recording sinks | JVM (JUnit + Robolectric) |
 | Kotlin plugin, real paths | The Android Emulator's emulated camera HAL | — (real CameraX/Camera2 code) | Android Emulator instrumentation |
-| Swift plugin | `CaptureDeviceProviding`, `CaptureSessionControlling`, `Clock` | Fake devices with scripted formats, ISO/duration ranges, and failures | XCTest on the iOS Simulator (cloud macOS) |
-| Swift plugin, end to end | `SyntheticCameraSource` (debug and test builds only) | Deterministic frames: test pattern, frame counter, timestamp; optional synthetic audio tone | iOS Simulator `integration_test` |
+| Swift plugin core | `DeviceFacts` (plain values read from `AVCaptureDevice` by `DeviceAdapter`), the capture-session state machine, `TimedRing`, `AtomicOutput` | Fake devices built from `DeviceFacts`, scripted events, temp directories, synthetic CoreImage inputs | `swift test` (`DOROCAM_SWIFT_STANDALONE=1`) on cloud macOS, manual `ios.yml` (ADR-0015, ADR-0016) |
+| Swift plugin, end to end | `SyntheticCamera` + `SyntheticDriver` (debug builds only, `DOROCAM_SYNTHETIC_CAMERA`) | Deterministic frames (moving gradient, white flash every second) and a matching 1 kHz beep | iOS Simulator `integration_test` on cloud macOS |
 | Motion pipeline | Frame/audio sample providers | Synthetic flash frames and beep tones at known timestamps | Emulator and Simulator |
 
 Rules for the synthetic source:
 - It is compiled only with the `DOROCAM_SYNTHETIC_CAMERA` flag (Swift) or the `debug` source set (Kotlin).
 - It is listed by `listCameras()` with `source: synthetic`, and the UI shows a "TEST CAMERA" badge.
 - It reports honest capabilities: it declares only the controls it actually simulates, and results report exactly what it applied.
-- A CI step asserts that release artifacts contain no synthetic-source symbols.
+- `scripts/check-synthetic-camera.sh` asserts that release artifacts contain no synthetic-source marker (run by `ios.yml`, and locally for Android).
 
 ## Performance and battery policy
 
@@ -130,3 +130,23 @@ Rules for the synthetic source:
 - LIVE ring buffering runs only while LIVE is on and the preview is visible (MOT-009).
 - Capture rendering runs off the camera thread. The shutter button re-arms as soon as the sensor capture completes, not after rendering.
 - Budgets (fps, shutter latency) are set from spike measurements (NFR-003, NFR-004). They are not invented here.
+
+## iOS implementation (as built)
+
+The iOS side follows ADR-0015: a Flutter-free `DoroCameraCore` target holds every decision, and the `doro_camera` glue target only converts Pigeon messages and talks to AVFoundation.
+
+| Concern | Where | How it works |
+|---|---|---|
+| Capability probe | `CapabilityProbe` (core), `DeviceFacts.init(device:photoOutput:)` (glue) | Manual ISO and shutter only with custom exposure **and** valid ranges; focal length from `videoFieldOfView`; white balance Kelvin only with lockable gains; manual focus only with a locked lens position **and** a known closest distance; aperture is display-only |
+| Settings | `SettingsClamp`, `AppliedComparison` (core), `DeviceController` (glue) | Dart sends resolved settings; the core clamps again as a safety net; the device is configured with `setExposureModeCustom`, `setFocusModeLocked`, locked white-balance gains, zoom and torch; applied values are read back and compared (mismatch names go to Dart) |
+| Manual focus | `FocusMath` | Dart speaks diopters (0 = infinity, up to the closest distance); iOS wants a lens position 0 (near) to 1 (far); the mapping is linear in diopters and always labelled uncalibrated |
+| Preview | `PreviewTexture`, `CameraSession` | BGRA frames from `AVCaptureVideoDataOutput` (4:3, portrait connection) published as a Flutter texture; the front preview is mirrored, saved photos never are |
+| Still capture | `PhotoCaptureDelegate`, `CameraSession.performCapture` | HEIC (or JPEG; DNG with a processed JPEG for rendering); the camera's file is written bit-exact to `.partial` then renamed (`AtomicOutput`); GPS goes into the photo's own metadata only when the app passes a location |
+| Renditions | `StillRenderer` (core, CoreImage and ImageIO) | Rendered JPEG with the LUT, vignette, grain and center crop; thumbnail (512) and display (2048) from it. A failure keeps the original and returns `renderFailed` |
+| Motion Memory | `TimedRing`, `MotionClipPlanner` (core), `FrameDownscaler`, `MotionClipWriter` (glue) | While LIVE is on, frames are copied to a private pool (15 fps, 960 px long edge) and audio is kept as 16-bit mono PCM, about 2 s. At the shutter the clip window is planned, post-roll is awaited, and video plus audio are encoded together to one MP4 (H.264 + AAC), so audio/video sync is kept |
+| Video | `VideoRecorder` | Real-time `AVAssetWriter` fed from the same frame path |
+| Interruptions | `SessionMachine` (core) | Another app, backgrounding, runtime errors and thermal state become events; a capture in progress finishes before the session pauses (no lost capture); critical thermal state closes the session with `thermal_shutdown`; background stops preview and buffering (NFR-012) |
+| Permissions | `PermissionEvaluation` (core), `DoroCameraPlugin` | Camera denial maps to `permission_denied` or `permission_restricted`; without microphone permission Motion is silent |
+| Synthetic camera | `SyntheticCamera`, `SyntheticDriver` | Debug builds only; offered by `listCameras()` only when the machine has no real camera (the Simulator); reports `source: synthetic` |
+
+Known limits, all recorded in [field-verification.md](../development/field-verification.md): the Motion clip is lower resolution than the still (memory safety); photo stabilization is not controllable on iOS; the iOS code has not yet been built (FV-008) until `ios.yml` has run.

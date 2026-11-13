@@ -9,6 +9,7 @@ rsync -a --delete \
   --exclude '.git' --exclude 'node_modules' --exclude '.dart_tool' --exclude 'build' \
   --exclude 'coverage' --exclude 'dist' --exclude '.gradle' --exclude 'playwright-report' \
   --exclude 'test-results' --exclude '.env' --exclude 'Pods' \
+  --exclude '.flutter-plugins*' --exclude 'local.properties' --exclude 'GeneratedPluginRegistrant.*' \
   "$SRC/" "$DST/"
 find "$DST" -path '*/node_modules' -prune -o -type f \( -name '*.sh' -o -name '*.ts' -o -name '*.dart' \) -print0 | xargs -0 sed -i 's/\r$//' 2>/dev/null || true
 echo "synced to $DST"

@@ -26,6 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Doro Cam uses the camera to take photos and Motion Memories.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Doro Cam records sound with Motion Memories and video. Without access they are silent.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Doro Cam can add the place a photo was taken. This is off unless you turn it on.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Doro Cam can save copies of your photos to your photo library when you ask it to.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

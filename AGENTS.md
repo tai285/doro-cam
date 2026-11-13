@@ -146,7 +146,7 @@ App-level commands (Flutter, API, web) are added here by the scaffolding tasks a
 - The product name is **Doro Cam** (confirmed by the owner, 2026-09-30).
 - The owner develops on **Windows 11** (i5-12450H, 16 GB RAM, WSL2 and Docker Desktop). There is **no local Mac** (ADR-0013):
   - **Android:** use the Android Emulator AVD `doro_api35` locally (needs Windows Hypervisor Platform; ask the owner to enable it if `emulator -accel-check` fails) and in CI with KVM.
-  - **iOS:** there is no Mac and no CI (ADR-0016), so iOS code cannot be built or run here. Write it carefully, keep its logic in the Flutter-free Swift core, and record it as unverified in field-verification.md.
+  - **iOS:** there is no local Mac. iOS is built and tested on GitHub cloud macOS by manually dispatching `ios.yml` (`bash scripts/ios-ci.sh`, ADR-0016). Keep its logic in the Flutter-free Swift core and record anything not yet passed there as unverified in field-verification.md.
   - **All tests run in WSL (Ubuntu), never in Windows.** Toolchain lives in `~/dev` inside WSL (`source scripts/dev-env.sh`). Mirror the Windows tree with `bash scripts/wsl-sync.sh`, then run tests in `~/doro-cam`. Docker runs inside WSL (`dockerd`).
   - **The synthetic camera source** exists for emulator and test builds only.
 - The owner's physical devices (**Honor X9c**, **iPhone 12 Pro Max**) are for optional field verification only. Agents never depend on them.

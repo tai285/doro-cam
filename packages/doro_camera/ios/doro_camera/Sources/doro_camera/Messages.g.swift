@@ -55,6 +55,10 @@ private func wrapError(_ error: Any) -> [Any?] {
   ]
 }
 
+private func createConnectionError(withChannelName channelName: String) -> PigeonError {
+  return PigeonError(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
+}
+
 enum MessagesPigeonInternal {
   static func isNullish(_ value: Any?) -> Bool {
     guard let innerValue = value else {
@@ -184,6 +188,1840 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 }
 
 
+enum CameraFacingMessage: Int, CaseIterable {
+  case back = 0
+  case front = 1
+  case external = 2
+}
+
+enum LensKindMessage: Int, CaseIterable {
+  case ultraWide = 0
+  case wide = 1
+  case tele = 2
+  case front = 3
+  case other = 4
+}
+
+/// `synthetic` exists only in debug and test builds (ADR-0013).
+enum CameraSourceMessage: Int, CaseIterable {
+  case hardware = 0
+  case synthetic = 1
+}
+
+enum PhotoFormatMessage: Int, CaseIterable {
+  case heif = 0
+  case jpeg = 1
+  case dng = 2
+}
+
+enum WbPresetMessage: Int, CaseIterable {
+  case auto = 0
+  case daylight = 1
+  case cloudy = 2
+  case shade = 3
+  case tungsten = 4
+  case fluorescent = 5
+}
+
+enum FlashModeMessage: Int, CaseIterable {
+  case off = 0
+  case auto = 1
+  case on = 2
+}
+
+enum FocusModeMessage: Int, CaseIterable {
+  case continuous = 0
+  case auto = 1
+  case manual = 2
+}
+
+enum FocusCalibrationMessage: Int, CaseIterable {
+  case uncalibrated = 0
+  case approximate = 1
+  case calibrated = 2
+}
+
+enum StabilizationModeMessage: Int, CaseIterable {
+  case off = 0
+  case standard = 1
+  case optical = 2
+}
+
+enum PermissionStatusMessage: Int, CaseIterable {
+  case granted = 0
+  case denied = 1
+  case restricted = 2
+  case notDetermined = 3
+}
+
+enum SessionStateMessage: Int, CaseIterable {
+  case configuring = 0
+  case previewing = 1
+  case capturing = 2
+  case recording = 3
+  case suspended = 4
+  case closed = 5
+}
+
+enum ThermalStateMessage: Int, CaseIterable {
+  case nominal = 0
+  case fair = 1
+  case serious = 2
+  case critical = 3
+}
+
+enum SessionEventKindMessage: Int, CaseIterable {
+  case state = 0
+  case applied = 1
+  case error = 2
+  case thermal = 3
+  case orientation = 4
+  case interrupted = 5
+  case resumed = 6
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct SizeMessage: Hashable, CustomStringConvertible {
+  var width: Int64
+  var height: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SizeMessage? {
+    let width = pigeonVar_list[0] as! Int64
+    let height = pigeonVar_list[1] as! Int64
+
+    return SizeMessage(
+      width: width,
+      height: height
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      width,
+      height,
+    ]
+  }
+  static func == (lhs: SizeMessage, rhs: SizeMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("SizeMessage")
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "SizeMessage(width: \(String(describing: width)), height: \(String(describing: height)))"
+  }
+}
+
+/// An inclusive integer range (ISO values, exposure durations in nanoseconds, Kelvin).
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct IntRangeMessage: Hashable, CustomStringConvertible {
+  var min: Int64
+  var max: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> IntRangeMessage? {
+    let min = pigeonVar_list[0] as! Int64
+    let max = pigeonVar_list[1] as! Int64
+
+    return IntRangeMessage(
+      min: min,
+      max: max
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      min,
+      max,
+    ]
+  }
+  static func == (lhs: IntRangeMessage, rhs: IntRangeMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.min, rhs.min) && MessagesPigeonInternal.deepEquals(lhs.max, rhs.max)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("IntRangeMessage")
+    MessagesPigeonInternal.deepHash(value: min, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: max, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "IntRangeMessage(min: \(String(describing: min)), max: \(String(describing: max)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct DoubleRangeMessage: Hashable, CustomStringConvertible {
+  var min: Double
+  var max: Double
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> DoubleRangeMessage? {
+    let min = pigeonVar_list[0] as! Double
+    let max = pigeonVar_list[1] as! Double
+
+    return DoubleRangeMessage(
+      min: min,
+      max: max
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      min,
+      max,
+    ]
+  }
+  static func == (lhs: DoubleRangeMessage, rhs: DoubleRangeMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.min, rhs.min) && MessagesPigeonInternal.deepEquals(lhs.max, rhs.max)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("DoubleRangeMessage")
+    MessagesPigeonInternal.deepHash(value: min, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: max, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "DoubleRangeMessage(min: \(String(describing: min)), max: \(String(describing: max)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct ExposureBiasCapabilityMessage: Hashable, CustomStringConvertible {
+  /// Range in EV stops (already multiplied by [step]).
+  var range: DoubleRangeMessage
+  /// Size of one compensation step in EV.
+  var step: Double
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ExposureBiasCapabilityMessage? {
+    let range = pigeonVar_list[0] as! DoubleRangeMessage
+    let step = pigeonVar_list[1] as! Double
+
+    return ExposureBiasCapabilityMessage(
+      range: range,
+      step: step
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      range,
+      step,
+    ]
+  }
+  static func == (lhs: ExposureBiasCapabilityMessage, rhs: ExposureBiasCapabilityMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.range, rhs.range) && MessagesPigeonInternal.deepEquals(lhs.step, rhs.step)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ExposureBiasCapabilityMessage")
+    MessagesPigeonInternal.deepHash(value: range, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: step, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "ExposureBiasCapabilityMessage(range: \(String(describing: range)), step: \(String(describing: step)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct ManualFocusCapabilityMessage: Hashable, CustomStringConvertible {
+  /// Diopters of the closest focus distance (1 / metres). Manual focus accepts 0 (infinity) .. this.
+  var minFocusDistanceDiopters: Double
+  var calibration: FocusCalibrationMessage
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ManualFocusCapabilityMessage? {
+    let minFocusDistanceDiopters = pigeonVar_list[0] as! Double
+    let calibration = pigeonVar_list[1] as! FocusCalibrationMessage
+
+    return ManualFocusCapabilityMessage(
+      minFocusDistanceDiopters: minFocusDistanceDiopters,
+      calibration: calibration
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      minFocusDistanceDiopters,
+      calibration,
+    ]
+  }
+  static func == (lhs: ManualFocusCapabilityMessage, rhs: ManualFocusCapabilityMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.minFocusDistanceDiopters, rhs.minFocusDistanceDiopters) && MessagesPigeonInternal.deepEquals(lhs.calibration, rhs.calibration)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ManualFocusCapabilityMessage")
+    MessagesPigeonInternal.deepHash(value: minFocusDistanceDiopters, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: calibration, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "ManualFocusCapabilityMessage(minFocusDistanceDiopters: \(String(describing: minFocusDistanceDiopters)), calibration: \(String(describing: calibration)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct FocusCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var auto: Bool
+  var continuous: Bool
+  var tapToFocus: Bool
+  var manual: ManualFocusCapabilityMessage? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> FocusCapabilitiesMessage? {
+    let auto = pigeonVar_list[0] as! Bool
+    let continuous = pigeonVar_list[1] as! Bool
+    let tapToFocus = pigeonVar_list[2] as! Bool
+    let manual: ManualFocusCapabilityMessage? = nilOrValue(pigeonVar_list[3])
+
+    return FocusCapabilitiesMessage(
+      auto: auto,
+      continuous: continuous,
+      tapToFocus: tapToFocus,
+      manual: manual
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      auto,
+      continuous,
+      tapToFocus,
+      manual,
+    ]
+  }
+  static func == (lhs: FocusCapabilitiesMessage, rhs: FocusCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.auto, rhs.auto) && MessagesPigeonInternal.deepEquals(lhs.continuous, rhs.continuous) && MessagesPigeonInternal.deepEquals(lhs.tapToFocus, rhs.tapToFocus) && MessagesPigeonInternal.deepEquals(lhs.manual, rhs.manual)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("FocusCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: auto, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: continuous, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: tapToFocus, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: manual, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "FocusCapabilitiesMessage(auto: \(String(describing: auto)), continuous: \(String(describing: continuous)), tapToFocus: \(String(describing: tapToFocus)), manual: \(String(describing: manual)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct WhiteBalanceCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var presets: [WbPresetMessage]
+  /// Non-null only when the device really supports manual colour gains (docs/specs/camera.md).
+  var kelvin: IntRangeMessage? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> WhiteBalanceCapabilitiesMessage? {
+    let presets = pigeonVar_list[0] as! [WbPresetMessage]
+    let kelvin: IntRangeMessage? = nilOrValue(pigeonVar_list[1])
+
+    return WhiteBalanceCapabilitiesMessage(
+      presets: presets,
+      kelvin: kelvin
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      presets,
+      kelvin,
+    ]
+  }
+  static func == (lhs: WhiteBalanceCapabilitiesMessage, rhs: WhiteBalanceCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.presets, rhs.presets) && MessagesPigeonInternal.deepEquals(lhs.kelvin, rhs.kelvin)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("WhiteBalanceCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: presets, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: kelvin, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "WhiteBalanceCapabilitiesMessage(presets: \(String(describing: presets)), kelvin: \(String(describing: kelvin)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct ZoomCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var min: Double
+  var max: Double
+  /// Zoom ratios that correspond to real optical lenses (for example 1.0, 2.0). May be just [1.0].
+  var opticalSteps: [Double]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ZoomCapabilitiesMessage? {
+    let min = pigeonVar_list[0] as! Double
+    let max = pigeonVar_list[1] as! Double
+    let opticalSteps = pigeonVar_list[2] as! [Double]
+
+    return ZoomCapabilitiesMessage(
+      min: min,
+      max: max,
+      opticalSteps: opticalSteps
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      min,
+      max,
+      opticalSteps,
+    ]
+  }
+  static func == (lhs: ZoomCapabilitiesMessage, rhs: ZoomCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.min, rhs.min) && MessagesPigeonInternal.deepEquals(lhs.max, rhs.max) && MessagesPigeonInternal.deepEquals(lhs.opticalSteps, rhs.opticalSteps)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ZoomCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: min, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: max, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: opticalSteps, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "ZoomCapabilitiesMessage(min: \(String(describing: min)), max: \(String(describing: max)), opticalSteps: \(String(describing: opticalSteps)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct StabilizationCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var photo: [StabilizationModeMessage]
+  var video: [StabilizationModeMessage]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> StabilizationCapabilitiesMessage? {
+    let photo = pigeonVar_list[0] as! [StabilizationModeMessage]
+    let video = pigeonVar_list[1] as! [StabilizationModeMessage]
+
+    return StabilizationCapabilitiesMessage(
+      photo: photo,
+      video: video
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      photo,
+      video,
+    ]
+  }
+  static func == (lhs: StabilizationCapabilitiesMessage, rhs: StabilizationCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.photo, rhs.photo) && MessagesPigeonInternal.deepEquals(lhs.video, rhs.video)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("StabilizationCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: photo, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: video, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "StabilizationCapabilitiesMessage(photo: \(String(describing: photo)), video: \(String(describing: video)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct VideoSizeOptionMessage: Hashable, CustomStringConvertible {
+  var size: SizeMessage
+  var fps: [Int64]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VideoSizeOptionMessage? {
+    let size = pigeonVar_list[0] as! SizeMessage
+    let fps = pigeonVar_list[1] as! [Int64]
+
+    return VideoSizeOptionMessage(
+      size: size,
+      fps: fps
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      size,
+      fps,
+    ]
+  }
+  static func == (lhs: VideoSizeOptionMessage, rhs: VideoSizeOptionMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.size, rhs.size) && MessagesPigeonInternal.deepEquals(lhs.fps, rhs.fps)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("VideoSizeOptionMessage")
+    MessagesPigeonInternal.deepHash(value: size, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: fps, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "VideoSizeOptionMessage(size: \(String(describing: size)), fps: \(String(describing: fps)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct VideoCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var options: [VideoSizeOptionMessage]
+  var audio: Bool
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VideoCapabilitiesMessage? {
+    let options = pigeonVar_list[0] as! [VideoSizeOptionMessage]
+    let audio = pigeonVar_list[1] as! Bool
+
+    return VideoCapabilitiesMessage(
+      options: options,
+      audio: audio
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      options,
+      audio,
+    ]
+  }
+  static func == (lhs: VideoCapabilitiesMessage, rhs: VideoCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.options, rhs.options) && MessagesPigeonInternal.deepEquals(lhs.audio, rhs.audio)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("VideoCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: options, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: audio, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "VideoCapabilitiesMessage(options: \(String(describing: options)), audio: \(String(describing: audio)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct LiveCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var supported: Bool
+  var maxPreBufferMs: Int64
+  var audio: Bool
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> LiveCapabilitiesMessage? {
+    let supported = pigeonVar_list[0] as! Bool
+    let maxPreBufferMs = pigeonVar_list[1] as! Int64
+    let audio = pigeonVar_list[2] as! Bool
+
+    return LiveCapabilitiesMessage(
+      supported: supported,
+      maxPreBufferMs: maxPreBufferMs,
+      audio: audio
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      supported,
+      maxPreBufferMs,
+      audio,
+    ]
+  }
+  static func == (lhs: LiveCapabilitiesMessage, rhs: LiveCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.supported, rhs.supported) && MessagesPigeonInternal.deepEquals(lhs.maxPreBufferMs, rhs.maxPreBufferMs) && MessagesPigeonInternal.deepEquals(lhs.audio, rhs.audio)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("LiveCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: supported, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: maxPreBufferMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: audio, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "LiveCapabilitiesMessage(supported: \(String(describing: supported)), maxPreBufferMs: \(String(describing: maxPreBufferMs)), audio: \(String(describing: audio)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct CameraDescriptorMessage: Hashable, CustomStringConvertible {
+  var id: String
+  var facing: CameraFacingMessage
+  var lensKind: LensKindMessage
+  var isLogical: Bool
+  var physicalIds: [String]
+  var sensorOrientation: Int64
+  var source: CameraSourceMessage
+  /// Short human label such as "Back camera" or "Back camera (wide)".
+  var label: String
+  var focalLengthMm: Double? = nil
+  var focalLength35mmEq: Double? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> CameraDescriptorMessage? {
+    let id = pigeonVar_list[0] as! String
+    let facing = pigeonVar_list[1] as! CameraFacingMessage
+    let lensKind = pigeonVar_list[2] as! LensKindMessage
+    let isLogical = pigeonVar_list[3] as! Bool
+    let physicalIds = pigeonVar_list[4] as! [String]
+    let sensorOrientation = pigeonVar_list[5] as! Int64
+    let source = pigeonVar_list[6] as! CameraSourceMessage
+    let label = pigeonVar_list[7] as! String
+    let focalLengthMm: Double? = nilOrValue(pigeonVar_list[8])
+    let focalLength35mmEq: Double? = nilOrValue(pigeonVar_list[9])
+
+    return CameraDescriptorMessage(
+      id: id,
+      facing: facing,
+      lensKind: lensKind,
+      isLogical: isLogical,
+      physicalIds: physicalIds,
+      sensorOrientation: sensorOrientation,
+      source: source,
+      label: label,
+      focalLengthMm: focalLengthMm,
+      focalLength35mmEq: focalLength35mmEq
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      id,
+      facing,
+      lensKind,
+      isLogical,
+      physicalIds,
+      sensorOrientation,
+      source,
+      label,
+      focalLengthMm,
+      focalLength35mmEq,
+    ]
+  }
+  static func == (lhs: CameraDescriptorMessage, rhs: CameraDescriptorMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.id, rhs.id) && MessagesPigeonInternal.deepEquals(lhs.facing, rhs.facing) && MessagesPigeonInternal.deepEquals(lhs.lensKind, rhs.lensKind) && MessagesPigeonInternal.deepEquals(lhs.isLogical, rhs.isLogical) && MessagesPigeonInternal.deepEquals(lhs.physicalIds, rhs.physicalIds) && MessagesPigeonInternal.deepEquals(lhs.sensorOrientation, rhs.sensorOrientation) && MessagesPigeonInternal.deepEquals(lhs.source, rhs.source) && MessagesPigeonInternal.deepEquals(lhs.label, rhs.label) && MessagesPigeonInternal.deepEquals(lhs.focalLengthMm, rhs.focalLengthMm) && MessagesPigeonInternal.deepEquals(lhs.focalLength35mmEq, rhs.focalLength35mmEq)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("CameraDescriptorMessage")
+    MessagesPigeonInternal.deepHash(value: id, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: facing, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: lensKind, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: isLogical, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: physicalIds, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: sensorOrientation, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: source, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: label, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focalLengthMm, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focalLength35mmEq, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "CameraDescriptorMessage(id: \(String(describing: id)), facing: \(String(describing: facing)), lensKind: \(String(describing: lensKind)), isLogical: \(String(describing: isLogical)), physicalIds: \(String(describing: physicalIds)), sensorOrientation: \(String(describing: sensorOrientation)), source: \(String(describing: source)), label: \(String(describing: label)), focalLengthMm: \(String(describing: focalLengthMm)), focalLength35mmEq: \(String(describing: focalLength35mmEq)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct CameraCapabilitiesMessage: Hashable, CustomStringConvertible {
+  var cameraId: String
+  /// Null = no manual ISO.
+  var iso: IntRangeMessage? = nil
+  /// Nanoseconds. Null = no manual shutter.
+  var exposureTimeNs: IntRangeMessage? = nil
+  var exposureBias: ExposureBiasCapabilityMessage? = nil
+  /// Usually length 1, which means display only (CAM-013).
+  var apertures: [Double]
+  var focus: FocusCapabilitiesMessage
+  var whiteBalance: WhiteBalanceCapabilitiesMessage
+  var zoom: ZoomCapabilitiesMessage
+  var flash: [FlashModeMessage]
+  var torch: Bool
+  var photoFormats: [PhotoFormatMessage]
+  var photoSizes: [SizeMessage]
+  var stabilization: StabilizationCapabilitiesMessage
+  var video: VideoCapabilitiesMessage
+  var hdr: Bool
+  var live: LiveCapabilitiesMessage
+  /// Android: LEGACY | LIMITED | FULL | LEVEL_3 | EXTERNAL. iOS: `n/a`.
+  var hardwareLevel: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> CameraCapabilitiesMessage? {
+    let cameraId = pigeonVar_list[0] as! String
+    let iso: IntRangeMessage? = nilOrValue(pigeonVar_list[1])
+    let exposureTimeNs: IntRangeMessage? = nilOrValue(pigeonVar_list[2])
+    let exposureBias: ExposureBiasCapabilityMessage? = nilOrValue(pigeonVar_list[3])
+    let apertures = pigeonVar_list[4] as! [Double]
+    let focus = pigeonVar_list[5] as! FocusCapabilitiesMessage
+    let whiteBalance = pigeonVar_list[6] as! WhiteBalanceCapabilitiesMessage
+    let zoom = pigeonVar_list[7] as! ZoomCapabilitiesMessage
+    let flash = pigeonVar_list[8] as! [FlashModeMessage]
+    let torch = pigeonVar_list[9] as! Bool
+    let photoFormats = pigeonVar_list[10] as! [PhotoFormatMessage]
+    let photoSizes = pigeonVar_list[11] as! [SizeMessage]
+    let stabilization = pigeonVar_list[12] as! StabilizationCapabilitiesMessage
+    let video = pigeonVar_list[13] as! VideoCapabilitiesMessage
+    let hdr = pigeonVar_list[14] as! Bool
+    let live = pigeonVar_list[15] as! LiveCapabilitiesMessage
+    let hardwareLevel = pigeonVar_list[16] as! String
+
+    return CameraCapabilitiesMessage(
+      cameraId: cameraId,
+      iso: iso,
+      exposureTimeNs: exposureTimeNs,
+      exposureBias: exposureBias,
+      apertures: apertures,
+      focus: focus,
+      whiteBalance: whiteBalance,
+      zoom: zoom,
+      flash: flash,
+      torch: torch,
+      photoFormats: photoFormats,
+      photoSizes: photoSizes,
+      stabilization: stabilization,
+      video: video,
+      hdr: hdr,
+      live: live,
+      hardwareLevel: hardwareLevel
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      cameraId,
+      iso,
+      exposureTimeNs,
+      exposureBias,
+      apertures,
+      focus,
+      whiteBalance,
+      zoom,
+      flash,
+      torch,
+      photoFormats,
+      photoSizes,
+      stabilization,
+      video,
+      hdr,
+      live,
+      hardwareLevel,
+    ]
+  }
+  static func == (lhs: CameraCapabilitiesMessage, rhs: CameraCapabilitiesMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.cameraId, rhs.cameraId) && MessagesPigeonInternal.deepEquals(lhs.iso, rhs.iso) && MessagesPigeonInternal.deepEquals(lhs.exposureTimeNs, rhs.exposureTimeNs) && MessagesPigeonInternal.deepEquals(lhs.exposureBias, rhs.exposureBias) && MessagesPigeonInternal.deepEquals(lhs.apertures, rhs.apertures) && MessagesPigeonInternal.deepEquals(lhs.focus, rhs.focus) && MessagesPigeonInternal.deepEquals(lhs.whiteBalance, rhs.whiteBalance) && MessagesPigeonInternal.deepEquals(lhs.zoom, rhs.zoom) && MessagesPigeonInternal.deepEquals(lhs.flash, rhs.flash) && MessagesPigeonInternal.deepEquals(lhs.torch, rhs.torch) && MessagesPigeonInternal.deepEquals(lhs.photoFormats, rhs.photoFormats) && MessagesPigeonInternal.deepEquals(lhs.photoSizes, rhs.photoSizes) && MessagesPigeonInternal.deepEquals(lhs.stabilization, rhs.stabilization) && MessagesPigeonInternal.deepEquals(lhs.video, rhs.video) && MessagesPigeonInternal.deepEquals(lhs.hdr, rhs.hdr) && MessagesPigeonInternal.deepEquals(lhs.live, rhs.live) && MessagesPigeonInternal.deepEquals(lhs.hardwareLevel, rhs.hardwareLevel)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("CameraCapabilitiesMessage")
+    MessagesPigeonInternal.deepHash(value: cameraId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: iso, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: exposureTimeNs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: exposureBias, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: apertures, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focus, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: whiteBalance, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: zoom, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: flash, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: torch, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: photoFormats, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: photoSizes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: stabilization, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: video, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: hdr, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: live, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: hardwareLevel, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "CameraCapabilitiesMessage(cameraId: \(String(describing: cameraId)), iso: \(String(describing: iso)), exposureTimeNs: \(String(describing: exposureTimeNs)), exposureBias: \(String(describing: exposureBias)), apertures: \(String(describing: apertures)), focus: \(String(describing: focus)), whiteBalance: \(String(describing: whiteBalance)), zoom: \(String(describing: zoom)), flash: \(String(describing: flash)), torch: \(String(describing: torch)), photoFormats: \(String(describing: photoFormats)), photoSizes: \(String(describing: photoSizes)), stabilization: \(String(describing: stabilization)), video: \(String(describing: video)), hdr: \(String(describing: hdr)), live: \(String(describing: live)), hardwareLevel: \(String(describing: hardwareLevel)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct SessionConfigMessage: Hashable, CustomStringConvertible {
+  var cameraId: String
+  var photoFormat: PhotoFormatMessage
+  /// Keep a rolling pre-shutter buffer so a capture can include motion (MOT-009).
+  var live: Bool
+  /// Record audio for motion and video. Requires microphone permission, else motion is silent (MOT-003).
+  var audio: Bool
+  var previewSize: SizeMessage? = nil
+  /// Null = the largest size the format supports (CAM-003).
+  var photoSize: SizeMessage? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SessionConfigMessage? {
+    let cameraId = pigeonVar_list[0] as! String
+    let photoFormat = pigeonVar_list[1] as! PhotoFormatMessage
+    let live = pigeonVar_list[2] as! Bool
+    let audio = pigeonVar_list[3] as! Bool
+    let previewSize: SizeMessage? = nilOrValue(pigeonVar_list[4])
+    let photoSize: SizeMessage? = nilOrValue(pigeonVar_list[5])
+
+    return SessionConfigMessage(
+      cameraId: cameraId,
+      photoFormat: photoFormat,
+      live: live,
+      audio: audio,
+      previewSize: previewSize,
+      photoSize: photoSize
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      cameraId,
+      photoFormat,
+      live,
+      audio,
+      previewSize,
+      photoSize,
+    ]
+  }
+  static func == (lhs: SessionConfigMessage, rhs: SessionConfigMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.cameraId, rhs.cameraId) && MessagesPigeonInternal.deepEquals(lhs.photoFormat, rhs.photoFormat) && MessagesPigeonInternal.deepEquals(lhs.live, rhs.live) && MessagesPigeonInternal.deepEquals(lhs.audio, rhs.audio) && MessagesPigeonInternal.deepEquals(lhs.previewSize, rhs.previewSize) && MessagesPigeonInternal.deepEquals(lhs.photoSize, rhs.photoSize)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("SessionConfigMessage")
+    MessagesPigeonInternal.deepHash(value: cameraId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: photoFormat, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: live, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: audio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: previewSize, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: photoSize, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "SessionConfigMessage(cameraId: \(String(describing: cameraId)), photoFormat: \(String(describing: photoFormat)), live: \(String(describing: live)), audio: \(String(describing: audio)), previewSize: \(String(describing: previewSize)), photoSize: \(String(describing: photoSize)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct SessionInfoMessage: Hashable, CustomStringConvertible {
+  var sessionId: Int64
+  /// Flutter `Texture` id of the live preview.
+  var textureId: Int64
+  var cameraId: String
+  /// Size of the preview frames as delivered (before rotating for display).
+  var previewSize: SizeMessage
+  var photoSize: SizeMessage
+  /// The format actually used, which can differ from the request (typed fallback, docs/specs/camera.md).
+  var photoFormat: PhotoFormatMessage
+  var sensorOrientation: Int64
+  var source: CameraSourceMessage
+  var liveActive: Bool
+  var audioActive: Bool
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SessionInfoMessage? {
+    let sessionId = pigeonVar_list[0] as! Int64
+    let textureId = pigeonVar_list[1] as! Int64
+    let cameraId = pigeonVar_list[2] as! String
+    let previewSize = pigeonVar_list[3] as! SizeMessage
+    let photoSize = pigeonVar_list[4] as! SizeMessage
+    let photoFormat = pigeonVar_list[5] as! PhotoFormatMessage
+    let sensorOrientation = pigeonVar_list[6] as! Int64
+    let source = pigeonVar_list[7] as! CameraSourceMessage
+    let liveActive = pigeonVar_list[8] as! Bool
+    let audioActive = pigeonVar_list[9] as! Bool
+
+    return SessionInfoMessage(
+      sessionId: sessionId,
+      textureId: textureId,
+      cameraId: cameraId,
+      previewSize: previewSize,
+      photoSize: photoSize,
+      photoFormat: photoFormat,
+      sensorOrientation: sensorOrientation,
+      source: source,
+      liveActive: liveActive,
+      audioActive: audioActive
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      sessionId,
+      textureId,
+      cameraId,
+      previewSize,
+      photoSize,
+      photoFormat,
+      sensorOrientation,
+      source,
+      liveActive,
+      audioActive,
+    ]
+  }
+  static func == (lhs: SessionInfoMessage, rhs: SessionInfoMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.sessionId, rhs.sessionId) && MessagesPigeonInternal.deepEquals(lhs.textureId, rhs.textureId) && MessagesPigeonInternal.deepEquals(lhs.cameraId, rhs.cameraId) && MessagesPigeonInternal.deepEquals(lhs.previewSize, rhs.previewSize) && MessagesPigeonInternal.deepEquals(lhs.photoSize, rhs.photoSize) && MessagesPigeonInternal.deepEquals(lhs.photoFormat, rhs.photoFormat) && MessagesPigeonInternal.deepEquals(lhs.sensorOrientation, rhs.sensorOrientation) && MessagesPigeonInternal.deepEquals(lhs.source, rhs.source) && MessagesPigeonInternal.deepEquals(lhs.liveActive, rhs.liveActive) && MessagesPigeonInternal.deepEquals(lhs.audioActive, rhs.audioActive)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("SessionInfoMessage")
+    MessagesPigeonInternal.deepHash(value: sessionId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: textureId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: cameraId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: previewSize, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: photoSize, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: photoFormat, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: sensorOrientation, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: source, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: liveActive, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: audioActive, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "SessionInfoMessage(sessionId: \(String(describing: sessionId)), textureId: \(String(describing: textureId)), cameraId: \(String(describing: cameraId)), previewSize: \(String(describing: previewSize)), photoSize: \(String(describing: photoSize)), photoFormat: \(String(describing: photoFormat)), sensorOrientation: \(String(describing: sensorOrientation)), source: \(String(describing: source)), liveActive: \(String(describing: liveActive)), audioActive: \(String(describing: audioActive)))"
+  }
+}
+
+/// Already clamped to the capabilities by the Dart resolver. Native applies it as given.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct ResolvedCaptureSettingsMessage: Hashable, CustomStringConvertible {
+  /// Manual ISO; both [iso] and [exposureTimeNs] null = auto exposure.
+  var iso: Int64? = nil
+  /// Manual shutter in nanoseconds.
+  var exposureTimeNs: Int64? = nil
+  /// Exposure compensation in EV. Ignored by native when exposure is fully manual.
+  var exposureBiasEv: Double? = nil
+  var aeLock: Bool
+  var focusMode: FocusModeMessage
+  /// Only for [FocusModeMessage.manual].
+  var focusDistanceDiopters: Double? = nil
+  var afLock: Bool
+  /// Null = auto white balance.
+  var whiteBalancePreset: WbPresetMessage? = nil
+  /// Takes precedence over [whiteBalancePreset].
+  var kelvin: Int64? = nil
+  var zoomRatio: Double
+  var flash: FlashModeMessage
+  var torch: Bool
+  var stabilization: StabilizationModeMessage? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ResolvedCaptureSettingsMessage? {
+    let iso: Int64? = nilOrValue(pigeonVar_list[0])
+    let exposureTimeNs: Int64? = nilOrValue(pigeonVar_list[1])
+    let exposureBiasEv: Double? = nilOrValue(pigeonVar_list[2])
+    let aeLock = pigeonVar_list[3] as! Bool
+    let focusMode = pigeonVar_list[4] as! FocusModeMessage
+    let focusDistanceDiopters: Double? = nilOrValue(pigeonVar_list[5])
+    let afLock = pigeonVar_list[6] as! Bool
+    let whiteBalancePreset: WbPresetMessage? = nilOrValue(pigeonVar_list[7])
+    let kelvin: Int64? = nilOrValue(pigeonVar_list[8])
+    let zoomRatio = pigeonVar_list[9] as! Double
+    let flash = pigeonVar_list[10] as! FlashModeMessage
+    let torch = pigeonVar_list[11] as! Bool
+    let stabilization: StabilizationModeMessage? = nilOrValue(pigeonVar_list[12])
+
+    return ResolvedCaptureSettingsMessage(
+      iso: iso,
+      exposureTimeNs: exposureTimeNs,
+      exposureBiasEv: exposureBiasEv,
+      aeLock: aeLock,
+      focusMode: focusMode,
+      focusDistanceDiopters: focusDistanceDiopters,
+      afLock: afLock,
+      whiteBalancePreset: whiteBalancePreset,
+      kelvin: kelvin,
+      zoomRatio: zoomRatio,
+      flash: flash,
+      torch: torch,
+      stabilization: stabilization
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      iso,
+      exposureTimeNs,
+      exposureBiasEv,
+      aeLock,
+      focusMode,
+      focusDistanceDiopters,
+      afLock,
+      whiteBalancePreset,
+      kelvin,
+      zoomRatio,
+      flash,
+      torch,
+      stabilization,
+    ]
+  }
+  static func == (lhs: ResolvedCaptureSettingsMessage, rhs: ResolvedCaptureSettingsMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.iso, rhs.iso) && MessagesPigeonInternal.deepEquals(lhs.exposureTimeNs, rhs.exposureTimeNs) && MessagesPigeonInternal.deepEquals(lhs.exposureBiasEv, rhs.exposureBiasEv) && MessagesPigeonInternal.deepEquals(lhs.aeLock, rhs.aeLock) && MessagesPigeonInternal.deepEquals(lhs.focusMode, rhs.focusMode) && MessagesPigeonInternal.deepEquals(lhs.focusDistanceDiopters, rhs.focusDistanceDiopters) && MessagesPigeonInternal.deepEquals(lhs.afLock, rhs.afLock) && MessagesPigeonInternal.deepEquals(lhs.whiteBalancePreset, rhs.whiteBalancePreset) && MessagesPigeonInternal.deepEquals(lhs.kelvin, rhs.kelvin) && MessagesPigeonInternal.deepEquals(lhs.zoomRatio, rhs.zoomRatio) && MessagesPigeonInternal.deepEquals(lhs.flash, rhs.flash) && MessagesPigeonInternal.deepEquals(lhs.torch, rhs.torch) && MessagesPigeonInternal.deepEquals(lhs.stabilization, rhs.stabilization)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ResolvedCaptureSettingsMessage")
+    MessagesPigeonInternal.deepHash(value: iso, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: exposureTimeNs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: exposureBiasEv, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: aeLock, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focusMode, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focusDistanceDiopters, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: afLock, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: whiteBalancePreset, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: kelvin, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: zoomRatio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: flash, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: torch, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: stabilization, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "ResolvedCaptureSettingsMessage(iso: \(String(describing: iso)), exposureTimeNs: \(String(describing: exposureTimeNs)), exposureBiasEv: \(String(describing: exposureBiasEv)), aeLock: \(String(describing: aeLock)), focusMode: \(String(describing: focusMode)), focusDistanceDiopters: \(String(describing: focusDistanceDiopters)), afLock: \(String(describing: afLock)), whiteBalancePreset: \(String(describing: whiteBalancePreset)), kelvin: \(String(describing: kelvin)), zoomRatio: \(String(describing: zoomRatio)), flash: \(String(describing: flash)), torch: \(String(describing: torch)), stabilization: \(String(describing: stabilization)))"
+  }
+}
+
+/// What the device reported it actually used (CAM-050). Every value comes from the capture result.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct AppliedSettingsMessage: Hashable, CustomStringConvertible {
+  var iso: Int64? = nil
+  var exposureTimeNs: Int64? = nil
+  var exposureBiasEv: Double? = nil
+  var aperture: Double? = nil
+  var focalLengthMm: Double? = nil
+  var focusDistanceDiopters: Double? = nil
+  var focusMode: FocusModeMessage? = nil
+  /// `auto`, or `manual`, or a preset name.
+  var whiteBalanceMode: String? = nil
+  /// Red, green-even, green-odd, blue gains when the device reported them.
+  var whiteBalanceGains: [Double]? = nil
+  /// Estimated colour temperature derived from the gains. Never a hardware-reported value.
+  var estimatedKelvin: Int64? = nil
+  var aeLocked: Bool
+  var afLocked: Bool
+  var zoomRatio: Double
+  var flashFired: Bool? = nil
+  var flash: FlashModeMessage? = nil
+  var stabilization: StabilizationModeMessage? = nil
+  /// Names of requested fields the device did not honour (for example `iso`), so Dart can downgrade
+  /// the capability after a persistent mismatch (docs/specs/camera.md acceptance criteria).
+  var mismatches: [String]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> AppliedSettingsMessage? {
+    let iso: Int64? = nilOrValue(pigeonVar_list[0])
+    let exposureTimeNs: Int64? = nilOrValue(pigeonVar_list[1])
+    let exposureBiasEv: Double? = nilOrValue(pigeonVar_list[2])
+    let aperture: Double? = nilOrValue(pigeonVar_list[3])
+    let focalLengthMm: Double? = nilOrValue(pigeonVar_list[4])
+    let focusDistanceDiopters: Double? = nilOrValue(pigeonVar_list[5])
+    let focusMode: FocusModeMessage? = nilOrValue(pigeonVar_list[6])
+    let whiteBalanceMode: String? = nilOrValue(pigeonVar_list[7])
+    let whiteBalanceGains: [Double]? = nilOrValue(pigeonVar_list[8])
+    let estimatedKelvin: Int64? = nilOrValue(pigeonVar_list[9])
+    let aeLocked = pigeonVar_list[10] as! Bool
+    let afLocked = pigeonVar_list[11] as! Bool
+    let zoomRatio = pigeonVar_list[12] as! Double
+    let flashFired: Bool? = nilOrValue(pigeonVar_list[13])
+    let flash: FlashModeMessage? = nilOrValue(pigeonVar_list[14])
+    let stabilization: StabilizationModeMessage? = nilOrValue(pigeonVar_list[15])
+    let mismatches = pigeonVar_list[16] as! [String]
+
+    return AppliedSettingsMessage(
+      iso: iso,
+      exposureTimeNs: exposureTimeNs,
+      exposureBiasEv: exposureBiasEv,
+      aperture: aperture,
+      focalLengthMm: focalLengthMm,
+      focusDistanceDiopters: focusDistanceDiopters,
+      focusMode: focusMode,
+      whiteBalanceMode: whiteBalanceMode,
+      whiteBalanceGains: whiteBalanceGains,
+      estimatedKelvin: estimatedKelvin,
+      aeLocked: aeLocked,
+      afLocked: afLocked,
+      zoomRatio: zoomRatio,
+      flashFired: flashFired,
+      flash: flash,
+      stabilization: stabilization,
+      mismatches: mismatches
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      iso,
+      exposureTimeNs,
+      exposureBiasEv,
+      aperture,
+      focalLengthMm,
+      focusDistanceDiopters,
+      focusMode,
+      whiteBalanceMode,
+      whiteBalanceGains,
+      estimatedKelvin,
+      aeLocked,
+      afLocked,
+      zoomRatio,
+      flashFired,
+      flash,
+      stabilization,
+      mismatches,
+    ]
+  }
+  static func == (lhs: AppliedSettingsMessage, rhs: AppliedSettingsMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.iso, rhs.iso) && MessagesPigeonInternal.deepEquals(lhs.exposureTimeNs, rhs.exposureTimeNs) && MessagesPigeonInternal.deepEquals(lhs.exposureBiasEv, rhs.exposureBiasEv) && MessagesPigeonInternal.deepEquals(lhs.aperture, rhs.aperture) && MessagesPigeonInternal.deepEquals(lhs.focalLengthMm, rhs.focalLengthMm) && MessagesPigeonInternal.deepEquals(lhs.focusDistanceDiopters, rhs.focusDistanceDiopters) && MessagesPigeonInternal.deepEquals(lhs.focusMode, rhs.focusMode) && MessagesPigeonInternal.deepEquals(lhs.whiteBalanceMode, rhs.whiteBalanceMode) && MessagesPigeonInternal.deepEquals(lhs.whiteBalanceGains, rhs.whiteBalanceGains) && MessagesPigeonInternal.deepEquals(lhs.estimatedKelvin, rhs.estimatedKelvin) && MessagesPigeonInternal.deepEquals(lhs.aeLocked, rhs.aeLocked) && MessagesPigeonInternal.deepEquals(lhs.afLocked, rhs.afLocked) && MessagesPigeonInternal.deepEquals(lhs.zoomRatio, rhs.zoomRatio) && MessagesPigeonInternal.deepEquals(lhs.flashFired, rhs.flashFired) && MessagesPigeonInternal.deepEquals(lhs.flash, rhs.flash) && MessagesPigeonInternal.deepEquals(lhs.stabilization, rhs.stabilization) && MessagesPigeonInternal.deepEquals(lhs.mismatches, rhs.mismatches)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("AppliedSettingsMessage")
+    MessagesPigeonInternal.deepHash(value: iso, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: exposureTimeNs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: exposureBiasEv, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: aperture, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focalLengthMm, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focusDistanceDiopters, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: focusMode, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: whiteBalanceMode, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: whiteBalanceGains, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: estimatedKelvin, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: aeLocked, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: afLocked, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: zoomRatio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: flashFired, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: flash, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: stabilization, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mismatches, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "AppliedSettingsMessage(iso: \(String(describing: iso)), exposureTimeNs: \(String(describing: exposureTimeNs)), exposureBiasEv: \(String(describing: exposureBiasEv)), aperture: \(String(describing: aperture)), focalLengthMm: \(String(describing: focalLengthMm)), focusDistanceDiopters: \(String(describing: focusDistanceDiopters)), focusMode: \(String(describing: focusMode)), whiteBalanceMode: \(String(describing: whiteBalanceMode)), whiteBalanceGains: \(String(describing: whiteBalanceGains)), estimatedKelvin: \(String(describing: estimatedKelvin)), aeLocked: \(String(describing: aeLocked)), afLocked: \(String(describing: afLocked)), zoomRatio: \(String(describing: zoomRatio)), flashFired: \(String(describing: flashFired)), flash: \(String(describing: flash)), stabilization: \(String(describing: stabilization)), mismatches: \(String(describing: mismatches)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct LocationMessage: Hashable, CustomStringConvertible {
+  var latitude: Double
+  var longitude: Double
+  var accuracyM: Double? = nil
+  var altitudeM: Double? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> LocationMessage? {
+    let latitude = pigeonVar_list[0] as! Double
+    let longitude = pigeonVar_list[1] as! Double
+    let accuracyM: Double? = nilOrValue(pigeonVar_list[2])
+    let altitudeM: Double? = nilOrValue(pigeonVar_list[3])
+
+    return LocationMessage(
+      latitude: latitude,
+      longitude: longitude,
+      accuracyM: accuracyM,
+      altitudeM: altitudeM
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      latitude,
+      longitude,
+      accuracyM,
+      altitudeM,
+    ]
+  }
+  static func == (lhs: LocationMessage, rhs: LocationMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.latitude, rhs.latitude) && MessagesPigeonInternal.deepEquals(lhs.longitude, rhs.longitude) && MessagesPigeonInternal.deepEquals(lhs.accuracyM, rhs.accuracyM) && MessagesPigeonInternal.deepEquals(lhs.altitudeM, rhs.altitudeM)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("LocationMessage")
+    MessagesPigeonInternal.deepHash(value: latitude, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: longitude, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: accuracyM, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: altitudeM, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "LocationMessage(latitude: \(String(describing: latitude)), longitude: \(String(describing: longitude)), accuracyM: \(String(describing: accuracyM)), altitudeM: \(String(describing: altitudeM)))"
+  }
+}
+
+/// Look applied when rendering the `rendered` JPEG (ADR-0004). Native does the pixel work.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct RenderSpecMessage: Hashable, CustomStringConvertible {
+  /// Packed RGB bytes of a cube LUT (`lutSize`^3 entries, R fastest, 3 bytes per entry). Null = identity.
+  var lut: FlutterStandardTypedData? = nil
+  var lutSize: Int64? = nil
+  /// 0..1 film grain strength.
+  var grain: Double
+  /// 0..1 vignette strength.
+  var vignette: Double
+  /// `W:H` such as `3:2`. The ORIGINAL is never cropped (CAM-044); only the rendition is.
+  var aspectRatio: String? = nil
+  var profileId: String? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> RenderSpecMessage? {
+    let lut: FlutterStandardTypedData? = nilOrValue(pigeonVar_list[0])
+    let lutSize: Int64? = nilOrValue(pigeonVar_list[1])
+    let grain = pigeonVar_list[2] as! Double
+    let vignette = pigeonVar_list[3] as! Double
+    let aspectRatio: String? = nilOrValue(pigeonVar_list[4])
+    let profileId: String? = nilOrValue(pigeonVar_list[5])
+
+    return RenderSpecMessage(
+      lut: lut,
+      lutSize: lutSize,
+      grain: grain,
+      vignette: vignette,
+      aspectRatio: aspectRatio,
+      profileId: profileId
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      lut,
+      lutSize,
+      grain,
+      vignette,
+      aspectRatio,
+      profileId,
+    ]
+  }
+  static func == (lhs: RenderSpecMessage, rhs: RenderSpecMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.lut, rhs.lut) && MessagesPigeonInternal.deepEquals(lhs.lutSize, rhs.lutSize) && MessagesPigeonInternal.deepEquals(lhs.grain, rhs.grain) && MessagesPigeonInternal.deepEquals(lhs.vignette, rhs.vignette) && MessagesPigeonInternal.deepEquals(lhs.aspectRatio, rhs.aspectRatio) && MessagesPigeonInternal.deepEquals(lhs.profileId, rhs.profileId)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("RenderSpecMessage")
+    MessagesPigeonInternal.deepHash(value: lut, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: lutSize, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: grain, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: vignette, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: aspectRatio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: profileId, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "RenderSpecMessage(lut: \(String(describing: lut)), lutSize: \(String(describing: lutSize)), grain: \(String(describing: grain)), vignette: \(String(describing: vignette)), aspectRatio: \(String(describing: aspectRatio)), profileId: \(String(describing: profileId)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct CaptureRequestMessage: Hashable, CustomStringConvertible {
+  var memoryId: String
+  /// Directory that exists and is writable. Native writes temp files then renames (NFR-002).
+  var outputDir: String
+  /// File names (without directory). Dart owns naming.
+  var originalName: String
+  var renderedName: String
+  var thumbnailName: String
+  var displayName: String
+  var motionName: String? = nil
+  /// Include the pre/post-roll clip. Ignored (with `liveIncluded=false` in the result) when LIVE is off.
+  var live: Bool
+  /// Motion window before and after the shutter. Native may deliver more pre-roll (it must start on a
+  /// key frame) but never less than the buffer holds.
+  var preRollMs: Int64
+  var postRollMs: Int64
+  var jpegQuality: Int64
+  var render: RenderSpecMessage? = nil
+  /// Written into EXIF only when the app passes it (PRIV-001).
+  var location: LocationMessage? = nil
+  /// Overrides the shutter timestamp; null = now.
+  var timestampEpochMs: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> CaptureRequestMessage? {
+    let memoryId = pigeonVar_list[0] as! String
+    let outputDir = pigeonVar_list[1] as! String
+    let originalName = pigeonVar_list[2] as! String
+    let renderedName = pigeonVar_list[3] as! String
+    let thumbnailName = pigeonVar_list[4] as! String
+    let displayName = pigeonVar_list[5] as! String
+    let motionName: String? = nilOrValue(pigeonVar_list[6])
+    let live = pigeonVar_list[7] as! Bool
+    let preRollMs = pigeonVar_list[8] as! Int64
+    let postRollMs = pigeonVar_list[9] as! Int64
+    let jpegQuality = pigeonVar_list[10] as! Int64
+    let render: RenderSpecMessage? = nilOrValue(pigeonVar_list[11])
+    let location: LocationMessage? = nilOrValue(pigeonVar_list[12])
+    let timestampEpochMs: Int64? = nilOrValue(pigeonVar_list[13])
+
+    return CaptureRequestMessage(
+      memoryId: memoryId,
+      outputDir: outputDir,
+      originalName: originalName,
+      renderedName: renderedName,
+      thumbnailName: thumbnailName,
+      displayName: displayName,
+      motionName: motionName,
+      live: live,
+      preRollMs: preRollMs,
+      postRollMs: postRollMs,
+      jpegQuality: jpegQuality,
+      render: render,
+      location: location,
+      timestampEpochMs: timestampEpochMs
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      memoryId,
+      outputDir,
+      originalName,
+      renderedName,
+      thumbnailName,
+      displayName,
+      motionName,
+      live,
+      preRollMs,
+      postRollMs,
+      jpegQuality,
+      render,
+      location,
+      timestampEpochMs,
+    ]
+  }
+  static func == (lhs: CaptureRequestMessage, rhs: CaptureRequestMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.memoryId, rhs.memoryId) && MessagesPigeonInternal.deepEquals(lhs.outputDir, rhs.outputDir) && MessagesPigeonInternal.deepEquals(lhs.originalName, rhs.originalName) && MessagesPigeonInternal.deepEquals(lhs.renderedName, rhs.renderedName) && MessagesPigeonInternal.deepEquals(lhs.thumbnailName, rhs.thumbnailName) && MessagesPigeonInternal.deepEquals(lhs.displayName, rhs.displayName) && MessagesPigeonInternal.deepEquals(lhs.motionName, rhs.motionName) && MessagesPigeonInternal.deepEquals(lhs.live, rhs.live) && MessagesPigeonInternal.deepEquals(lhs.preRollMs, rhs.preRollMs) && MessagesPigeonInternal.deepEquals(lhs.postRollMs, rhs.postRollMs) && MessagesPigeonInternal.deepEquals(lhs.jpegQuality, rhs.jpegQuality) && MessagesPigeonInternal.deepEquals(lhs.render, rhs.render) && MessagesPigeonInternal.deepEquals(lhs.location, rhs.location) && MessagesPigeonInternal.deepEquals(lhs.timestampEpochMs, rhs.timestampEpochMs)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("CaptureRequestMessage")
+    MessagesPigeonInternal.deepHash(value: memoryId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: outputDir, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: originalName, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: renderedName, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: thumbnailName, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: displayName, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: motionName, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: live, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: preRollMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: postRollMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: jpegQuality, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: render, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: location, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: timestampEpochMs, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "CaptureRequestMessage(memoryId: \(String(describing: memoryId)), outputDir: \(String(describing: outputDir)), originalName: \(String(describing: originalName)), renderedName: \(String(describing: renderedName)), thumbnailName: \(String(describing: thumbnailName)), displayName: \(String(describing: displayName)), motionName: \(String(describing: motionName)), live: \(String(describing: live)), preRollMs: \(String(describing: preRollMs)), postRollMs: \(String(describing: postRollMs)), jpegQuality: \(String(describing: jpegQuality)), render: \(String(describing: render)), location: \(String(describing: location)), timestampEpochMs: \(String(describing: timestampEpochMs)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct MotionResultMessage: Hashable, CustomStringConvertible {
+  var path: String
+  var durationMs: Int64
+  var preRollMs: Int64
+  var postRollMs: Int64
+  /// Time of the shutter inside the clip.
+  var keyFrameTimeMs: Int64
+  var hasAudio: Bool
+  var width: Int64
+  var height: Int64
+  var orientationDegrees: Int64
+  var mime: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MotionResultMessage? {
+    let path = pigeonVar_list[0] as! String
+    let durationMs = pigeonVar_list[1] as! Int64
+    let preRollMs = pigeonVar_list[2] as! Int64
+    let postRollMs = pigeonVar_list[3] as! Int64
+    let keyFrameTimeMs = pigeonVar_list[4] as! Int64
+    let hasAudio = pigeonVar_list[5] as! Bool
+    let width = pigeonVar_list[6] as! Int64
+    let height = pigeonVar_list[7] as! Int64
+    let orientationDegrees = pigeonVar_list[8] as! Int64
+    let mime = pigeonVar_list[9] as! String
+
+    return MotionResultMessage(
+      path: path,
+      durationMs: durationMs,
+      preRollMs: preRollMs,
+      postRollMs: postRollMs,
+      keyFrameTimeMs: keyFrameTimeMs,
+      hasAudio: hasAudio,
+      width: width,
+      height: height,
+      orientationDegrees: orientationDegrees,
+      mime: mime
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      path,
+      durationMs,
+      preRollMs,
+      postRollMs,
+      keyFrameTimeMs,
+      hasAudio,
+      width,
+      height,
+      orientationDegrees,
+      mime,
+    ]
+  }
+  static func == (lhs: MotionResultMessage, rhs: MotionResultMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.path, rhs.path) && MessagesPigeonInternal.deepEquals(lhs.durationMs, rhs.durationMs) && MessagesPigeonInternal.deepEquals(lhs.preRollMs, rhs.preRollMs) && MessagesPigeonInternal.deepEquals(lhs.postRollMs, rhs.postRollMs) && MessagesPigeonInternal.deepEquals(lhs.keyFrameTimeMs, rhs.keyFrameTimeMs) && MessagesPigeonInternal.deepEquals(lhs.hasAudio, rhs.hasAudio) && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height) && MessagesPigeonInternal.deepEquals(lhs.orientationDegrees, rhs.orientationDegrees) && MessagesPigeonInternal.deepEquals(lhs.mime, rhs.mime)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("MotionResultMessage")
+    MessagesPigeonInternal.deepHash(value: path, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: durationMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: preRollMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: postRollMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: keyFrameTimeMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: hasAudio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: orientationDegrees, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mime, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "MotionResultMessage(path: \(String(describing: path)), durationMs: \(String(describing: durationMs)), preRollMs: \(String(describing: preRollMs)), postRollMs: \(String(describing: postRollMs)), keyFrameTimeMs: \(String(describing: keyFrameTimeMs)), hasAudio: \(String(describing: hasAudio)), width: \(String(describing: width)), height: \(String(describing: height)), orientationDegrees: \(String(describing: orientationDegrees)), mime: \(String(describing: mime)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct CaptureResultMessage: Hashable, CustomStringConvertible {
+  var memoryId: String
+  var originalPath: String
+  var originalMime: String
+  var width: Int64
+  var height: Int64
+  /// Clockwise degrees to rotate the stored pixels for upright display (EXIF orientation).
+  var orientationDegrees: Int64
+  var applied: AppliedSettingsMessage
+  var capturedAtEpochMs: Int64
+  var source: CameraSourceMessage
+  var liveIncluded: Bool
+  /// Front camera photos are NOT mirrored in the file; this is true only when the preview was.
+  var mirrored: Bool
+  /// True when the original was saved but rendition steps failed (retry later; original is safe).
+  var renderFailed: Bool
+  var renderedPath: String? = nil
+  var thumbnailPath: String? = nil
+  var displayPath: String? = nil
+  var motion: MotionResultMessage? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> CaptureResultMessage? {
+    let memoryId = pigeonVar_list[0] as! String
+    let originalPath = pigeonVar_list[1] as! String
+    let originalMime = pigeonVar_list[2] as! String
+    let width = pigeonVar_list[3] as! Int64
+    let height = pigeonVar_list[4] as! Int64
+    let orientationDegrees = pigeonVar_list[5] as! Int64
+    let applied = pigeonVar_list[6] as! AppliedSettingsMessage
+    let capturedAtEpochMs = pigeonVar_list[7] as! Int64
+    let source = pigeonVar_list[8] as! CameraSourceMessage
+    let liveIncluded = pigeonVar_list[9] as! Bool
+    let mirrored = pigeonVar_list[10] as! Bool
+    let renderFailed = pigeonVar_list[11] as! Bool
+    let renderedPath: String? = nilOrValue(pigeonVar_list[12])
+    let thumbnailPath: String? = nilOrValue(pigeonVar_list[13])
+    let displayPath: String? = nilOrValue(pigeonVar_list[14])
+    let motion: MotionResultMessage? = nilOrValue(pigeonVar_list[15])
+
+    return CaptureResultMessage(
+      memoryId: memoryId,
+      originalPath: originalPath,
+      originalMime: originalMime,
+      width: width,
+      height: height,
+      orientationDegrees: orientationDegrees,
+      applied: applied,
+      capturedAtEpochMs: capturedAtEpochMs,
+      source: source,
+      liveIncluded: liveIncluded,
+      mirrored: mirrored,
+      renderFailed: renderFailed,
+      renderedPath: renderedPath,
+      thumbnailPath: thumbnailPath,
+      displayPath: displayPath,
+      motion: motion
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      memoryId,
+      originalPath,
+      originalMime,
+      width,
+      height,
+      orientationDegrees,
+      applied,
+      capturedAtEpochMs,
+      source,
+      liveIncluded,
+      mirrored,
+      renderFailed,
+      renderedPath,
+      thumbnailPath,
+      displayPath,
+      motion,
+    ]
+  }
+  static func == (lhs: CaptureResultMessage, rhs: CaptureResultMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.memoryId, rhs.memoryId) && MessagesPigeonInternal.deepEquals(lhs.originalPath, rhs.originalPath) && MessagesPigeonInternal.deepEquals(lhs.originalMime, rhs.originalMime) && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height) && MessagesPigeonInternal.deepEquals(lhs.orientationDegrees, rhs.orientationDegrees) && MessagesPigeonInternal.deepEquals(lhs.applied, rhs.applied) && MessagesPigeonInternal.deepEquals(lhs.capturedAtEpochMs, rhs.capturedAtEpochMs) && MessagesPigeonInternal.deepEquals(lhs.source, rhs.source) && MessagesPigeonInternal.deepEquals(lhs.liveIncluded, rhs.liveIncluded) && MessagesPigeonInternal.deepEquals(lhs.mirrored, rhs.mirrored) && MessagesPigeonInternal.deepEquals(lhs.renderFailed, rhs.renderFailed) && MessagesPigeonInternal.deepEquals(lhs.renderedPath, rhs.renderedPath) && MessagesPigeonInternal.deepEquals(lhs.thumbnailPath, rhs.thumbnailPath) && MessagesPigeonInternal.deepEquals(lhs.displayPath, rhs.displayPath) && MessagesPigeonInternal.deepEquals(lhs.motion, rhs.motion)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("CaptureResultMessage")
+    MessagesPigeonInternal.deepHash(value: memoryId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: originalPath, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: originalMime, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: orientationDegrees, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: applied, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: capturedAtEpochMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: source, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: liveIncluded, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mirrored, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: renderFailed, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: renderedPath, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: thumbnailPath, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: displayPath, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: motion, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "CaptureResultMessage(memoryId: \(String(describing: memoryId)), originalPath: \(String(describing: originalPath)), originalMime: \(String(describing: originalMime)), width: \(String(describing: width)), height: \(String(describing: height)), orientationDegrees: \(String(describing: orientationDegrees)), applied: \(String(describing: applied)), capturedAtEpochMs: \(String(describing: capturedAtEpochMs)), source: \(String(describing: source)), liveIncluded: \(String(describing: liveIncluded)), mirrored: \(String(describing: mirrored)), renderFailed: \(String(describing: renderFailed)), renderedPath: \(String(describing: renderedPath)), thumbnailPath: \(String(describing: thumbnailPath)), displayPath: \(String(describing: displayPath)), motion: \(String(describing: motion)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct VideoRequestMessage: Hashable, CustomStringConvertible {
+  var outputPath: String
+  var size: SizeMessage? = nil
+  var fps: Int64? = nil
+  var audio: Bool
+  var stabilization: StabilizationModeMessage? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VideoRequestMessage? {
+    let outputPath = pigeonVar_list[0] as! String
+    let size: SizeMessage? = nilOrValue(pigeonVar_list[1])
+    let fps: Int64? = nilOrValue(pigeonVar_list[2])
+    let audio = pigeonVar_list[3] as! Bool
+    let stabilization: StabilizationModeMessage? = nilOrValue(pigeonVar_list[4])
+
+    return VideoRequestMessage(
+      outputPath: outputPath,
+      size: size,
+      fps: fps,
+      audio: audio,
+      stabilization: stabilization
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      outputPath,
+      size,
+      fps,
+      audio,
+      stabilization,
+    ]
+  }
+  static func == (lhs: VideoRequestMessage, rhs: VideoRequestMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.outputPath, rhs.outputPath) && MessagesPigeonInternal.deepEquals(lhs.size, rhs.size) && MessagesPigeonInternal.deepEquals(lhs.fps, rhs.fps) && MessagesPigeonInternal.deepEquals(lhs.audio, rhs.audio) && MessagesPigeonInternal.deepEquals(lhs.stabilization, rhs.stabilization)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("VideoRequestMessage")
+    MessagesPigeonInternal.deepHash(value: outputPath, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: size, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: fps, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: audio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: stabilization, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "VideoRequestMessage(outputPath: \(String(describing: outputPath)), size: \(String(describing: size)), fps: \(String(describing: fps)), audio: \(String(describing: audio)), stabilization: \(String(describing: stabilization)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct VideoResultMessage: Hashable, CustomStringConvertible {
+  var path: String
+  var durationMs: Int64
+  var width: Int64
+  var height: Int64
+  var hasAudio: Bool
+  var bytes: Int64
+  var orientationDegrees: Int64
+  var mime: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VideoResultMessage? {
+    let path = pigeonVar_list[0] as! String
+    let durationMs = pigeonVar_list[1] as! Int64
+    let width = pigeonVar_list[2] as! Int64
+    let height = pigeonVar_list[3] as! Int64
+    let hasAudio = pigeonVar_list[4] as! Bool
+    let bytes = pigeonVar_list[5] as! Int64
+    let orientationDegrees = pigeonVar_list[6] as! Int64
+    let mime = pigeonVar_list[7] as! String
+
+    return VideoResultMessage(
+      path: path,
+      durationMs: durationMs,
+      width: width,
+      height: height,
+      hasAudio: hasAudio,
+      bytes: bytes,
+      orientationDegrees: orientationDegrees,
+      mime: mime
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      path,
+      durationMs,
+      width,
+      height,
+      hasAudio,
+      bytes,
+      orientationDegrees,
+      mime,
+    ]
+  }
+  static func == (lhs: VideoResultMessage, rhs: VideoResultMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.path, rhs.path) && MessagesPigeonInternal.deepEquals(lhs.durationMs, rhs.durationMs) && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height) && MessagesPigeonInternal.deepEquals(lhs.hasAudio, rhs.hasAudio) && MessagesPigeonInternal.deepEquals(lhs.bytes, rhs.bytes) && MessagesPigeonInternal.deepEquals(lhs.orientationDegrees, rhs.orientationDegrees) && MessagesPigeonInternal.deepEquals(lhs.mime, rhs.mime)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("VideoResultMessage")
+    MessagesPigeonInternal.deepHash(value: path, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: durationMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: hasAudio, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: bytes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: orientationDegrees, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mime, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "VideoResultMessage(path: \(String(describing: path)), durationMs: \(String(describing: durationMs)), width: \(String(describing: width)), height: \(String(describing: height)), hasAudio: \(String(describing: hasAudio)), bytes: \(String(describing: bytes)), orientationDegrees: \(String(describing: orientationDegrees)), mime: \(String(describing: mime)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct PermissionsMessage: Hashable, CustomStringConvertible {
+  var camera: PermissionStatusMessage
+  var microphone: PermissionStatusMessage
+  /// True when Android will no longer show the system dialog: send the user to settings (CAM-052).
+  var cameraPermanentlyDenied: Bool
+  var microphonePermanentlyDenied: Bool
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> PermissionsMessage? {
+    let camera = pigeonVar_list[0] as! PermissionStatusMessage
+    let microphone = pigeonVar_list[1] as! PermissionStatusMessage
+    let cameraPermanentlyDenied = pigeonVar_list[2] as! Bool
+    let microphonePermanentlyDenied = pigeonVar_list[3] as! Bool
+
+    return PermissionsMessage(
+      camera: camera,
+      microphone: microphone,
+      cameraPermanentlyDenied: cameraPermanentlyDenied,
+      microphonePermanentlyDenied: microphonePermanentlyDenied
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      camera,
+      microphone,
+      cameraPermanentlyDenied,
+      microphonePermanentlyDenied,
+    ]
+  }
+  static func == (lhs: PermissionsMessage, rhs: PermissionsMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.camera, rhs.camera) && MessagesPigeonInternal.deepEquals(lhs.microphone, rhs.microphone) && MessagesPigeonInternal.deepEquals(lhs.cameraPermanentlyDenied, rhs.cameraPermanentlyDenied) && MessagesPigeonInternal.deepEquals(lhs.microphonePermanentlyDenied, rhs.microphonePermanentlyDenied)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("PermissionsMessage")
+    MessagesPigeonInternal.deepHash(value: camera, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: microphone, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: cameraPermanentlyDenied, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: microphonePermanentlyDenied, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "PermissionsMessage(camera: \(String(describing: camera)), microphone: \(String(describing: microphone)), cameraPermanentlyDenied: \(String(describing: cameraPermanentlyDenied)), microphonePermanentlyDenied: \(String(describing: microphonePermanentlyDenied)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct SessionEventMessage: Hashable, CustomStringConvertible {
+  var sessionId: Int64
+  var kind: SessionEventKindMessage
+  var state: SessionStateMessage? = nil
+  var applied: AppliedSettingsMessage? = nil
+  var errorCode: String? = nil
+  var errorMessage: String? = nil
+  var thermal: ThermalStateMessage? = nil
+  /// Device orientation from the sensor, 0/90/180/270 (CAM edge case: capture follows the sensor).
+  var orientationDegrees: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SessionEventMessage? {
+    let sessionId = pigeonVar_list[0] as! Int64
+    let kind = pigeonVar_list[1] as! SessionEventKindMessage
+    let state: SessionStateMessage? = nilOrValue(pigeonVar_list[2])
+    let applied: AppliedSettingsMessage? = nilOrValue(pigeonVar_list[3])
+    let errorCode: String? = nilOrValue(pigeonVar_list[4])
+    let errorMessage: String? = nilOrValue(pigeonVar_list[5])
+    let thermal: ThermalStateMessage? = nilOrValue(pigeonVar_list[6])
+    let orientationDegrees: Int64? = nilOrValue(pigeonVar_list[7])
+
+    return SessionEventMessage(
+      sessionId: sessionId,
+      kind: kind,
+      state: state,
+      applied: applied,
+      errorCode: errorCode,
+      errorMessage: errorMessage,
+      thermal: thermal,
+      orientationDegrees: orientationDegrees
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      sessionId,
+      kind,
+      state,
+      applied,
+      errorCode,
+      errorMessage,
+      thermal,
+      orientationDegrees,
+    ]
+  }
+  static func == (lhs: SessionEventMessage, rhs: SessionEventMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.sessionId, rhs.sessionId) && MessagesPigeonInternal.deepEquals(lhs.kind, rhs.kind) && MessagesPigeonInternal.deepEquals(lhs.state, rhs.state) && MessagesPigeonInternal.deepEquals(lhs.applied, rhs.applied) && MessagesPigeonInternal.deepEquals(lhs.errorCode, rhs.errorCode) && MessagesPigeonInternal.deepEquals(lhs.errorMessage, rhs.errorMessage) && MessagesPigeonInternal.deepEquals(lhs.thermal, rhs.thermal) && MessagesPigeonInternal.deepEquals(lhs.orientationDegrees, rhs.orientationDegrees)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("SessionEventMessage")
+    MessagesPigeonInternal.deepHash(value: sessionId, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: kind, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: state, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: applied, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: errorCode, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: errorMessage, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: thermal, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: orientationDegrees, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "SessionEventMessage(sessionId: \(String(describing: sessionId)), kind: \(String(describing: kind)), state: \(String(describing: state)), applied: \(String(describing: applied)), errorCode: \(String(describing: errorCode)), errorMessage: \(String(describing: errorMessage)), thermal: \(String(describing: thermal)), orientationDegrees: \(String(describing: orientationDegrees)))"
+  }
+}
+
 /// Answer to a `ping`: proves the bridge works in both directions and reports what the native side is.
 ///
 /// Generated class from Pigeon that represents data sent in messages.
@@ -245,6 +2083,138 @@ private class MessagesPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
     case 129:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return CameraFacingMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 130:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return LensKindMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 131:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return CameraSourceMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 132:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return PhotoFormatMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 133:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return WbPresetMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 134:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return FlashModeMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 135:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return FocusModeMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 136:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return FocusCalibrationMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 137:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return StabilizationModeMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 138:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return PermissionStatusMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 139:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return SessionStateMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 140:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return ThermalStateMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 141:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return SessionEventKindMessage(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 142:
+      return SizeMessage.fromList(self.readValue() as! [Any?])
+    case 143:
+      return IntRangeMessage.fromList(self.readValue() as! [Any?])
+    case 144:
+      return DoubleRangeMessage.fromList(self.readValue() as! [Any?])
+    case 145:
+      return ExposureBiasCapabilityMessage.fromList(self.readValue() as! [Any?])
+    case 146:
+      return ManualFocusCapabilityMessage.fromList(self.readValue() as! [Any?])
+    case 147:
+      return FocusCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 148:
+      return WhiteBalanceCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 149:
+      return ZoomCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 150:
+      return StabilizationCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 151:
+      return VideoSizeOptionMessage.fromList(self.readValue() as! [Any?])
+    case 152:
+      return VideoCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 153:
+      return LiveCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 154:
+      return CameraDescriptorMessage.fromList(self.readValue() as! [Any?])
+    case 155:
+      return CameraCapabilitiesMessage.fromList(self.readValue() as! [Any?])
+    case 156:
+      return SessionConfigMessage.fromList(self.readValue() as! [Any?])
+    case 157:
+      return SessionInfoMessage.fromList(self.readValue() as! [Any?])
+    case 158:
+      return ResolvedCaptureSettingsMessage.fromList(self.readValue() as! [Any?])
+    case 159:
+      return AppliedSettingsMessage.fromList(self.readValue() as! [Any?])
+    case 160:
+      return LocationMessage.fromList(self.readValue() as! [Any?])
+    case 161:
+      return RenderSpecMessage.fromList(self.readValue() as! [Any?])
+    case 162:
+      return CaptureRequestMessage.fromList(self.readValue() as! [Any?])
+    case 163:
+      return MotionResultMessage.fromList(self.readValue() as! [Any?])
+    case 164:
+      return CaptureResultMessage.fromList(self.readValue() as! [Any?])
+    case 165:
+      return VideoRequestMessage.fromList(self.readValue() as! [Any?])
+    case 166:
+      return VideoResultMessage.fromList(self.readValue() as! [Any?])
+    case 167:
+      return PermissionsMessage.fromList(self.readValue() as! [Any?])
+    case 168:
+      return SessionEventMessage.fromList(self.readValue() as! [Any?])
+    case 169:
       return PingResultMessage.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -254,8 +2224,128 @@ private class MessagesPigeonCodecReader: FlutterStandardReader {
 
 private class MessagesPigeonCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? PingResultMessage {
+    if let value = value as? CameraFacingMessage {
       super.writeByte(129)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? LensKindMessage {
+      super.writeByte(130)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? CameraSourceMessage {
+      super.writeByte(131)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? PhotoFormatMessage {
+      super.writeByte(132)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? WbPresetMessage {
+      super.writeByte(133)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? FlashModeMessage {
+      super.writeByte(134)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? FocusModeMessage {
+      super.writeByte(135)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? FocusCalibrationMessage {
+      super.writeByte(136)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? StabilizationModeMessage {
+      super.writeByte(137)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? PermissionStatusMessage {
+      super.writeByte(138)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? SessionStateMessage {
+      super.writeByte(139)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? ThermalStateMessage {
+      super.writeByte(140)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? SessionEventKindMessage {
+      super.writeByte(141)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? SizeMessage {
+      super.writeByte(142)
+      super.writeValue(value.toList())
+    } else if let value = value as? IntRangeMessage {
+      super.writeByte(143)
+      super.writeValue(value.toList())
+    } else if let value = value as? DoubleRangeMessage {
+      super.writeByte(144)
+      super.writeValue(value.toList())
+    } else if let value = value as? ExposureBiasCapabilityMessage {
+      super.writeByte(145)
+      super.writeValue(value.toList())
+    } else if let value = value as? ManualFocusCapabilityMessage {
+      super.writeByte(146)
+      super.writeValue(value.toList())
+    } else if let value = value as? FocusCapabilitiesMessage {
+      super.writeByte(147)
+      super.writeValue(value.toList())
+    } else if let value = value as? WhiteBalanceCapabilitiesMessage {
+      super.writeByte(148)
+      super.writeValue(value.toList())
+    } else if let value = value as? ZoomCapabilitiesMessage {
+      super.writeByte(149)
+      super.writeValue(value.toList())
+    } else if let value = value as? StabilizationCapabilitiesMessage {
+      super.writeByte(150)
+      super.writeValue(value.toList())
+    } else if let value = value as? VideoSizeOptionMessage {
+      super.writeByte(151)
+      super.writeValue(value.toList())
+    } else if let value = value as? VideoCapabilitiesMessage {
+      super.writeByte(152)
+      super.writeValue(value.toList())
+    } else if let value = value as? LiveCapabilitiesMessage {
+      super.writeByte(153)
+      super.writeValue(value.toList())
+    } else if let value = value as? CameraDescriptorMessage {
+      super.writeByte(154)
+      super.writeValue(value.toList())
+    } else if let value = value as? CameraCapabilitiesMessage {
+      super.writeByte(155)
+      super.writeValue(value.toList())
+    } else if let value = value as? SessionConfigMessage {
+      super.writeByte(156)
+      super.writeValue(value.toList())
+    } else if let value = value as? SessionInfoMessage {
+      super.writeByte(157)
+      super.writeValue(value.toList())
+    } else if let value = value as? ResolvedCaptureSettingsMessage {
+      super.writeByte(158)
+      super.writeValue(value.toList())
+    } else if let value = value as? AppliedSettingsMessage {
+      super.writeByte(159)
+      super.writeValue(value.toList())
+    } else if let value = value as? LocationMessage {
+      super.writeByte(160)
+      super.writeValue(value.toList())
+    } else if let value = value as? RenderSpecMessage {
+      super.writeByte(161)
+      super.writeValue(value.toList())
+    } else if let value = value as? CaptureRequestMessage {
+      super.writeByte(162)
+      super.writeValue(value.toList())
+    } else if let value = value as? MotionResultMessage {
+      super.writeByte(163)
+      super.writeValue(value.toList())
+    } else if let value = value as? CaptureResultMessage {
+      super.writeByte(164)
+      super.writeValue(value.toList())
+    } else if let value = value as? VideoRequestMessage {
+      super.writeByte(165)
+      super.writeValue(value.toList())
+    } else if let value = value as? VideoResultMessage {
+      super.writeByte(166)
+      super.writeValue(value.toList())
+    } else if let value = value as? PermissionsMessage {
+      super.writeByte(167)
+      super.writeValue(value.toList())
+    } else if let value = value as? SessionEventMessage {
+      super.writeByte(168)
+      super.writeValue(value.toList())
+    } else if let value = value as? PingResultMessage {
+      super.writeByte(169)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -277,9 +2367,29 @@ class MessagesPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = MessagesPigeonCodec(readerWriter: MessagesPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol CameraHostApi {
   func ping(message: String) throws -> PingResultMessage
+  func checkPermissions() throws -> PermissionsMessage
+  func requestPermissions(camera: Bool, microphone: Bool) async throws -> PermissionsMessage
+  func openAppSettings() throws
+  func listCameras() throws -> [CameraDescriptorMessage]
+  func getCapabilities(cameraId: String) throws -> CameraCapabilitiesMessage
+  func openSession(config: SessionConfigMessage) async throws -> SessionInfoMessage
+  /// Idempotent.
+  func closeSession(sessionId: Int64) async throws
+  /// Applies settings to the running preview and returns what the device reported.
+  func applySettings(sessionId: Int64, settings: ResolvedCaptureSettingsMessage) async throws -> AppliedSettingsMessage
+  /// Tap-to-focus and tap-to-meter at a normalised preview point (0..1, 0..1).
+  func focusAt(sessionId: Int64, x: Double, y: Double) async throws
+  func setLive(sessionId: Int64, enabled: Bool) throws
+  func capture(sessionId: Int64, request: CaptureRequestMessage) async throws -> CaptureResultMessage
+  func startVideo(sessionId: Int64, request: VideoRequestMessage) async throws
+  func stopVideo(sessionId: Int64) async throws -> VideoResultMessage
+  /// App backgrounded or another interruption: stop preview and LIVE buffering (NFR-012).
+  func suspendSession(sessionId: Int64) async throws
+  func resumeSession(sessionId: Int64) async throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -302,6 +2412,292 @@ class CameraHostApiSetup {
       }
     } else {
       pingChannel.setMessageHandler(nil)
+    }
+    let checkPermissionsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.checkPermissions\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      checkPermissionsChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.checkPermissions()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      checkPermissionsChannel.setMessageHandler(nil)
+    }
+    let requestPermissionsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.requestPermissions\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      requestPermissionsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let cameraArg = args[0] as! Bool
+        let microphoneArg = args[1] as! Bool
+        Task { @MainActor in
+          do {
+            let result = try await api.requestPermissions(camera: cameraArg, microphone: microphoneArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      requestPermissionsChannel.setMessageHandler(nil)
+    }
+    let openAppSettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.openAppSettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openAppSettingsChannel.setMessageHandler { _, reply in
+        do {
+          try api.openAppSettings()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      openAppSettingsChannel.setMessageHandler(nil)
+    }
+    let listCamerasChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.listCameras\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      listCamerasChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.listCameras()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      listCamerasChannel.setMessageHandler(nil)
+    }
+    let getCapabilitiesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.getCapabilities\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      getCapabilitiesChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let cameraIdArg = args[0] as! String
+        do {
+          let result = try api.getCapabilities(cameraId: cameraIdArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getCapabilitiesChannel.setMessageHandler(nil)
+    }
+    let openSessionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.openSession\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openSessionChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let configArg = args[0] as! SessionConfigMessage
+        Task { @MainActor in
+          do {
+            let result = try await api.openSession(config: configArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      openSessionChannel.setMessageHandler(nil)
+    }
+    /// Idempotent.
+    let closeSessionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.closeSession\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      closeSessionChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        Task { @MainActor in
+          do {
+            try await api.closeSession(sessionId: sessionIdArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      closeSessionChannel.setMessageHandler(nil)
+    }
+    /// Applies settings to the running preview and returns what the device reported.
+    let applySettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.applySettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      applySettingsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        let settingsArg = args[1] as! ResolvedCaptureSettingsMessage
+        Task { @MainActor in
+          do {
+            let result = try await api.applySettings(sessionId: sessionIdArg, settings: settingsArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      applySettingsChannel.setMessageHandler(nil)
+    }
+    /// Tap-to-focus and tap-to-meter at a normalised preview point (0..1, 0..1).
+    let focusAtChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.focusAt\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      focusAtChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        let xArg = args[1] as! Double
+        let yArg = args[2] as! Double
+        Task { @MainActor in
+          do {
+            try await api.focusAt(sessionId: sessionIdArg, x: xArg, y: yArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      focusAtChannel.setMessageHandler(nil)
+    }
+    let setLiveChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.setLive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      setLiveChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        let enabledArg = args[1] as! Bool
+        do {
+          try api.setLive(sessionId: sessionIdArg, enabled: enabledArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      setLiveChannel.setMessageHandler(nil)
+    }
+    let captureChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.capture\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      captureChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        let requestArg = args[1] as! CaptureRequestMessage
+        Task { @MainActor in
+          do {
+            let result = try await api.capture(sessionId: sessionIdArg, request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      captureChannel.setMessageHandler(nil)
+    }
+    let startVideoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.startVideo\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      startVideoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        let requestArg = args[1] as! VideoRequestMessage
+        Task { @MainActor in
+          do {
+            try await api.startVideo(sessionId: sessionIdArg, request: requestArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      startVideoChannel.setMessageHandler(nil)
+    }
+    let stopVideoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.stopVideo\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      stopVideoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        Task { @MainActor in
+          do {
+            let result = try await api.stopVideo(sessionId: sessionIdArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      stopVideoChannel.setMessageHandler(nil)
+    }
+    /// App backgrounded or another interruption: stop preview and LIVE buffering (NFR-012).
+    let suspendSessionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.suspendSession\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      suspendSessionChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        Task { @MainActor in
+          do {
+            try await api.suspendSession(sessionId: sessionIdArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      suspendSessionChannel.setMessageHandler(nil)
+    }
+    let resumeSessionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.doro_camera.CameraHostApi.resumeSession\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      resumeSessionChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sessionIdArg = args[0] as! Int64
+        Task { @MainActor in
+          do {
+            try await api.resumeSession(sessionId: sessionIdArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      resumeSessionChannel.setMessageHandler(nil)
+    }
+  }
+}
+
+/// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
+protocol CameraEventsApiProtocol {
+  @MainActor func onSessionEvent(event eventArg: SessionEventMessage) async throws
+}
+class CameraEventsApi: CameraEventsApiProtocol {
+  private let binaryMessenger: FlutterBinaryMessenger
+  private let messageChannelSuffix: String
+  init(binaryMessenger: FlutterBinaryMessenger, messageChannelSuffix: String = "") {
+    self.binaryMessenger = binaryMessenger
+    self.messageChannelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+  }
+  var codec: MessagesPigeonCodec {
+    return MessagesPigeonCodec.shared
+  }
+  @MainActor func onSessionEvent(event eventArg: SessionEventMessage) async throws {
+    return try await withCheckedThrowingContinuation { continuation in
+      let channelName: String = "dev.flutter.pigeon.doro_camera.CameraEventsApi.onSessionEvent\(messageChannelSuffix)"
+      let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+      channel.sendMessage([eventArg] as [Any?]) { response in
+        guard let listResponse = response as? [Any?] else {
+          continuation.resume(throwing: createConnectionError(withChannelName: channelName))
+          return
+        }
+        if listResponse.count > 1 {
+          let code: String = listResponse[0] as! String
+          let message: String? = nilOrValue(listResponse[1])
+          let details: String? = nilOrValue(listResponse[2])
+          continuation.resume(throwing: PigeonError(code: code, message: message, details: details))
+        } else {
+          continuation.resume()
+        }
+      }
     }
   }
 }

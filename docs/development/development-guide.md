@@ -22,7 +22,7 @@ Target layout (ADR-0012). Directories are created by their scaffolding tasks, no
 │   └── docs-check/        Documentation integrity checker   (exists)
 ├── infrastructure/        docker-compose.yml, Dockerfiles, bucket policies
 ├── docs/
-└── .github/workflows/
+└── .github/workflows/        # only ios.yml (manual dispatch, cloud macOS; ADR-0016)
 ```
 
 **Why not one package manager:** Dart and Node ecosystems don't share tooling. TypeScript packages use **pnpm workspaces**. Dart packages use a **pub workspace** (root `pubspec.yaml` with `workspace:` listing `apps/mobile` and `packages/doro_camera`). They meet only at the OpenAPI contract and the compiled profile LUT files, which are both committed artifacts.
@@ -45,7 +45,7 @@ They must not restate root rules.
 - `flutter_lints` + `very_good_analysis`-level strictness (decided at scaffold). `strict-casts`, `strict-inference`, `strict-raw-types` are on.
 - No `dynamic` in domain or application code. Prefer sealed classes for states and failures.
 - File names in `snake_case`. One public type per file in the domain.
-- Codegen (drift, pigeon, and freezed if used; Riverpod providers are hand-written): build_runner outputs are **not** committed; CI regenerates them. Pigeon outputs **are** committed, because the native code compiles against them. The scaffold task records this in the package AGENTS.md.
+- Codegen (drift, pigeon, and freezed if used; Riverpod providers are hand-written): build_runner outputs are **not** committed; regenerate them locally with `dart run build_runner build`. Pigeon outputs **are** committed, because the native code compiles against them. The scaffold task records this in the package AGENTS.md.
 
 ### TypeScript
 - `strict: true`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. ESM only.
@@ -54,12 +54,12 @@ They must not restate root rules.
 
 ### Kotlin / Swift
 - Kotlin: ktlint; coroutines for async; no blocking on the camera thread.
-- Swift: SwiftLint (run in the cloud macOS workflow); Swift concurrency where AVFoundation permits; camera work on a dedicated serial queue. All `AVCaptureDevice`/`AVCaptureSession` access goes through protocols (`CaptureDeviceProviding`, `CaptureSessionControlling`) so logic is testable in XCTest without a camera (ADR-0013).
+- Swift: SwiftLint (not installed locally; no Mac); Swift concurrency where AVFoundation permits; camera work on a dedicated serial queue. All `AVCaptureDevice` access goes through `DeviceAdapter`, which turns the real device into plain `DeviceFacts` for the Flutter-free `DoroCameraCore` target; capability probing, settings clamping, the session state machine, the Live ring buffer and the still renderer are tested in XCTest with fake devices, without a camera (ADR-0013, ADR-0015).
 
 ### Git
 - Trunk-based: short-lived branches `feat/<task-id>-slug`, `fix/…`, `docs/…`.
 - Commit messages follow Conventional Commits and reference task IDs: `feat(camera): expose ISO range (CAM-T-020)`.
-- Every PR runs CI. No merging on red.
+- No CI runs on push or pull request (ADR-0016). Run the suites in WSL before every push; never push on red.
 
 ## Dependency policy
 
@@ -93,7 +93,7 @@ Three tiers. The PR or report states which tier applies.
 - [ ] **Every new or changed function, class, widget, endpoint, job, and migration has automated tests** per the obligations table in [testing-strategy.md](testing-strategy.md), including error paths
 - [ ] Tests are tagged with the requirement IDs they cover (`[CAM-010] …`)
 - [ ] Bug fixes include a regression test that fails before the fix
-- [ ] Mobile changes pass on the Android Emulator and the iOS Simulator (cloud macOS `ios.yml`) where applicable
+- [ ] Mobile changes pass on the Android Emulator and the iOS Simulator (cloud macOS, manual `ios.yml`) where applicable
 - [ ] Coverage gates and ratchets hold
 - [ ] Lint, format, and type checks pass for every touched package
 - [ ] Errors handled with typed failures and user-facing messages where relevant

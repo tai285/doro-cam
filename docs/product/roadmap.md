@@ -1,10 +1,10 @@
 # Roadmap
 
-Status: Living · Last updated: 2026-09-30 · Related: [requirements.md](requirements.md), [tasks](../tasks/README.md), ADR-0013
+Status: Living · Last updated: 2026-11-14 · Related: [requirements.md](requirements.md), [tasks](../tasks/README.md), ADR-0013, ADR-0016
 
 Phases are ordered by dependency and risk. Status values are `not started`, `in progress`, and `done`. Fine-grained tasks exist only for the current and next phases (see [tasks/README.md](../tasks/README.md)). Later phases are refined into task files when they start.
 
-**Verification model (ADR-0013):** every phase's acceptance is proven by the full automated test suite. That covers host tests, the Android Emulator, and the iOS Simulator on cloud macOS. Hardware-only aspects are logged in [field-verification.md](../development/field-verification.md) and don't block phases.
+**Verification model (ADR-0013, ADR-0016):** every phase's acceptance is proven by the full automated test suite, run locally in WSL: host tests, Playwright and the Android Emulator. iOS is proven on cloud macOS through the manually dispatched `ios.yml`; there is no CI on push. Hardware-only aspects are logged in [field-verification.md](../development/field-verification.md) and don't block phases.
 
 ## Deviations from the original proposal (and why)
 
@@ -15,14 +15,14 @@ Phases are ordered by dependency and risk. Status values are `not started`, `in 
 | Video moved after the MVP (P8) | Video isn't in the MVP journey, and it's costly: codecs, transcoding, storage. |
 | Motion Memory (P6) after upload (P5) | Motion capture is the riskiest capture feature. Its spike (S3) runs in P0, but the feature ships after the core loop works end to end. |
 | Redis removed from the MVP | pg-boss on Postgres covers jobs (ADR-0010). |
-| **Android and iOS in parallel, without a local Mac** | iOS builds and tests run on cloud macOS (GitHub Actions; free because the repository is public). The iOS Simulator has no camera, so it uses a synthetic source in test builds (ADR-0013). |
+| **Android and iOS in parallel, without a local Mac** | iOS builds and tests run on cloud macOS through a manually dispatched GitHub Actions workflow (free because the repository is public). The iOS Simulator has no camera, so it uses a synthetic source in debug builds (ADR-0013, ADR-0016). |
 | Emulators and simulators are the primary verification targets | Agents can verify their own work. Real devices are optional field validation. |
 
 ## MVP scope realism
 
 The MVP includes two native camera engines, a GPU look pipeline, motion capture, resumable sync, a backend, and a web app, all with a full test suite. That is large. The committed MVP is therefore:
 
-- **Android and iOS feature parity**, verified on the Android Emulator and the iOS Simulator. iOS iteration is slower because every iOS build is a cloud CI run, so iOS tasks follow their Android counterparts closely rather than simultaneously.
+- **Android and iOS feature parity**, verified on the Android Emulator and the iOS Simulator. iOS iteration is slower because every iOS build is a manual cloud macOS run, so iOS tasks follow their Android counterparts closely rather than simultaneously.
 - **Two fully built Experiences** (Mirrorless, Instant); DSLR and Film are styled variants (EXP-011).
 - **About five profiles** (PRF-004).
 - **Web: read-only library** plus account (WEB-001–WEB-006).
@@ -31,18 +31,18 @@ The MVP includes two native camera engines, a GPU look pipeline, motion capture,
 
 | Phase | Name | MVP | Status | Depends on |
 |---|---|---|---|---|
-| P0 | Foundations, test infrastructure and spikes | ✓ | in progress (planning done) | — |
+| P0 | Foundations, test infrastructure and spikes | ✓ | in progress (scaffolds, test infrastructure and WSL workflow done; spikes S1–S7 outstanding) | — |
 | P1 | Camera core and local Memories | ✓ | not started | P0 |
 | P2 | Manual controls, Experiences, presets | ✓ | not started | P1 |
 | P3 | Image profile engine | ✓ | not started | P1, S2, S7 |
-| P4 | Backend foundation and auth | ✓ | not started | P0 |
+| P4 | Backend foundation and auth | ✓ | **done** (accounts, sessions, memories, OpenAPI contract, worker; 274 API tests) | P0 |
 | P5 | Cloud storage, upload queue, sync | ✓ | not started | P1, P4, S4, S5 |
 | P6 | Motion Memory (LIVE) | ✓ | not started | P1, P5, S3 |
 | P7 | Web dashboard (library) → **MVP complete** | ✓ | not started | P4, P5 |
 | P8 | Video | | not started | P2, P5, S6 |
-| P9 | Shared albums and trips | | not started | P5, P7 |
-| P10 | Photography analytics | | not started | P5 |
-| P11 | Personalized presets | | not started | P10 |
+| P9 | Shared albums and trips | | server and web **done** (roles, invites, trip proposals, location privacy); mobile in progress | P5, P7 |
+| P10 | Photography analytics | | server and web **done** (distributions, trends, insights with their numbers) | P5 |
+| P11 | Personalized presets | | server and web **done** (suggest, accept, dismiss); mobile in progress | P10 |
 | P12 | AI | | not started | P10, new ADR |
 | P13 | Physical QR/NFC memories | | not started | P9 |
 

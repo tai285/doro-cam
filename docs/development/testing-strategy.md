@@ -1,10 +1,10 @@
 # Testing Strategy
 
-Status: Accepted · Last updated: 2026-09-30 · Related: NFR-009, NFR-010, NFR-014, NFR-015, NFR-016, ADR-0013, [development-guide.md](development-guide.md), [field-verification.md](field-verification.md)
+Status: Accepted · Last updated: 2026-11-14 · Related: NFR-009, NFR-010, NFR-014, NFR-015, NFR-016, ADR-0013, ADR-0016, [development-guide.md](development-guide.md), [field-verification.md](field-verification.md)
 
 ## The rule: a full automated test suite
 
-**Every function, class, widget, endpoint, job, migration and feature ships with automated tests in the same change** (NFR-014). There are no exceptions for "simple" code, and there is no "tests later". Agents verify their own work on host test runners, the Android Emulator, and the iOS Simulator on cloud macOS (ADR-0013). A change that isn't tested isn't done.
+**Every function, class, widget, endpoint, job, migration and feature ships with automated tests in the same change** (NFR-014). There are no exceptions for "simple" code, and there is no "tests later". Agents verify their own work **locally in WSL**: host test runners, the Playwright browsers and the Android Emulator (ADR-0016). iOS is verified on cloud macOS through the manually dispatched `ios.yml` (ADR-0016). A change that isn't tested isn't done.
 
 Tests must prove behavior:
 - **No fake assertions.** No tests that only check a mock was called when real behavior is observable. No snapshot-everything tests without intent.
@@ -24,26 +24,26 @@ Tests must prove behavior:
 | Widget / screen | Widget tests: rendering per state, interactions, semantics labels; golden tests for Experience skins | `flutter_test` |
 | drift schema | DAO tests on real SQLite; **a migration test for every schema version step** | drift `SchemaVerifier` |
 | Pigeon message / platform mapping | Round-trip mapping tests on both sides (Dart and Kotlin/Swift) | `package:test`, JUnit, XCTest |
-| Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices). Kotlin runs through the app's Gradle project (`./gradlew :doro_camera:testDebugUnitTest` in `apps/mobile/android`); Swift logic lives in the Flutter-free `DoroCameraCore` target and runs with `DOROCAM_SWIFT_STANDALONE=1 swift test` on a macOS runner (ADR-0015) | kotlin-test (JUnit 5), XCTest |
+| Native camera logic (Kotlin/Swift) | Unit tests behind seams (characteristics fixtures, fake capture devices). Kotlin runs through the app's Gradle project (`./gradlew :doro_camera:testDebugUnitTest` in `apps/mobile/android`); Swift logic lives in the Flutter-free `DoroCameraCore` target and runs with `DOROCAM_SWIFT_STANDALONE=1 swift test` on the macOS runner of `ios.yml` (ADR-0015, ADR-0016) | kotlin-test (JUnit 5), XCTest |
 | Native camera integration | Instrumented tests on the **Android Emulator**; XCTest plus the synthetic source on the **iOS Simulator** | AndroidX Test, XCTest |
 | App feature (end to end on mobile) | `integration_test` flows on the Android Emulator and iOS Simulator | `integration_test` |
 | API endpoint | Integration tests: success, validation error, 401, IDOR (404), idempotent replay, and every documented error code | Vitest + Fastify `inject` against the real Postgres/S3 from `pnpm infra:up` (an isolated database per test file) |
 | DB query / repository | Tests on real Postgres (isolated database per test file) | Vitest |
 | Worker job | Handler tests with real Postgres and S3 (Garage), run twice to prove idempotency; media outputs checked with ffprobe/exif parsing | Vitest |
-| Web component / hook | Component tests with MSW for HTTP; accessibility assertions (axe) | Vitest + Testing Library |
-| Web journey | Playwright E2E against the Docker Compose stack | Playwright |
-| Cross-system journey | Emulator app captures and uploads to the local stack in CI, then Playwright confirms the Memory on the web | `integration_test` + Playwright |
-| Contract | Committed OpenAPI equals generated; the Dart and TS clients regenerate without diff | script in CI |
+| Web component / hook | Component tests against an in-memory fake API (`src/test/fake-api.ts`); accessibility assertions (axe) | Vitest + Testing Library |
+| Web journey | Playwright E2E against the real API, worker, Postgres and S3 started locally | Playwright |
+| Cross-system journey | The emulator app captures and uploads to the local stack, then Playwright confirms the Memory on the web | `integration_test` + Playwright |
+| Contract | Committed OpenAPI equals the generated one (`services/api/test/openapi.test.ts`); regenerate with `pnpm --filter @doro/api openapi` | Vitest |
 | Docs | `tools/docs-check` | node:test |
 | Repository tooling | Unit tests plus fixture-based tests | node:test |
 
 ## Requirement traceability (NFR-015)
 
-Every requirement of a `done` task must be covered by at least one automated test. Tests carry requirement IDs in their names, e.g. `test('[CAM-010] clamps ISO to the device range', …)`; Swift and Kotlin test method names cannot hold brackets (the JVM forbids `[` and `]` in names), so Swift and Kotlin tests put the tag in a comment directly above the test (`// [CAM-010]`). `pnpm check:traceability` (`tools/docs-check`, task FND-T-011) scans every test source (Dart, TypeScript, Playwright, Kotlin, Swift), and CI fails when a tag names an unknown requirement or when a done task's requirement has no tagged test.
+Every requirement of a `done` task must be covered by at least one automated test. Tests carry requirement IDs in their names, e.g. `test('[CAM-010] clamps ISO to the device range', …)`; Swift and Kotlin test method names cannot hold brackets (the JVM forbids `[` and `]` in names), so Swift and Kotlin tests put the tag in a comment directly above the test (`// [CAM-010]`). `pnpm check:traceability` (`tools/docs-check`, task FND-T-011) scans every test source (Dart, TypeScript, Playwright, Kotlin, Swift), and the check fails when a tag names an unknown requirement or when a done task's requirement has no tagged test.
 
 Requirements that cannot be proven by a test (process requirements such as NFR-009 and NFR-010) are listed with a reason in [traceability-waivers.json](../product/traceability-waivers.json). Waivers without a reason do not count, and a waiver becomes an error once the requirement does get a tagged test, so the file cannot rot. Add a waiver only for genuine process requirements, never to skip writing a test.
 
-## Coverage gates (enforced in CI)
+## Coverage gates (enforced locally)
 
 | Scope | Lines | Branches |
 |---|---|---|
@@ -52,19 +52,19 @@ Requirements that cannot be proven by a test (process requirements such as NFR-0
 | Flutter presentation | ≥ 85% | — |
 | TypeScript (API, worker, web, profiles, tools) | ≥ 95% | ≥ 90% |
 | Kotlin plugin code (Kover) | ≥ 90% | ≥ 80% |
-| Swift plugin code (xccov) | ≥ 90% | — |
+| Swift core code (`DoroCameraCore`, llvm-cov in `ios.yml`) | ≥ 90% | — |
 
-Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Coverage may never decrease on `main`: [coverage-policy.json](../../coverage-policy.json) records each package's policy floor (`min`) and the best coverage reached so far (`ratchet`). `pnpm check:coverage -- --only <package>` (`tools/coverage-gate`) fails below either, tolerating 0.01 points of rounding noise. After improving coverage run it with `--update` and commit the file; ratchets only ever go up. Gated so far: Dart (`apps/mobile`, `packages/doro_camera`) and TypeScript (`apps/web`, `services/api`) through their lcov reports. Kotlin (Kover) and Swift (llvm-cov) gates are added when those toolchains report coverage (FND-T-010 follow-up). Coverage is a floor, not the goal: the obligations table still applies.
+Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Coverage may not decrease on `main` without an explicit owner decision (the API ratchet was reset once, on 2026-11-13, when the product grew from a skeleton to the full backend): [coverage-policy.json](../../coverage-policy.json) records each package's policy floor (`min`) and the best coverage reached so far (`ratchet`). `pnpm check:coverage -- --only <package>` (`tools/coverage-gate`) fails below either, tolerating 0.01 points of rounding noise. After improving coverage run it with `--update` and commit the file; ratchets only ever go up. Gated so far: Dart (`apps/mobile`, `packages/doro_camera`) and TypeScript (`apps/web`, `services/api`) through their lcov reports. Kotlin (Kover) and Swift (llvm-cov) gates are added when those toolchains report coverage (FND-T-012). Coverage is a floor, not the goal: the obligations table still applies.
 
 ## Emulator and simulator matrix
 
 | Target | Where | Used for |
 |---|---|---|
-| Android Emulator: Pixel-class AVD, **API 35**, x86_64, emulated back and front cameras | Local (Windows, WHPX) and CI (`ubuntu-latest` with KVM) | Primary Android instrumentation and `integration_test` runs |
-| Android Emulator: API 28 (minimum supported: `minSdk = 28`, decided at FND-T-004) | CI, nightly | Oldest-API regression of app behavior. Advanced emulated-camera features (RAW, logical cameras) need Android 11+ images, so camera-capability tests run on API 35 |
+| Android Emulator: Pixel-class AVD, **API 35**, x86_64, emulated back and front cameras | Local, inside WSL2 with KVM | Primary Android instrumentation and `integration_test` runs |
+| Android Emulator: API 28 (minimum supported: `minSdk = 28`, decided at FND-T-004) | Local, on demand | Oldest-API regression of app behavior. Advanced emulated-camera features (RAW, logical cameras) need Android 11+ images, so camera-capability tests run on API 35 |
 | iOS deployment target | iOS 16.0 (decided at FND-T-004) | Simulator runs use the latest iOS runtime |
-| iOS Simulator: a large iPhone on the iOS 18 runtime (the runner image has no iPhone 12 Pro Max device type; `scripts/ios-simulator.sh` picks the closest) | Cloud macOS (GitHub Actions `macos-15`, Xcode 16.4) | iOS unit, XCTest, `integration_test` with the synthetic camera |
-| iOS Simulator: newest iPhone profile | Cloud macOS, nightly or manual | Current-device regression |
+| iOS Simulator: a large iPhone on the iOS 18 runtime (the runner image has no iPhone 12 Pro Max device type; `scripts/ios-simulator.sh` picks the closest) | Cloud macOS (`ios.yml`, manual dispatch, `macos-15`, Xcode 16.4) | iOS unit, XCTest, `integration_test` with the synthetic camera |
+| iOS Simulator: newest iPhone profile | Cloud macOS, manual | Current-device regression |
 
 ### What emulators can verify
 - Capability probe logic and the reported characteristics of the emulated camera.
@@ -78,24 +78,23 @@ Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Cover
 ### What they cannot verify (goes to [field-verification.md](field-verification.md))
 Image quality and real sensor response, OEM-specific camera HAL behavior, real performance (fps, latency), thermals and battery, real microphone acoustics, and OEM background-execution policies.
 
-## CI layout (target; built by FND tasks)
+## Where verification runs (ADR-0016)
 
-| Workflow | Runner | Trigger | Runs |
-|---|---|---|---|
-| `docs.yml` (exists) | ubuntu | every push/PR | tooling typecheck and tests, docs check |
-| `ci.yml` › api, web, profiles | ubuntu | path-filtered | lint, typecheck, unit and integration (Testcontainers), coverage gates, Playwright |
-| `ci.yml` › mobile-dart | ubuntu | path-filtered | `flutter analyze`, `flutter test --coverage`, gates |
-| `ci.yml` › android | ubuntu + KVM | path-filtered to mobile/plugin | Gradle unit tests (Kover), emulator instrumentation, `integration_test` against Docker Compose |
-| `ios.yml` | `macos-*` | path-filtered to iOS/plugin/Dart changes, `workflow_dispatch`, weekly | build, XCTest (xccov), Simulator `integration_test`, check that release builds exclude the synthetic source |
-| `e2e.yml` | ubuntu + KVM | nightly and before a release | full cross-system journey (emulator app → API → web) |
+There is no CI on push or pull request. Verification is local, plus one manual cloud workflow.
 
-**Cost:** the repository is public, so GitHub-hosted macOS runners are free; a run takes about 9 minutes. Still path-filter and cache, because runs are slow. If the repository ever goes private, macOS minutes count 10x against the free quota (see [testing-infrastructure.md](../research/testing-infrastructure.md)) and Codemagic (500 free minutes a month) becomes the fallback.
+| What | Where | How |
+|---|---|---|
+| API, web, tools, docs, coverage gates, Playwright | WSL2 Ubuntu | `pnpm test`, `pnpm typecheck`, `pnpm check:docs`, `pnpm check:traceability`, `pnpm check:coverage`, `pnpm --filter @doro/web test:e2e` |
+| Dart, Flutter widgets, Kotlin unit tests, emulator instrumentation, `integration_test` | WSL2 Ubuntu with KVM | `flutter analyze`, `flutter test --coverage`, `./gradlew :doro_camera:testDebugUnitTest`, `bash scripts/emulator-start.sh`, `flutter test integration_test -d emulator-5554` |
+| Swift core tests, iOS build, iOS Simulator `integration_test`, synthetic-camera marker check | GitHub-hosted macOS (`.github/workflows/ios.yml`) | `bash scripts/ios-ci.sh [branch]` (manual dispatch only) |
+
+**Cost:** the repository is public, so GitHub-hosted macOS runners are free; a run takes about 9 minutes. Batch iOS changes to save runs. If the repository ever goes private, macOS minutes count 10x against the free quota (see [testing-infrastructure.md](../research/testing-infrastructure.md)).
 
 ## How agents run tests
 
-- **Host:** package-level commands listed in each package's `AGENTS.md`.
-- **Android Emulator (local):** start the AVD (`emulator -avd doro_api35 -no-snapshot-save`), then run `flutter test integration_test -d emulator-5554` and `./gradlew connectedDebugAndroidTest`.
-- **iOS (cloud):** push the branch, then `gh workflow run ios.yml --ref <branch>` and `gh run watch`. Read failures with `gh run view --log-failed`. XCTest result bundles are uploaded as artifacts.
+- **Everything except iOS:** in WSL, with `scripts/wsl-run.sh` from the Windows shell (see [local-development.md](local-development.md)). Package-level commands are listed in each package's `AGENTS.md`.
+- **Android Emulator (local):** `bash scripts/emulator-start.sh`, then `flutter test integration_test -d emulator-5554` and `./gradlew connectedDebugAndroidTest`.
+- **iOS (cloud macOS):** commit and push the branch, then `bash scripts/ios-ci.sh`. Read failures with `gh run view --log-failed`. Until a run has passed, the iOS part of a change is recorded as unverified in [field-verification.md](field-verification.md).
 - A report must cite the actual commands and pass/fail counts. It must not paraphrase them.
 
 ## Coverage of special cases

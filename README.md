@@ -6,9 +6,9 @@ Doro Cam is a photography and memory platform. It combines a Flutter camera app 
 
 ## Status
 
-**Phase 0 (foundations) nearly done.** Done and green in CI: the docs and traceability checkers, the pnpm workspace, the local Postgres + S3 stack, the API and worker skeleton, the web app shell, the Flutter app shell, the native camera plugin bridge (Dart to Kotlin and Swift, verified on the Android Emulator and the iOS Simulator), the emulator and cloud-macOS pipelines, and the coverage gate. Remaining: the technical spikes S1-S7. See the [roadmap](docs/product/roadmap.md) and [tasks](docs/tasks/README.md).
+**The full product is being built.** Built and tested locally in WSL: the Fastify API and pg-boss worker (accounts, sessions, memories, resumable verified uploads, sync feed, presets, albums and sharing with location privacy, insights and preset suggestions, account deletion; committed OpenAPI contract), and the React dashboard (sign-in, library, memory detail with motion playback, albums, insights, presets, account). The camera app (Flutter, with a first-party Kotlin and Swift camera plugin) is built alongside them. See the [roadmap](docs/product/roadmap.md) and [tasks](docs/tasks/README.md).
 
-Everything is built with a full automated test suite and verified on the Android Emulator and the iOS Simulator (via cloud macOS CI). No physical device or local Mac is required ([ADR-0013](docs/decisions/adr/0013-emulator-simulator-and-cloud-macos-verification.md)).
+Everything is built with a full automated test suite. Tests run locally in WSL (no CI on push); Android is verified on the Android Emulator, and iOS on GitHub-hosted cloud macOS through a manually dispatched workflow. No physical device or local Mac is required ([ADR-0013](docs/decisions/adr/0013-emulator-simulator-and-cloud-macos-verification.md), [ADR-0016](docs/decisions/adr/0016-local-wsl-verification-no-ci.md)).
 
 ## Where to start
 
@@ -19,14 +19,14 @@ Everything is built with a full automated test suite and verified on the Android
 | Looking for any document | [docs/README.md](docs/README.md) |
 | Picking up work | [docs/tasks/README.md](docs/tasks/README.md) |
 
-## Stack (planned)
+## Stack
 
 - Flutter/Dart mobile, with first-party native camera plugin code (Kotlin/CameraX, Swift/AVFoundation)
 - React + TypeScript + Vite web
 - Fastify + TypeScript modular monolith with a pg-boss worker
 - PostgreSQL + Drizzle
 - S3-compatible object storage
-- Docker Compose for local development; GitHub Actions for CI
+- Docker Compose for local development; tests run locally in WSL; one manually dispatched GitHub Actions workflow builds iOS on cloud macOS
 
 Rationale for each choice: [docs/decisions/adr/](docs/decisions/adr/README.md).
 

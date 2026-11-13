@@ -10,10 +10,11 @@ ADR-0013 verified work through GitHub Actions, including a cloud macOS job for i
 
 ## Decision
 
-- All GitHub Actions workflows and Dependabot configuration are removed. No pipeline is added or relied on.
+- All GitHub Actions workflows and Dependabot configuration are removed. No push or pull-request pipeline exists.
+- One exception, added the same day at the owner's request: `.github/workflows/ios.yml` runs on GitHub-hosted cloud macOS (free for this public repository) and is **manual dispatch only** (`bash scripts/ios-ci.sh`). It is the only way to build and test iOS, and it is never triggered automatically.
 - Every test suite (unit, integration, Playwright e2e, Android Emulator) runs locally inside WSL2 Ubuntu, never in the Windows environment. The Windows tree is mirrored into WSL with `scripts/wsl-sync.sh`.
 - The Android Emulator runs in WSL with KVM. Docker runs inside WSL.
-- Without a Mac or a macOS runner, iOS code cannot be built or run. iOS is written against the Flutter-free Swift core (ADR-0015) and recorded as unverified in `docs/development/field-verification.md`. It never counts as verified.
+- iOS code is verified only by manual runs of that cloud macOS workflow (Swift core tests, build, iOS Simulator tests with the synthetic camera). Until a run has passed for a change, its iOS part is recorded as unverified in `docs/development/field-verification.md`.
 - Coverage gates, traceability and docs checks remain, but are run locally.
 
 ## Consequences

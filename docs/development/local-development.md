@@ -1,104 +1,102 @@
 # Local Development
 
-Status: Living (partially planned) · Last updated: 2026-09-30 · Related: ADR-0012, ADR-0013
+Status: Living · Last updated: 2026-11-14 · Related: ADR-0012, ADR-0013, ADR-0014, ADR-0016
 
-## Available now
+All development tooling and **every test suite runs inside WSL2 Ubuntu** (owner decision, ADR-0016). The working tree lives on Windows and is the copy that gets committed; WSL gets a fast ext4 mirror of it. There is no CI that runs on push. The one automation that exists is the manually dispatched `ios.yml` for cloud macOS (see [iOS without a Mac](#ios-without-a-mac)).
 
-| Tool | Version (verified 2026-09-30) | Used for |
+## One-time WSL setup
+
+Installed user-level or via `apt` in the Ubuntu distribution (done on the owner's machine, 2026-11-13):
+
+| Tool | Version | Notes |
 |---|---|---|
-| Git | 2.52 | Version control |
-| Node.js | 24.12 | Repo tooling (`tools/docs-check`), later API and web |
-| GitHub CLI | 2.102 (`C:\Program Files\GitHub CLI\gh.exe`; logged in as `tai285`) | Repo and CI operations, triggering iOS cloud builds |
-| Docker Desktop | 29.1 (WSL2 backend; start it if `docker info` fails) | Local Postgres and Garage S3 |
-| Hypervisor | present (WSL2/Hyper-V) | The Android Emulator must use WHPX (see below) |
+| Node.js | 24.x | `engines.node >= 24` |
+| pnpm | 12.8.1 | pinned by `packageManager`; `npm i -g pnpm@12.8.1` |
+| JDK | OpenJDK 17 | `JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64` |
+| Flutter | 3.47.7 (Dart 3.13.5) | `git clone -b 3.47.7` into `~/dev/flutter` |
+| Android SDK | platform 35 and 36, build-tools 35.0.0 and 36.0.0, emulator, platform-tools, system image `system-images;android-35;google_apis;x86_64` | `~/dev/android-sdk` |
+| AVD | `doro_api35` (Pixel 6 profile, KVM-accelerated) | `hw.camera.back=virtualscene` |
+| Docker Engine + Compose v2 | `docker.io`, `docker-compose-v2` | run `dockerd` inside WSL (`nohup dockerd &`) |
+| Playwright browsers | Chromium (and Firefox, WebKit when needed) | `pnpm exec playwright install --with-deps` |
+
+Load the toolchain in a WSL shell with `source scripts/dev-env.sh` (sets `JAVA_HOME`, `ANDROID_HOME` and `PATH`).
+
+## Working from Windows
+
+The repository path contains a space (`Doro Cam`), so always quote it. The helper scripts do the quoting for you:
 
 ```sh
-pnpm install         # installs workspace dependencies (pnpm 12.8.1, pinned by packageManager)
-pnpm test:tools      # tooling and script tests only (no Docker needed)
-pnpm test            # tests in every TypeScript package (the API's need `pnpm infra:up` first)
-pnpm typecheck       # tsc --noEmit in every TypeScript package
-pnpm check:docs      # documentation integrity
+# mirror the Windows tree into ~/doro-cam (never copies node_modules, build outputs or .git)
+wsl -e bash "/mnt/c/Users/yying/dev/scratch/Doro Cam/Doro Cam/scripts/wsl-sync.sh"
+
+# mirror, run a command in the WSL tree, then copy dependency manifests, the lockfile,
+# Drizzle migrations and the generated OpenAPI back to the Windows tree
+wsl -e bash "/mnt/c/Users/yying/dev/scratch/Doro Cam/Doro Cam/scripts/wsl-run.sh" 'pnpm --filter @doro/api test'
 ```
 
-pnpm is installed per user with `npm install -g pnpm` (Corepack's `enable` needs admin rights to write into the nvm-managed Node folder on this machine). If `pnpm` isn't found in a new shell, add `%APPDATA%\npm` to `PATH` (or dot-source `scripts/dev-env.ps1`).
+Set `DORO_WSL_TREE` to use a different WSL directory (several people or agents can work at once). Keep LF line endings (`.gitattributes` enforces them).
 
-## Mobile toolchain (installed user-level, no admin needed)
-
-Everything lives under `%USERPROFILE%\dev` (override with `DORO_DEV_HOME`). Load it into a shell with:
+## Everyday commands (run in the WSL tree)
 
 ```sh
-source scripts/dev-env.sh        # Git Bash
-. .\scripts\dev-env.ps1          # PowerShell
+pnpm install              # workspace dependencies
+pnpm infra:up             # Postgres 17 + Garage S3 (bootstraps bucket, key, CORS, lifecycle rule)
+pnpm test                 # every TypeScript package (API tests need infra:up)
+pnpm typecheck            # tsc --noEmit everywhere
+pnpm check:docs           # documentation integrity
+pnpm check:traceability   # every requirement of a done task has a tagged test
+pnpm check:coverage -- --only services/api    # coverage gate (floor + ratchet)
+pnpm --filter @doro/api openapi               # regenerate packages/api-contract/openapi.json
+pnpm --filter @doro/web test:e2e              # Playwright end to end
 ```
-
-| Tool | Version (verified 2026-10-01) | Notes |
-|---|---|---|
-| Flutter (stable) | 3.47.5 (Dart 3.13.4) | `git clone -b stable` into `dev\flutter`; analytics disabled |
-| JDK | Temurin 17.0.20 | The machine's system `JAVA_HOME` points at a stale JDK 1.6; `dev-env` overrides it per session and the user-level variable was set too |
-| Android SDK | platform 35 and 36, build-tools 35.0.0, 36.0.0 and 28.0.3, NDK 28.2.13676358, platform-tools, emulator 37.1 | Flutter 3.47 requires platform 36 and build-tools 28.0.3; the NDK must be installed explicitly or Gradle fails |
-| System image | `system-images;android-35;google_apis;x86_64` | AVD `doro_api35` |
-| Windows Hypervisor Platform | present and usable | `emulator -accel-check` reports "WHPX is installed and usable"; no admin step was needed |
-| Cloud macOS (iOS) | working (2026-09-30) | GitHub Actions `macos-15`, Xcode 16.4; see `ios.yml` |
-
-`flutter doctor` is green for Flutter, Android toolchain, Chrome and network. The only warning is Visual Studio (Windows-desktop apps), which we don't build.
-
-### Installing the Android SDK (reproduction notes)
-
-- `sdkmanager` is deprecated in favor of Google's new Android CLI but still works. Package names contain `;`, which the `.bat` wrapper splits on, so quote them from `cmd`: `cmd /c "echo y| sdkmanager.bat --sdk_root=... \"platforms;android-35\""`.
-- `--licenses` prints a warning and isn't needed on the current tools.
-- A first `flutter build apk` takes about 4 minutes (Gradle and dependency downloads); later builds take under a minute.
-
-### Android Emulator on Windows
-
-1. Create the standard AVD (the name is used by scripts and docs):
-   `avdmanager create avd -n doro_api35 -k "system-images;android-35;google_apis;x86_64" -d pixel_7`
-   then set `hw.camera.back=virtualscene`, `hw.camera.front=emulated`, `hw.ramSize=3072` in the AVD `config.ini`. (Done on this machine.)
-2. Run headless for tests: `bash scripts/emulator-start.sh` (boots `doro_api35`, waits for Android's boot-completed signal with a timeout, reuses an emulator that is already running, and prints the serial). It boots in about 40-60 seconds here. Stop it with `adb emu kill`.
-3. Run tests on it: `cd apps/mobile && flutter test integration_test -d emulator-5554`.
-4. The emulator reaches the host's local API and S3 (`10.0.2.2:9000`) without `adb reverse`.
-
-Acceleration must use the Windows Hypervisor Platform because WSL2/Hyper-V is active. If `emulator -accel-check` ever reports it unavailable, the owner enables *Windows Hypervisor Platform* once (admin), then reboots; agents must ask rather than attempt elevation.
-
-Resource note: 16 GB RAM is tight. One emulator (about 3 GB with its guest) plus Docker Desktop, VS Code and a browser leaves only a few GB free, and once memory runs out everything slows dramatically: a 7-second script test took 8 minutes while the emulator sat idle in the background. **Stop the emulator when you are not running device tests** (`adb emu kill`), and never run two. Closing Docker Desktop when the API tests are not needed also helps.
-
-### iOS without a Mac
-
-- Every iOS build and test runs in the cloud (ADR-0013). Agents push a branch, then run `gh workflow run ios.yml --ref <branch>`, `gh run watch`, and `gh run view --log-failed`.
-- The repository is **public**, so GitHub-hosted runners (including macOS) are free. A run takes about 9 minutes; `bash scripts/ios-ci.sh` triggers it and waits. Codemagic is not configured; it is only a fallback if the repository ever goes private again.
-- Simulator camera: none. Debug and test builds use the plugin's synthetic camera source (ADR-0013).
 
 ### Local services (`infrastructure/docker-compose.yml`)
 
-```sh
-pnpm infra:up          # starts Postgres + Garage S3, bootstraps bucket, key, CORS, lifecycle (idempotent)
-pnpm infra:down        # stops the stack, keeps data (add -- --volumes to wipe it)
-pnpm test:infra        # live-stack protocol tests (needs infra:up first)
-```
-
 | Service | Host port | Purpose |
 |---|---|---|
-| postgres (17) | 5432 (`POSTGRES_PORT`) | Metadata + pg-boss |
+| postgres (17) | 5432 (`POSTGRES_PORT`) | Metadata and pg-boss |
 | garage (S3) | 9000 (`S3_PORT`) | S3-compatible storage (ADR-0014). Bucket `doro-media`, public dev key from `.env.example` |
 
-Both are bound to `127.0.0.1` only, and the credentials are public dev-only values. `pnpm infra:up` creates the bucket, imports the dev key, and applies CORS and the abort-incomplete-multipart lifecycle rule using the S3 API, so the same code works against R2 or S3 later. Copy `.env.example` to `.env` to override anything.
+Both bind to `127.0.0.1` only and use public dev-only credentials. Copy `.env.example` to `.env` to override anything.
 
-### Planned commands
+### Running the whole product locally
 
 ```sh
-docker compose -f infrastructure/docker-compose.yml up -d
-pnpm --filter api dev          # API on :3000
-pnpm --filter api worker:dev   # worker
-pnpm --filter @doro/web dev     # web on :5173
-cd apps/mobile && flutter run -d emulator-5554
+pnpm infra:up
+pnpm --filter @doro/api db:migrate      # apply migrations
+pnpm --filter @doro/api dev             # API on :3000 (verification and reset emails are written to its log)
+pnpm --filter @doro/api worker:dev      # worker (verify, derivatives, purge, sweeps)
+pnpm --filter @doro/web dev             # dashboard on :5173
+source scripts/dev-env.sh && cd apps/mobile && flutter run -d emulator-5554
 ```
 
-### Optional: owner's physical devices (field verification only)
+## Android Emulator in WSL
 
-- **Honor X9c:** enable Developer options, then USB debugging. Install the CI debug APK artifact with `adb install`. The phone reaches the local API via `adb reverse tcp:3000 tcp:3000` and `adb reverse tcp:9000 tcp:9000`.
-- **iPhone 12 Pro Max:** needs TestFlight, which requires the Apple Developer Program (an owner decision).
+KVM is available in WSL2, so the emulator is hardware-accelerated.
 
-## Windows notes
+1. `bash scripts/emulator-start.sh` boots the headless `doro_api35` AVD, waits for Android's boot-completed signal, reuses an emulator that is already running and prints the serial. Stop it with `adb emu kill`.
+2. Run tests: `cd apps/mobile && flutter test integration_test -d emulator-5554`.
+3. The emulator reaches services in WSL through `10.0.2.2` (for example the API on `10.0.2.2:3000`).
 
-- Keep LF line endings. `.gitattributes` enforces this, and `core.autocrlf=false` is set in the repo.
-- Avoid path-length issues: enable long paths (`git config core.longpaths true`) if Gradle complains. The repo path contains a space (`Doro Cam`), so always quote paths in scripts.
-- Commands in docs are POSIX. PowerShell equivalents are given where they differ. In PowerShell, run `gh ... --jq` through the Bash tool, because PowerShell splits the quoted jq expressions.
+Resource note: WSL has about 7 GB of RAM. One emulator (about 3 GB with its guest) plus Docker, Postgres and a browser is the limit. Stop the emulator when you are not running device tests, and never run two.
+
+## iOS without a Mac
+
+There is no local Mac. iOS is built and tested only on GitHub-hosted cloud macOS through `.github/workflows/ios.yml`, which is **manual dispatch only**; nothing runs on push or pull request (ADR-0016).
+
+- Trigger it with `bash scripts/ios-ci.sh [branch]`. It dispatches the workflow, waits and prints the failing logs. Equivalent manual commands: `gh workflow run ios.yml --ref <branch>`, `gh run watch`, `gh run view --log-failed`.
+- The repository is public, so macOS runners are free. A run takes about 9 minutes.
+- The workflow has two jobs: Swift core unit tests (`DOROCAM_SWIFT_STANDALONE=1 swift test`, no simulator) and the iOS Simulator job (build, synthetic-camera marker checks, `integration_test` with the plugin's synthetic camera).
+- The iOS Simulator has no camera. Debug builds use the plugin's synthetic camera source (ADR-0013); release builds must never contain it.
+- Until a run has passed for a change, record its iOS part as unverified in [field-verification.md](field-verification.md).
+
+## Physical devices (optional, field verification only)
+
+- **Honor X9c:** enable Developer options and USB debugging. Build a debug APK and install it with `adb install` (from Windows, or forward the device to WSL with `usbipd`). The phone reaches the local API through `adb reverse tcp:3000 tcp:3000` and `adb reverse tcp:9000 tcp:9000`.
+- **iPhone 12 Pro Max:** needs a signed build; TestFlight requires the Apple Developer Program (an owner decision). iPhone entries stay `pending` until then.
+
+## Notes
+
+- Commands in docs are POSIX shell. Run them in WSL.
+- Tests never run in the Windows environment; this avoids path, shell and line-ending differences.
+- A cold first install is slow; later runs use caches.
