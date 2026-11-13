@@ -73,3 +73,32 @@ When the app is in the foreground, the queue runner also drives uploads directly
 ## Free-up-space (Post, LIB-005)
 
 Only `synced` assets whose checksum was verified server-side may have local originals removed. Thumbnails and display renditions stay. Opening the original then downloads it on demand.
+
+## Implementation (mobile data layer)
+
+Status: implemented and tested on the host and against the real API · Code: `apps/mobile/lib/{data,sync,api}` · Tests: `apps/mobile/test/{data,sync,api,integration}`
+
+**What differs from the plan above**
+
+- `upload_jobs` also stores `resume_state` (the state a backoff returns to), `part_count`, `last_error_code` and `checksum_failures`; `memories` stores `account_id` (null while anonymous), `registered` and `captured_here` (false for Memories mirrored from the server). `outbox` and `sync_state` are as planned. `dirty_fields` was not needed: a pending outbox row is what marks a field as locally edited.
+- The schema is version 1. Later versions add an entry to `AppDatabase.extraSteps`; `test/data/db/migration_test.dart` covers the step runner, data preservation, failing steps and the downgrade guard. A database newer than the app is refused (`DatabaseDowngradeError`).
+- Server-origin Memories (from other devices, SYNC-006) only mirror assets the server reports as verified; their `sha256` is empty because the API does not return it, and they have no local file.
+
+**Capture → Memory (MEM-001, NFR-002).** `MemoryRepository.commitCapture` hashes each file (SHA-256), moves it into `<media>/<memoryId>/<role>.<ext>`, fsyncs it, then inserts the Memory, its assets and (when signed in) the upload jobs in one transaction. Any failure removes the moved files. A crash between the move and the commit leaves an orphan directory that `recoverOrphans` deletes after a one hour grace period. The call is idempotent per Memory id.
+
+**Upload engine.** `UploadEngine.drain()` implements the state machine above and `docs/specs/upload-sync.md` exactly: register (PUT), create-or-resume, single or multipart transfer with the ETag stored per part before the next step, re-presign on 400/403 (only freshly signed URLs being rejected counts, three in a row is permanent), completion, and polling until the server reports `verified` or `ready`. Backoff is full jitter, 5 s base, 30 min cap, honoring `Retry-After`. A checksum mismatch restarts the upload; the third is `failed_permanent`. `401` pauses the queue (`NeedsSignIn`), a full quota pauses it for an hour (`QuotaExceeded`). Policy: connected, Wi-Fi only by default (SYNC-005), not below 15% battery unless charging. Jobs are partitioned by account and Memories in the trash are skipped.
+
+**Metadata.** `OutboxPusher` sends edits in order per entity (version conflicts re-apply on top of the newer server version; permanent 4xx drops the operation; edits for an unregistered Memory wait). `PullSync` pages the change feed, fetches changed Memories and presets, never overwrites fields with an unsent local edit, lets a server-side delete win, and advances the cursor in the same transaction as the data. `SyncCoordinator.syncOnce()` runs push, upload, push again, pull; `start()` re-runs on connectivity or account changes; `BackgroundScheduler` is the thin OS hand-off (WorkManager / URLSession adapters implement it).
+
+**Running the tests (inside WSL).**
+
+```bash
+source scripts/dev-env.sh
+cd apps/mobile
+flutter test test/data test/sync test/api            # host tests, no network
+pnpm infra:up                                         # once, from the repo root (Postgres + Garage)
+flutter test test/integration                         # the real API, including 200 MB through 6 network drops and 2 kills
+dart run build_runner build                           # after changing lib/data/db/tables.dart
+```
+
+`test/integration` starts the real `services/api` through `apps/mobile/tool/test_api_server.ts` (a test-only wrapper that runs jobs in-process and exposes the mailer), so uploads are verified immediately.
