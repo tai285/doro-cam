@@ -35,13 +35,38 @@ describe('loadConfig', () => {
         accessKeyId: 'AKIDEXAMPLE-KEY-ID',
         secretAccessKey: 'super-secret-access-key',
       },
+      auth: {
+        secret: expect.stringMatching(/^dev-only/),
+        baseUrl: 'http://localhost:3000',
+        webOrigins: ['http://localhost:5173'],
+      },
+      limits: { storageQuotaBytes: 10 * 1024 ** 3, authPerMinute: 30 },
     });
+  });
+
+  it('[AUTH-001] requires AUTH_SECRET in production and rejects a short one', () => {
+    expect(messageOf({ ...REQUIRED, NODE_ENV: 'production' })).toContain('AUTH_SECRET: is required in production');
+    expect(messageOf({ ...REQUIRED, AUTH_SECRET: 'too-short' })).toContain('AUTH_SECRET: must be at least 32 characters');
+  });
+
+  it('[AUTH-001] parses web origins, the public URL, quota and the auth rate limit', () => {
+    const config = loadConfig({
+      ...REQUIRED,
+      PUBLIC_BASE_URL: 'https://api.example.com/',
+      WEB_ORIGINS: 'https://app.example.com, http://localhost:5173 ,',
+      STORAGE_QUOTA_BYTES: '1048576',
+      AUTH_RATE_LIMIT_PER_MINUTE: '5',
+    });
+    expect(config.auth.baseUrl).toBe('https://api.example.com');
+    expect(config.auth.webOrigins).toEqual(['https://app.example.com', 'http://localhost:5173']);
+    expect(config.limits).toEqual({ storageQuotaBytes: 1048576, authPerMinute: 5 });
   });
 
   it('reads overrides and coerces numeric strings', () => {
     const config = loadConfig({
       ...REQUIRED,
       NODE_ENV: 'production',
+      AUTH_SECRET: 'a-production-secret-that-is-long-enough-123',
       LOG_LEVEL: 'warn',
       HOST: '127.0.0.1',
       PORT: '8080',

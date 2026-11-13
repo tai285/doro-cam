@@ -1,5 +1,7 @@
+import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
 import Fastify, { type FastifyInstance, type FastifyPluginAsync } from 'fastify';
-import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import type { AppConfig } from './config/env.ts';
 import type { Database } from './db/client.ts';
 import { registerErrorHandling } from './lib/error-handler.ts';
@@ -44,6 +46,18 @@ export async function buildApp(deps: AppDeps, options: BuildAppOptions = {}): Pr
     void reply.header(REQUEST_ID_HEADER, request.id);
   });
   registerErrorHandling(app);
+
+  await app.register(cors, {
+    origin: deps.config.auth.webOrigins,
+    credentials: true,
+    exposedHeaders: ['set-auth-token', REQUEST_ID_HEADER],
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
+  await app.register(swagger, {
+    openapi: { info: { title: 'Doro Cam API', version: '1.0.0' }, servers: [{ url: deps.config.auth.baseUrl }] },
+    transform: jsonSchemaTransform,
+  });
+  app.get('/v1/openapi.json', { schema: { hide: true } }, async () => app.swagger());
 
   await app.register(
     healthRoutes([

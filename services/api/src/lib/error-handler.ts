@@ -4,6 +4,7 @@ import { AppError, BadRequestError, internalEnvelope, NotFoundError, toEnvelope 
 
 /** Fastify-generated 4xx errors (bad JSON, body too large, ...) mapped to stable API codes. */
 const FRAMEWORK_CODES = new Map<number, { code: string; message: string }>([
+  [429, { code: 'rate_limited', message: 'Too many requests. Try again shortly.' }],
   [413, { code: 'request.too_large', message: 'The request body is too large.' }],
   [415, { code: 'request.unsupported_media_type', message: 'The content type is not supported.' }],
 ]);
