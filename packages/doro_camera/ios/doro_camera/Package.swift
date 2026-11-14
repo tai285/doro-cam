@@ -46,7 +46,8 @@ if insideFlutterApp {
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
                 "DoroCameraCore",
             ],
-            path: "Sources/doro_camera"
+            path: "Sources/doro_camera",
+            swiftSettings: syntheticCameraInDebug
         )
     )
 } else {
