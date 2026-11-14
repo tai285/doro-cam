@@ -54,8 +54,8 @@ stateDiagram-v2
 
 | Platform | Mechanism | Limits |
 |---|---|---|
-| Android | `background_downloader` → WorkManager / user-initiated data transfer jobs | Runs after app kill; OEM battery managers (including Honor/MagicOS) may delay it. S4 verifies correctness on the emulator; OEM delays are field verification FV-005. |
-| iOS | `background_downloader` → background `URLSession` upload tasks (file-based) | The system schedules tasks; each task is a whole request. Resumability comes from **per-part tasks** (see [upload-sync.md](../specs/upload-sync.md)). |
+| Android | WorkManager through the `workmanager` plugin (see the implementation section; `background_downloader` was not adopted) | Runs after app kill; OEM battery managers (including Honor/MagicOS) may delay it. S4 verifies correctness on the emulator; OEM delays are field verification FV-005. |
+| iOS | BGTaskScheduler app refresh through the `workmanager` plugin (the pass runs the ordinary foreground upload code; no background `URLSession` yet) | The system schedules tasks; each task is a whole request. Resumability comes from **per-part tasks** (see [upload-sync.md](../specs/upload-sync.md)). |
 
 When the app is in the foreground, the queue runner also drives uploads directly.
 
@@ -88,7 +88,20 @@ Status: implemented and tested on the host and against the real API · Code: `ap
 
 **Upload engine.** `UploadEngine.drain()` implements the state machine above and `docs/specs/upload-sync.md` exactly: register (PUT), create-or-resume, single or multipart transfer with the ETag stored per part before the next step, re-presign on 400/403 (only freshly signed URLs being rejected counts, three in a row is permanent), completion, and polling until the server reports `verified` or `ready`. Backoff is full jitter, 5 s base, 30 min cap, honoring `Retry-After`. A checksum mismatch restarts the upload; the third is `failed_permanent`. `401` pauses the queue (`NeedsSignIn`), a full quota pauses it for an hour (`QuotaExceeded`). Policy: connected, Wi-Fi only by default (SYNC-005), not below 15% battery unless charging. Jobs are partitioned by account and Memories in the trash are skipped.
 
-**Metadata.** `OutboxPusher` sends edits in order per entity (version conflicts re-apply on top of the newer server version; permanent 4xx drops the operation; edits for an unregistered Memory wait). `PullSync` pages the change feed, fetches changed Memories and presets, never overwrites fields with an unsent local edit, lets a server-side delete win, and advances the cursor in the same transaction as the data. `SyncCoordinator.syncOnce()` runs push, upload, push again, pull; `start()` re-runs on connectivity or account changes; `BackgroundScheduler` is the thin OS hand-off (WorkManager / URLSession adapters implement it).
+**Metadata.** `OutboxPusher` sends edits in order per entity (version conflicts re-apply on top of the newer server version; permanent 4xx drops the operation; edits for an unregistered Memory wait). `PullSync` pages the change feed, fetches changed Memories and presets, never overwrites fields with an unsent local edit, lets a server-side delete win, and advances the cursor in the same transaction as the data. `SyncCoordinator.syncOnce()` runs push, upload, push again, pull; `start()` re-runs on connectivity or account changes; `BackgroundScheduler` is the thin OS hand-off (implemented by the WorkManager / BGTaskScheduler adapter below).
+
+**Background execution (SYNC-002).** `BackgroundScheduler` is implemented by `WorkmanagerBackgroundScheduler` (`apps/mobile/lib/platform/background_sync.dart`) on top of the `workmanager` plugin, behind a small `WorkPlanner` seam that tests replace with a fake. It registers two kinds of work, both running one headless sync pass:
+
+- a **periodic** pass `doro.sync.periodic` every 30 minutes (WorkManager's minimum is 15), registered at start-up with the `update` policy. It is the safety net that picks up work after an app kill or a reboot;
+- a **one-off** `doro.sync.wakeup`, which `SyncCoordinator` requests for the time the next backed-off job is due (`scheduleWakeUp`) and cancels when the queue is empty (`cancel`).
+
+Constraints given to the OS: a connected network, or an **unmetered** one while "Upload on Wi-Fi only" is on (the setting is read when registering, and the periodic pass is registered again when the setting changes), and *battery not low*. These only avoid pointless wake-ups. The pass enforces the policy again (Wi-Fi only, 15% battery unless charging, SYNC-005) because it uses the same `UploadEngine`. Charging is not required.
+
+`runBackgroundSyncPass` opens its own `DataLayer` (`openDataLayer` in `bootstrap.dart`, without a scheduler, so it never replaces the work item it runs in), calls `syncOnce()`, and always closes it. It returns `false` only for unexpected errors (Android then retries with backoff); network and server failures are handled by the engine. The app and a background pass can have the SQLite file open together, so the executor sets `busy_timeout`; uploads are idempotent (SYNC-004) in case both process the same job. The headless entry point is `backgroundCallbackDispatcher`.
+
+Platform setup: Android needs nothing beyond the plugin's own manifest merge (`INTERNET` and `ACCESS_NETWORK_STATE` were already declared). iOS has `BGTaskSchedulerPermittedIdentifiers` and `UIBackgroundModes: fetch` in `Info.plist` and the periodic task registered in `AppDelegate.swift`.
+
+**Dependency justification (development-guide dependency policy).** `workmanager` 0.10.10 (MIT; Flutter Community organization, releases within the last months; Android and iOS). Necessity: WorkManager and BGTaskScheduler are native APIs that need a platform channel and a headless Flutter engine, far beyond ~100 lines. It adds three federated platform packages (`workmanager_android`, `workmanager_apple`, `workmanager_platform_interface`) plus Linux and web stubs and the AndroidX WorkManager library. `workmanager_android` is also a dev dependency, only so a test can stand in for the plugin's Android implementation. Not a camera API, so ADR-0001 does not apply. It does not replace the ADR-0009 decision for resumable transfers: transfers still run in Dart; the plugin only wakes the app. What the OS really does after an app kill, under Doze or OEM battery managers, and on iOS is unverified: FV-005, FV-015 and FV-016 in [field-verification.md](../development/field-verification.md).
 
 **Running the tests (inside WSL).**
 
