@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import 'support.dart';
+
 /// The core journey on a real Android Emulator / iOS Simulator (ADR-0013, the MVP journey of requirements.md):
 /// open the app, take a photo with the camera the device offers (the Simulator has only the synthetic source),
 /// see it saved, and find it in the library with its metadata.
@@ -12,28 +14,11 @@ import 'package:integration_test/integration_test.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<bool> waitFor(
-    WidgetTester tester,
-    Finder finder, {
-    int seconds = 30,
-  }) async {
-    for (var i = 0; i < seconds * 4; i++) {
-      await tester.pump(const Duration(milliseconds: 250));
-      if (finder.evaluate().isNotEmpty) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   testWidgets(
     '[MEM-001][LIB-001][CAM-050] a captured photo is saved and shows up with its applied settings',
     (tester) async {
       await app.main();
-      await tester.pump(const Duration(seconds: 1));
-      if (find.byKey(const Key('onboarding-skip')).evaluate().isNotEmpty) {
-        await tester.tap(find.byKey(const Key('onboarding-skip')));
-      }
+      await passOnboarding(tester);
       final ready = await waitFor(
         tester,
         find.byKey(const Key('shutter-button')),
@@ -46,9 +31,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('shutter-button')));
       // The Memory is saved before success is shown, so a few seconds are plenty (capture, render, durable write).
-      for (var i = 0; i < 40; i++) {
-        await tester.pump(const Duration(milliseconds: 250));
-      }
+      await settle(tester, milliseconds: 6000);
 
       await tester.tap(find.byKey(const Key('last-capture')));
       expect(
