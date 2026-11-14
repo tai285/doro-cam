@@ -32,13 +32,13 @@ The MVP includes two native camera engines, a GPU look pipeline, motion capture,
 | Phase | Name | MVP | Status | Depends on |
 |---|---|---|---|---|
 | P0 | Foundations, test infrastructure and spikes | ✓ | in progress (scaffolds, test infrastructure and WSL workflow done; spikes S1–S7 outstanding) | — |
-| P1 | Camera core and local Memories | ✓ | not started | P0 |
+| P1 | Camera core and local Memories | ✓ | Android built and emulator-verified (capture, local Memory, library); iOS written, unverified. Task entries below are not yet updated | P0 |
 | P2 | Manual controls, Experiences, presets | ✓ | not started | P1 |
 | P3 | Image profile engine | ✓ | not started | P1, S2, S7 |
 | P4 | Backend foundation and auth | ✓ | **done** (accounts, sessions, memories, OpenAPI contract, worker; 274 API tests) | P0 |
-| P5 | Cloud storage, upload queue, sync | ✓ | not started | P1, P4, S4, S5 |
-| P6 | Motion Memory (LIVE) | ✓ | not started | P1, P5, S3 |
-| P7 | Web dashboard (library) → **MVP complete** | ✓ | not started | P4, P5 |
+| P5 | Cloud storage, upload queue, sync | ✓ | built; Android emulator-verified end to end against the real stack (`scripts/e2e-fullstack.sh`: back-up, restore on a fresh install); iOS unverified; real-network behavior unverified (FV-013) | P1, P4, S4, S5 |
+| P6 | Motion Memory (LIVE) | ✓ | built; Android emulator-verified with the synthetic camera through upload, transcode and web playback; real microphone sync unverified (FV-004); iOS unverified | P1, P5, S3 |
+| P7 | Web dashboard (library) → **MVP complete** | ✓ | built; verified in Chromium against app-uploaded data (`scripts/e2e-fullstack.sh`) | P4, P5 |
 | P8 | Video | | not started | P2, P5, S6 |
 | P9 | Shared albums and trips | | server and web **done** (roles, invites, trip proposals, location privacy); mobile in progress | P5, P7 |
 | P10 | Photography analytics | | server and web **done** (distributions, trends, insights with their numbers) | P5 |

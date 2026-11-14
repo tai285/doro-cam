@@ -48,6 +48,7 @@ pnpm check:traceability   # every requirement of a done task has a tagged test
 pnpm check:coverage -- --only services/api    # coverage gate (floor + ratchet)
 pnpm --filter @doro/api openapi               # regenerate packages/api-contract/openapi.json
 pnpm --filter @doro/web test:e2e              # Playwright end to end
+bash scripts/e2e-fullstack.sh                  # emulator app + API + worker + S3 + web, one scenario (testing-strategy.md)
 ```
 
 ### Local services (`infrastructure/docker-compose.yml`)

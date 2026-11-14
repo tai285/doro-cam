@@ -14,7 +14,7 @@ Doro Cam is a cross-platform photography and memory platform:
 
 The central domain concept is the **Memory**. The north star is: *capture and preserve the feeling of a moment.* Full context: [docs/product/vision.md](docs/product/vision.md).
 
-**Current state:** planning complete, **no application code yet**. See [docs/product/roadmap.md](docs/product/roadmap.md) for phase status and [docs/tasks/README.md](docs/tasks/README.md) for the next task.
+**Current state:** the API and worker, the web dashboard, the Flutter app and the Android camera plugin are built and tested; the iOS plugin is written but unverified (ADR-0016). `bash scripts/e2e-fullstack.sh` proves the Android app, API, worker, storage and web dashboard work together. See [docs/product/roadmap.md](docs/product/roadmap.md) for phase status and [docs/tasks/README.md](docs/tasks/README.md) for the next task.
 
 ## 2. Source of truth and authority
 

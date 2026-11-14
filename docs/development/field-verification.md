@@ -31,6 +31,8 @@ Status is `pending`, `pass`, `fail (task link)`, or `n/a`.
 | FV-010 | iOS plugin | **iOS Simulator end to end** with the synthetic camera: preview texture, capture to Memory, Motion clip with audio/video sync (flash and beep), video recording, interruptions | The Simulator has no camera; the synthetic source stands in | cloud macOS (`ios.yml` simulator job) | pending: not run | — |
 | FV-011 | iOS plugin | Real iPhone: manual ISO/shutter/focus/white balance honoured and reported, lens switching, HEIC/DNG capture, GPS in EXIF only when enabled, interruptions (call, another app), thermal behaviour of the Live buffer | Real camera pipeline | iPhone 12 Pro Max | pending | — |
 | FV-012 | iOS plugin | Motion clip quality and memory: the Live buffer keeps about 2 s of frames at 15 fps and 960 px long edge (about 60 MB), so clips are lower resolution than the stills. Check memory pressure and clip quality on a real device | Real memory limits and encoder | iPhone 12 Pro Max | pending | — |
+| FV-013 | full-stack scenario | The Android app against the API over a real network: TLS, mobile data and flaky links, a public hostname instead of `10.0.2.2` and loopback storage, uploads of full-size originals and long Motion clips | The scenario runs the emulator against the same machine over plain HTTP with tiny synthetic media | Honor X9c, a deployed API | pending | — |
+| FV-014 | full-stack scenario | The same scenario with the iOS app (sign-up, photo, Motion Memory, back-up, web dashboard) | No Mac; `ios.yml` does not run the stack | iPhone 12 Pro Max, cloud macOS | pending: not run | — |
 
 ## Installing builds on the owner's devices
 

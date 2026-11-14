@@ -32,7 +32,7 @@ Tests must prove behavior:
 | Worker job | Handler tests with real Postgres and S3 (Garage), run twice to prove idempotency; media outputs checked with ffprobe/exif parsing | Vitest |
 | Web component / hook | Component tests against an in-memory fake API (`src/test/fake-api.ts`); accessibility assertions (axe) | Vitest + Testing Library |
 | Web journey | Playwright E2E against the real API, worker, Postgres and S3 started locally | Playwright |
-| Cross-system journey | The emulator app captures and uploads to the local stack, then Playwright confirms the Memory on the web | `integration_test` + Playwright |
+| Cross-system journey | The emulator app captures and uploads to the local stack, then Playwright confirms the Memory on the web (see [Full-stack scenario](#full-stack-scenario)) | `integration_test` + Playwright, driven by `scripts/e2e-fullstack.sh` |
 | Contract | Committed OpenAPI equals the generated one (`services/api/test/openapi.test.ts`); regenerate with `pnpm --filter @doro/api openapi` | Vitest |
 | Docs | `tools/docs-check` | node:test |
 | Repository tooling | Unit tests plus fixture-based tests | node:test |
@@ -78,6 +78,17 @@ Generated code (Pigeon, drift, build_runner, OpenAPI clients) is excluded. Cover
 ### What they cannot verify (goes to [field-verification.md](field-verification.md))
 Image quality and real sensor response, OEM-specific camera HAL behavior, real performance (fps, latency), thermals and battery, real microphone acoustics, and OEM background-execution policies.
 
+## Full-stack scenario
+
+`bash scripts/e2e-fullstack.sh` (inside WSL, after `pnpm infra:up`) proves the product works as one system. One private Postgres database and the real Garage S3 serve everything:
+
+1. `services/api/test/fullstack-server.ts` starts the real pg-boss **worker** and two API listeners on the same database: `10.0.2.2` for the Android Emulator and `127.0.0.1` for the browser (presigned storage URLs are signed per host). Only mail is replaced, by an in-memory outbox readable at `/__test/outbox`.
+2. `apps/mobile/integration_test/fullstack_test.dart` drives the real app on the emulator with the synthetic camera: a photo with no account, account creation, the mailed confirmation link, sign-in, a Motion Memory (LIVE on), and back-up until both Memories show as backed up. Camera and microphone are pre-granted with `adb shell pm grant`.
+3. `apps/web/e2e-fullstack/fullstack.spec.ts` (`pnpm --filter @doro/web test:e2e:fullstack`, config `playwright.fullstack.config.ts`) signs in to the dashboard as the same account and checks: both Memories listed with real thumbnails and every asset verified; the original JPEG is complete and the size the app reported; the motion clip is a well-formed MP4 (box structure, H.264 video and AAC audio tracks, duration) that plays in the browser; an album is created, an invite link accepted by a second account, and the shared Memories (including the motion clip) are viewable read-only; a caption and favorite are set on the web.
+4. `apps/mobile/integration_test/fullstack_restore_test.dart` reinstalls the app (clean data), signs in and syncs: both Memories come back, with the web favorite and caption.
+
+The script warms Gradle before booting the emulator and restarts the emulator once if it dies mid-run: on a 8 GB WSL VM an emulator booting during a Gradle build has hung QEMU and once crashed the VM. `FULLSTACK_SKIP_MOBILE=1` / `FULLSTACK_SKIP_WEB=1` run one half. Tests are skipped (not failed) when run outside the script, so `flutter test integration_test` and `pnpm --filter @doro/web test:e2e` stay independent. What this does not prove: real-network behavior (TLS, mobile data, slow links), the real camera, and iOS (see [field-verification.md](field-verification.md)).
+
 ## Where verification runs (ADR-0016)
 
 There is no CI on push or pull request. Verification is local, plus one manual cloud workflow.
@@ -86,6 +97,7 @@ There is no CI on push or pull request. Verification is local, plus one manual c
 |---|---|---|
 | API, web, tools, docs, coverage gates, Playwright | WSL2 Ubuntu | `pnpm test`, `pnpm typecheck`, `pnpm check:docs`, `pnpm check:traceability`, `pnpm check:coverage`, `pnpm --filter @doro/web test:e2e` |
 | Dart, Flutter widgets, Kotlin unit tests, emulator instrumentation, `integration_test` | WSL2 Ubuntu with KVM | `flutter analyze`, `flutter test --coverage`, `./gradlew :doro_camera:testDebugUnitTest`, `bash scripts/emulator-start.sh`, `flutter test integration_test -d emulator-5554` |
+| Whole product (emulator app + API + worker + S3 + web) | WSL2 Ubuntu with KVM | `bash scripts/e2e-fullstack.sh` |
 | Swift core tests, iOS build, iOS Simulator `integration_test`, synthetic-camera marker check | GitHub-hosted macOS (`.github/workflows/ios.yml`) | `bash scripts/ios-ci.sh [branch]` (manual dispatch only) |
 
 **Cost:** the repository is public, so GitHub-hosted macOS runners are free; a run takes about 9 minutes. Batch iOS changes to save runs. If the repository ever goes private, macOS minutes count 10x against the free quota (see [testing-infrastructure.md](../research/testing-infrastructure.md)).
