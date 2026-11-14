@@ -71,3 +71,4 @@ infrastructure/.data/
 
 # Web tooling caches
 .eslintcache
+.fullstack-logs/

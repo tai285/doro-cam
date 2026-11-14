@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:fullstack": "playwright test -c playwright.fullstack.config.ts",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint --cache .",
     "format": "prettier --write .",
