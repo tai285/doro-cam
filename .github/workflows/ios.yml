@@ -36,6 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Select the newest installed Xcode
+        run: |
+          ls /Applications | grep -E "^Xcode_[0-9.]+.app$" | sort -V
+          latest=$(ls /Applications | grep -E "^Xcode_[0-9.]+.app$" | sort -V | tail -1)
+          sudo xcode-select -s "/Applications/$latest/Contents/Developer"
+          xcodebuild -version
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
