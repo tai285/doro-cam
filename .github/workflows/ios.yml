@@ -91,6 +91,9 @@ jobs:
         run: |
           # One file per invocation: each run rebuilds and installs the app, and a single stall only
           # costs that file's attempt instead of the whole suite.
+          # Pre-grant camera and microphone so the system permission alert never blocks the test run.
+          xcrun simctl privacy "${{ steps.sim.outputs.udid }}" grant camera com.dorocam.app || true
+          xcrun simctl privacy "${{ steps.sim.outputs.udid }}" grant microphone com.dorocam.app || true
           for f in integration_test/*_test.dart; do
             echo "=== $f"
             bash ../../scripts/run-with-retry.sh --attempts 3 --timeout 600 -- flutter test "$f" -d "${{ steps.sim.outputs.udid }}"
