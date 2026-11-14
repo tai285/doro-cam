@@ -88,7 +88,13 @@ jobs:
       - name: Integration tests on the simulator
         timeout-minutes: 30
         working-directory: apps/mobile
-        run: bash ../../scripts/run-with-retry.sh --attempts 3 --timeout 420 -- flutter test integration_test -d "${{ steps.sim.outputs.udid }}" --verbose
+        run: |
+          # One file per invocation: each run rebuilds and installs the app, and a single stall only
+          # costs that file's attempt instead of the whole suite.
+          for f in integration_test/*_test.dart; do
+            echo "=== $f"
+            bash ../../scripts/run-with-retry.sh --attempts 3 --timeout 600 -- flutter test "$f" -d "${{ steps.sim.outputs.udid }}"
+          done
 
       - name: Release build excludes the synthetic camera (ADR-0013)
         working-directory: apps/mobile
