@@ -12,23 +12,29 @@ GoRouter _router() => GoRouter(
         body: AppBackButton(label: 'Back to somewhere', location: '/there'),
       ),
     ),
-    GoRoute(path: '/there', builder: (context, state) => const Scaffold(body: Text('There'))),
+    GoRoute(
+      path: '/there',
+      builder: (context, state) => const Scaffold(body: Text('There')),
+    ),
   ],
 );
 
 void main() {
-  testWidgets('[NFR-007] exposes its label as the accessible name and as a tooltip', (tester) async {
-    final handle = tester.ensureSemantics();
-    final router = _router();
-    addTearDown(router.dispose);
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+  testWidgets(
+    '[NFR-007] exposes its label as the accessible name and as a tooltip',
+    (tester) async {
+      final handle = tester.ensureSemantics();
+      final router = _router();
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
-    final node = tester.getSemantics(find.byType(IconButton));
-    expect(node.label, contains('Back to somewhere'));
-    expect(node.tooltip, 'Back to somewhere');
-    expect(find.byTooltip('Back to somewhere'), findsOneWidget);
-    handle.dispose();
-  });
+      final node = tester.getSemantics(find.byType(IconButton));
+      expect(node.label, contains('Back to somewhere'));
+      expect(node.tooltip, 'Back to somewhere');
+      expect(find.byTooltip('Back to somewhere'), findsOneWidget);
+      handle.dispose();
+    },
+  );
 
   testWidgets('navigates to its location when tapped', (tester) async {
     final router = _router();

@@ -7,7 +7,10 @@ abstract final class AppTheme {
   static ThemeData light() => _build(Brightness.light, DoroTokens.light);
 
   static ThemeData _build(Brightness brightness, DoroTokens tokens) {
-    final scheme = ColorScheme.fromSeed(seedColor: tokens.accent, brightness: brightness);
+    final scheme = ColorScheme.fromSeed(
+      seedColor: tokens.accent,
+      brightness: brightness,
+    );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,

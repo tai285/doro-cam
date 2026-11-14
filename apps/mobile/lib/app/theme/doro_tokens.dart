@@ -38,7 +38,12 @@ class DoroTokens extends ThemeExtension<DoroTokens> {
   );
 
   @override
-  DoroTokens copyWith({Color? readout, Color? warning, Color? recording, Color? accent}) {
+  DoroTokens copyWith({
+    Color? readout,
+    Color? warning,
+    Color? recording,
+    Color? accent,
+  }) {
     return DoroTokens(
       readout: readout ?? this.readout,
       warning: warning ?? this.warning,
@@ -62,5 +67,6 @@ class DoroTokens extends ThemeExtension<DoroTokens> {
 }
 
 extension DoroTokensContext on BuildContext {
-  DoroTokens get tokens => Theme.of(this).extension<DoroTokens>() ?? DoroTokens.dark;
+  DoroTokens get tokens =>
+      Theme.of(this).extension<DoroTokens>() ?? DoroTokens.dark;
 }
