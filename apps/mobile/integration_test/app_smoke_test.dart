@@ -18,10 +18,17 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
       }
       // The camera screen is up: either the viewfinder controls or the permission explanation.
+      final texts = find
+          .byType(Text)
+          .evaluate()
+          .map((e) => (e.widget as Text).data ?? '')
+          .where((t) => t.isNotEmpty)
+          .toList();
       expect(
         find.byKey(const Key('shutter-button')).evaluate().isNotEmpty ||
             find.byKey(const Key('camera-status-title')).evaluate().isNotEmpty,
         isTrue,
+        reason: 'visible texts: $texts',
       );
     },
   );
