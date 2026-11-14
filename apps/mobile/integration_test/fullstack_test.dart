@@ -46,8 +46,7 @@ void main() {
       expect(
         await waitFor(tester, find.byKey(const Key('shutter-button'))),
         isTrue,
-        reason:
-            'camera permission must be granted before the run (adb shell pm grant)',
+        reason: 'camera permission must be granted before the run (adb shell pm grant)',
       );
 
       // 1. A photo with no account: the camera and the library work offline first.
@@ -132,11 +131,7 @@ void main() {
       await _tap(tester, find.byKey(const Key('open-sync')));
       for (var i = 0; i < 8; i++) {
         await _tap(tester, find.byKey(const Key('sync-now')));
-        if (await waitFor(
-          tester,
-          find.text('Backed up: 2'),
-          seconds: 20,
-        )) {
+        if (await waitFor(tester, find.text('Backed up: 2'), seconds: 20)) {
           break;
         }
       }

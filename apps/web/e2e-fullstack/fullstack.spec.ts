@@ -303,3 +303,29 @@ test.describe('what the phone backed up shows up on the web', () => {
     await Promise.all([ownerCtx.close(), friendCtx.close()]);
   });
 });
+
+test.describe('what the web changes comes back to the phone', () => {
+  test.skip(EMAIL === '', 'run through scripts/e2e-fullstack.sh');
+
+  test('[WEB-003][MEM-004][MEM-006] a caption and favorite set in the dashboard are stored for the phone to pull', async ({
+    page,
+    request,
+  }) => {
+    const token = await apiSignIn(request, EMAIL, PASSWORD);
+    const list = await request.get(`${API}/v1/memories`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    const photo = ((await list.json()) as { items: MemoryJson[] }).items.find(
+      (m) => m.kind === 'photo',
+    ) as MemoryJson;
+    await webSignIn(page, EMAIL, PASSWORD);
+    await page.goto(`/memories/${photo.id}`);
+    await page.getByLabel('Caption').fill('Caption written on the web');
+    await page.getByRole('button', { name: 'Save caption' }).click();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Caption written on the web' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: '☆ Favorite' }).click();
+    await expect(page.getByRole('button', { name: '★ Favorite' })).toBeVisible();
+  });
+});
