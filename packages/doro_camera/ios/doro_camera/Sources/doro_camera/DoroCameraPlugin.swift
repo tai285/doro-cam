@@ -88,10 +88,9 @@ public class DoroCameraPlugin: NSObject, FlutterPlugin, CameraHostApi {
             result.append(CameraDescriptorMessage(CapabilityProbe.descriptor(for: facts), label: DeviceDiscovery.label(for: facts)))
         }
         #if DOROCAM_SYNTHETIC_CAMERA
-        // The Simulator has no camera: debug builds offer the labelled synthetic one instead (ADR-0013).
-        if result.isEmpty {
-            result.append(CameraDescriptorMessage(SyntheticCamera.descriptor(), label: "Synthetic test camera"))
-        }
+        // Debug builds always offer the labelled synthetic camera next to real hardware (ADR-0013), so
+        // tests and the Simulator (which has no camera) can capture without a device.
+        result.append(CameraDescriptorMessage(SyntheticCamera.descriptor(), label: "Synthetic test camera"))
         #endif
         return result
     }
