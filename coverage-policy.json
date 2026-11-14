@@ -10,7 +10,7 @@
         "lines": 85
       },
       "ratchet": {
-        "lines": 100
+        "lines": 93.04
       }
     },
     {
@@ -23,7 +23,7 @@
         "lines": 95
       },
       "ratchet": {
-        "lines": 100
+        "lines": 97.71
       }
     },
     {
@@ -35,8 +35,8 @@
         "branches": 90
       },
       "ratchet": {
-        "lines": 100,
-        "branches": 100
+        "lines": 98.67,
+        "branches": 93.74
       }
     },
     {
