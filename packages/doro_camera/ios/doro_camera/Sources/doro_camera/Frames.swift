@@ -29,7 +29,11 @@ struct AudioChunk {
 /// Copies camera frames into a small private pool at reduced size. The camera's own buffer pool is tiny:
 /// holding its buffers for seconds (the Live pre-roll) would make the camera drop frames.
 final class FrameDownscaler {
+    #if targetEnvironment(simulator)
+    private let context = CIContext(options: [.cacheIntermediates: false, .useSoftwareRenderer: true])
+    #else
     private let context = CIContext(options: [.cacheIntermediates: false])
+    #endif
     private var pool: CVPixelBufferPool?
     private var poolSize = (width: 0, height: 0)
 

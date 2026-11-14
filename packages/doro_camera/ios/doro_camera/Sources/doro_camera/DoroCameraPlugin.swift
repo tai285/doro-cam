@@ -158,12 +158,19 @@ public class DoroCameraPlugin: NSObject, FlutterPlugin, CameraHostApi {
 
     func openSession(config: SessionConfigMessage) async throws -> SessionInfoMessage {
         try await translating {
-            var camera = Self.state(for: .video)
-            if camera == .notDetermined {
-                _ = await AVCaptureDevice.requestAccess(for: .video)
-                camera = Self.state(for: .video)
+            #if DOROCAM_SYNTHETIC_CAMERA
+            let syntheticRequested = config.cameraId == SyntheticCamera.cameraId
+            #else
+            let syntheticRequested = false
+            #endif
+            if PermissionEvaluation.cameraPermissionRequired(syntheticSource: syntheticRequested) {
+                var camera = Self.state(for: .video)
+                if camera == .notDetermined {
+                    _ = await AVCaptureDevice.requestAccess(for: .video)
+                    camera = Self.state(for: .video)
+                }
+                if let error = PermissionEvaluation.cameraError(for: camera) { throw error }
             }
-            if let error = PermissionEvaluation.cameraError(for: camera) { throw error }
 
             let resolved: (CameraBackend, CameraDescriptor, CameraCapabilities)
             #if DOROCAM_SYNTHETIC_CAMERA

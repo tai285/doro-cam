@@ -20,6 +20,12 @@ final class ErrorsAndPermissionsTests: XCTestCase {
         XCTAssertFalse(PermissionEvaluation.cameraError(for: .denied)?.message.isEmpty ?? true)
     }
 
+    // ADR-0013: the synthetic camera must not wait on a permission dialog
+    func testSyntheticCameraNeverNeedsCameraPermission() {
+        XCTAssertFalse(PermissionEvaluation.cameraPermissionRequired(syntheticSource: true))
+        XCTAssertTrue(PermissionEvaluation.cameraPermissionRequired(syntheticSource: false))
+    }
+
     // [MOT-003]
     func testLiveAudioNeedsPermissionHardwareAndNoMute() {
         XCTAssertTrue(PermissionEvaluation.liveAudioAvailable(microphone: .authorized, deviceHasMicrophone: true, muted: false))

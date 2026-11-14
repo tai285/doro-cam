@@ -42,6 +42,12 @@ public enum PermissionEvaluation {
         }
     }
 
+    /// The synthetic test camera makes its own pictures, so it never needs camera permission. Asking would
+    /// show a system dialog nobody can answer on the Simulator, and the open call would wait forever.
+    public static func cameraPermissionRequired(syntheticSource: Bool) -> Bool {
+        !syntheticSource
+    }
+
     /// LIVE without a granted microphone captures silent motion and says so (MOT-003).
     public static func liveAudioAvailable(microphone: AuthorizationState, deviceHasMicrophone: Bool, muted: Bool) -> Bool {
         microphone == .authorized && deviceHasMicrophone && !muted

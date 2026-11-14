@@ -54,7 +54,12 @@ public struct RenderedImage: Sendable {
 }
 
 public enum StillRenderer {
+    // A cloud Simulator VM has no usable GPU: software rendering avoids stalls in Metal.
+    #if targetEnvironment(simulator)
+    private static let context = CIContext(options: [.useSoftwareRenderer: true])
+    #else
     private static let context = CIContext(options: [.useSoftwareRenderer: false])
+    #endif
 
     /// Parses `W:H` such as `3:2`. nil for anything else, so a bad value never crops silently.
     public static func parseAspect(_ text: String?) -> (width: Int, height: Int)? {

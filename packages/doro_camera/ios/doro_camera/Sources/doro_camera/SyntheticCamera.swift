@@ -63,7 +63,7 @@ final class SyntheticDriver {
     private let source = SyntheticSource(width: 216, height: 288, fps: 30, flashPeriod: 1.0, flashDuration: 1.0 / 30.0)
     private var timer: DispatchSourceTimer?
     private var index = 0
-    private static let context = CIContext()
+    private static let context = CIContext(options: [.useSoftwareRenderer: true])
 
     init(session: CameraSession) {
         self.session = session
